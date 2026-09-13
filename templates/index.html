@@ -38,6 +38,15 @@
     const predictionText = document.getElementById('predictionText');
     const statusText = document.getElementById('statusText');
 
+    // Frames are downscaled before sending - MediaPipe processing time
+    // scales with image size, and full 640x480 is unnecessarily slow on
+    // a shared/free-tier CPU. The visible <video> stays full resolution;
+    // only the sent copy is smaller.
+    const SEND_WIDTH = 320;
+    const SEND_HEIGHT = 240;
+    canvas.width = SEND_WIDTH;
+    canvas.height = SEND_HEIGHT;
+
     let lastSpoken = "";
     let sending = false;
 
@@ -64,8 +73,8 @@
       if (sending) return;
       sending = true;
 
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      ctx.drawImage(video, 0, 0, SEND_WIDTH, SEND_HEIGHT);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
 
       try {
         const res = await fetch('/predict', {
