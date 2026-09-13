@@ -1,0 +1,7 @@
+MP_Data/
+Logs/
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+venv/
+.env
