@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignSpeakPH</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>SignSpeakPH</h1>
+    <p class="subtitle">Real-Time Filipino Sign Language Recognition with Text &amp; Voice Output</p>
+  </header>
+
+  <main>
+    <section class="video-container">
+      <!-- Plain camera feed - your own browser's webcam, no landmark overlay -->
+      <video id="webcam" autoplay playsinline muted width="640" height="480"></video>
+      <canvas id="captureCanvas" width="640" height="480" style="display:none;"></canvas>
+    </section>
+
+    <section class="output-panel">
+      <h2>Recognized Sign</h2>
+      <p id="predictionText" class="prediction-text">Allow camera access to begin</p>
+      <p id="statusText" class="confidence-text"></p>
+
+      <label class="toggle">
+        <input type="checkbox" id="voiceToggle" checked>
+        Voice output enabled
+      </label>
+    </section>
+  </main>
+
+  <script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('captureCanvas');
+    const ctx = canvas.getContext('2d');
+    const predictionText = document.getElementById('predictionText');
+    const statusText = document.getElementById('statusText');
+
+    let lastSpoken = "";
+    let sending = false;
+
+    function speak(text) {
+      if (!document.getElementById('voiceToggle').checked) return;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "fil-PH";
+      speechSynthesis.speak(utterance);
+    }
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+        video.srcObject = stream;
+        predictionText.innerText = "Waiting for sign...";
+        requestAnimationFrame(captureLoop);
+      } catch (err) {
+        predictionText.innerText = "Camera access denied or unavailable";
+        console.error("getUserMedia error:", err);
+      }
+    }
+
+    async function sendFrame() {
+      if (sending) return;
+      sending = true;
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+      try {
+        const res = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: dataUrl })
+        });
+        const data = await res.json();
+
+        if (data.buffering) {
+          statusText.innerText = `Collecting frames... (${data.frames_collected}/30)`;
+        } else if (data.text) {
+          predictionText.innerText = data.text;
+          statusText.innerText = `Confidence: ${(data.confidence * 100).toFixed(1)}%`;
+
+          if (data.text !== lastSpoken) {
+            speak(data.text);
+            lastSpoken = data.text;
+          }
+        } else {
+          statusText.innerText = `Confidence too low: ${(data.confidence * 100).toFixed(1)}%`;
+        }
+      } catch (err) {
+        console.error('Prediction request failed:', err);
+      } finally {
+        sending = false;
+      }
+    }
+
+    function captureLoop() {
+      sendFrame();
+      setTimeout(() => requestAnimationFrame(captureLoop), 150);
+    }
+
+    startCamera();
+  </script>
+</body>
+</html>
