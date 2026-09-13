@@ -16,6 +16,7 @@ Render deployment: see README.md
 import base64
 import json
 import os
+import time
 
 import cv2
 import numpy as np
@@ -83,22 +84,29 @@ def predict():
     if frame is None:
         return jsonify({"error": "could not decode image"}), 400
 
+    t0 = time.time()
     _, results = mediapipe_detection(frame, holistic)
+    t1 = time.time()
     keypoints = extract_keypoints(results)
 
     sequence_buffer.append(keypoints)
     sequence_buffer = sequence_buffer[-SEQUENCE_LENGTH:]
 
     if len(sequence_buffer) < SEQUENCE_LENGTH:
+        print(f"[timing] mediapipe={  (t1-t0)*1000:.0f}ms (buffering {len(sequence_buffer)}/30)")
         return jsonify({"text": "", "confidence": 0.0, "buffering": True,
                          "frames_collected": len(sequence_buffer)})
 
+    t2 = time.time()
     input_data = np.expand_dims(sequence_buffer, axis=0).astype(np.float32)  # (1, 30, 258)
     interpreter.set_tensor(input_details[0]['index'], input_data)
     interpreter.invoke()
     res = interpreter.get_tensor(output_details[0]['index'])[0]
+    t3 = time.time()
     idx = int(np.argmax(res))
     confidence = float(res[idx])
+
+    print(f"[timing] mediapipe={(t1-t0)*1000:.0f}ms tflite={(t3-t2)*1000:.0f}ms")
 
     if confidence > THRESHOLD:
         return jsonify({"text": ACTIONS[idx], "confidence": confidence, "buffering": False})

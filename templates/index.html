@@ -72,6 +72,7 @@
     async function sendFrame() {
       if (sending) return;
       sending = true;
+      const startTime = performance.now();
 
       ctx.drawImage(video, 0, 0, SEND_WIDTH, SEND_HEIGHT);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
@@ -83,19 +84,20 @@
           body: JSON.stringify({ image: dataUrl })
         });
         const data = await res.json();
+        const elapsedMs = Math.round(performance.now() - startTime);
 
         if (data.buffering) {
-          statusText.innerText = `Collecting frames... (${data.frames_collected}/30)`;
+          statusText.innerText = `Collecting frames... (${data.frames_collected}/30) - ${elapsedMs}ms/frame`;
         } else if (data.text) {
           predictionText.innerText = data.text;
-          statusText.innerText = `Confidence: ${(data.confidence * 100).toFixed(1)}%`;
+          statusText.innerText = `Confidence: ${(data.confidence * 100).toFixed(1)}% - ${elapsedMs}ms/frame`;
 
           if (data.text !== lastSpoken) {
             speak(data.text);
             lastSpoken = data.text;
           }
         } else {
-          statusText.innerText = `Confidence too low: ${(data.confidence * 100).toFixed(1)}%`;
+          statusText.innerText = `Confidence too low: ${(data.confidence * 100).toFixed(1)}% - ${elapsedMs}ms/frame`;
         }
       } catch (err) {
         console.error('Prediction request failed:', err);
@@ -105,8 +107,7 @@
     }
 
     function captureLoop() {
-      sendFrame();
-      setTimeout(() => requestAnimationFrame(captureLoop), 150);
+      sendFrame().finally(() => requestAnimationFrame(captureLoop));
     }
 
     startCamera();
