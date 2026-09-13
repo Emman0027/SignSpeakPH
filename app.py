@@ -20,13 +20,16 @@ import os
 import cv2
 import numpy as np
 from flask import Flask, jsonify, render_template, request
-from tensorflow.keras.models import load_model
+import tflite_runtime.interpreter as tflite
 
 from utils.mediapipe_utils import mp_holistic, mediapipe_detection, extract_keypoints
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-model = load_model(os.path.join(BASE_DIR, "action.h5"))
+interpreter = tflite.Interpreter(model_path=os.path.join(BASE_DIR, "action.tflite"))
+interpreter.allocate_tensors()
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 
 with open(os.path.join(BASE_DIR, "labels.json")) as f:
     ACTIONS = json.load(f)
@@ -83,8 +86,10 @@ def predict():
         return jsonify({"text": "", "confidence": 0.0, "buffering": True,
                          "frames_collected": len(sequence_buffer)})
 
-    input_data = np.expand_dims(sequence_buffer, axis=0)  # (1, 30, 258)
-    res = model.predict(input_data, verbose=0)[0]
+    input_data = np.expand_dims(sequence_buffer, axis=0).astype(np.float32)  # (1, 30, 258)
+    interpreter.set_tensor(input_details[0]['index'], input_data)
+    interpreter.invoke()
+    res = interpreter.get_tensor(output_details[0]['index'])[0]
     idx = int(np.argmax(res))
     confidence = float(res[idx])
 

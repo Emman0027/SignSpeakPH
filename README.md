@@ -1,63 +1,78 @@
-# SignSpeakPH Website (browser-camera, Render-ready)
+# SignSpeakPH - Filipino Sign Language Recognition Website
 
-## What this version does
+Real-time Filipino Sign Language recognition with text and voice output.
 The browser captures the VISITOR's own webcam via `getUserMedia()` and sends
-individual frames to Flask's `/predict` endpoint. MediaPipe + your model run
-server-side and return a prediction as JSON. No landmark lines are drawn -
-the video is the plain camera feed. This works for any visitor online, not
-just the machine running the server - which is why it's Render-ready.
+frames to a Flask backend, which runs MediaPipe + a TFLite model and returns
+predictions. No landmark lines are drawn - the video is the plain camera feed.
 
-## 1. Copy your trained files here
-From your notebook, copy these into this folder (next to `app.py`):
-- `action.h5`
-- `labels.json`
-- `config.json`  <- must have `"num_features": 258` (NOT 1662 - see note below)
+## Why TFLite instead of full TensorFlow
+Full TensorFlow is several hundred MB and memory-hungry - this is what
+caused "out of memory" 502 errors on Render's free tier (512MB RAM) and
+what made every paid-tier-requiring host (Hugging Face Docker SDK, Google
+Cloud Run) seem necessary. Converting the trained model to `.tflite` and
+using the tiny `tflite-runtime` package (a few MB) instead removes that
+problem at the source - no card, no upgrade, no bigger host needed.
 
-If your `config.json` still says 1662, fix it in the notebook:
+## 1. Convert your model to TFLite (one-time, in your notebook)
+Add this cell after `model.save('action.h5')`:
 ```python
-config = {"sequence_length": sequence_length, "num_features": 258, "threshold": 0.7}
-with open('config.json', 'w') as f:
-    json.dump(config, f)
-```
+import tensorflow as tf
 
-## 2. Test locally first
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+
+with open('action.tflite', 'wb') as f:
+    f.write(tflite_model)
+```
+This runs on your own machine, where full TensorFlow is already installed -
+only the much smaller `action.tflite` output needs to go to the server.
+
+## 2. Copy your files here
+Copy these into this folder (next to `app.py`):
+- `action.tflite`  <- NEW, replaces action.h5 for deployment
+- `labels.json`
+- `config.json`  <- must have `"num_features": 258`
+
+(Keep `action.h5` for your notebook/local training work - it's just not
+what gets deployed anymore.)
+
+## 3. Test locally first
 ```bash
 pip install -r requirements.txt
 python app.py
 ```
-Open http://127.0.0.1:5000 - confirm predictions work before deploying.
+Open http://127.0.0.1:5000
 
-## 3. Deploy to Render (free)
+## 4. Deploy to Render (free, no credit card)
 
-1. Push this whole folder (including `action.h5`, `labels.json`, `config.json`)
-   to a GitHub repository. `action.h5` is a few MB, fine for a normal repo.
-2. Go to https://render.com and sign up (no credit card required).
-3. Click **New +** -> **Web Service**, connect your GitHub repo.
-4. Render should auto-detect `render.yaml` and fill in the settings. If not,
-   set manually:
+1. Push this folder (including `action.tflite`, `labels.json`,
+   `config.json`) to a GitHub repo.
+2. Go to https://render.com, sign up (no card required), **New +** ->
+   **Web Service**, connect your repo.
+3. Settings:
    - **Build Command:** `pip install -r requirements.txt`
    - **Start Command:** `gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120`
    - **Instance Type:** Free
-5. Click **Create Web Service**. First build can take a few minutes
-   (TensorFlow is a large install).
-6. Once live, Render gives you a URL like `https://signspeakph.onrender.com`
-   - HTTPS is automatic, so camera permissions will work correctly.
+4. Add an environment variable so Render uses a TensorFlow/MediaPipe
+   compatible Python version:
+   - **Key:** `PYTHON_VERSION`   **Value:** `3.11.9`
+5. Deploy. Since the install is now just a few small packages instead of
+   full TensorFlow, both the earlier Python-version build error and the
+   memory crash should be resolved.
 
 ## Free tier behavior to know about
-- The free instance **spins down after 15 minutes of inactivity**. The next
-  visit triggers a "cold start" that can take 30-60 seconds to wake back up.
-  For a defense/demo, open the URL a few minutes beforehand so it's already
-  awake.
-- Render's free tier includes 750 instance-hours/month - plenty for a demo
-  or portfolio project, not meant for high-traffic production use.
+- Sleeps after 15 minutes idle; next visit takes ~30-60s to wake up. Open
+  the URL a few minutes before your defense/demo.
+- 750 free instance-hours/month - plenty for a demo project.
 
 ## Notes
-- `opencv-python-headless` is used instead of `opencv-python` - the headless
-  build avoids missing system GUI libraries on Render's minimal Linux image.
-- `sequence_buffer` in `app.py` is a single global buffer - fine for one
-  visitor at a time (a demo). For real multi-user support it would need to
-  be keyed per session instead.
-- `utils/mediapipe_utils.py` must always match whatever `extract_keypoints()`
-  your notebook actually uses. This version is 258 features (pose + both
-  hands, no face) - confirmed directly from your notebook's Cell 15 and the
-  model's `input_shape=(30,258)` in Cell 49.
+- `opencv-python-headless` avoids missing system GUI libraries.
+- `sequence_buffer` in `app.py` is a single global buffer - fine for a solo
+  demo. For real multi-user support it would need to be keyed per session.
+- `utils/mediapipe_utils.py` uses a 258-feature vector (pose + both hands,
+  no face) - confirmed from the notebook's Cell 15 and the model's
+  `input_shape=(30,258)` in Cell 49.
+- If Render's build still shows any missing-system-library error (e.g.
+  `libGL.so.1`), that's a separate, unrelated issue to memory/version - see
+  the project history for the Docker + Cloud Run fallback path, which
+  remains available if ever needed, just not required for this fix.
