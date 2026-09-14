@@ -23,7 +23,7 @@ import numpy as np
 from flask import Flask, jsonify, render_template, request
 import tflite_runtime.interpreter as tflite
 
-from utils.mediapipe_utils import mp_holistic, mediapipe_detection, extract_keypoints
+from utils.mediapipe_utils import create_models, mediapipe_detection, extract_keypoints
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -44,17 +44,11 @@ THRESHOLD = CONFIG["threshold"]               # 0.7
 
 app = Flask(__name__)
 
-# One Holistic instance reused across requests. model_complexity=0 uses
-# the lightest/fastest internal models - meaningfully faster on a shared
-# free-tier CPU, with a small accuracy trade-off that's usually fine for
-# landmark-based gesture recognition like this.
+# Pose + Hands models reused across requests (much faster than Holistic,
+# which also runs an unused 468-point face mesh on every single frame).
 # NOTE: sequence_buffer is a single global buffer - fine for a solo demo.
 # For multiple simultaneous visitors, key this by session/user ID instead.
-holistic = mp_holistic.Holistic(
-    model_complexity=0,
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5,
-)
+models = create_models()
 sequence_buffer = []
 
 
@@ -85,7 +79,7 @@ def predict():
         return jsonify({"error": "could not decode image"}), 400
 
     t0 = time.time()
-    _, results = mediapipe_detection(frame, holistic)
+    _, results = mediapipe_detection(frame, models)
     t1 = time.time()
     keypoints = extract_keypoints(results)
 
