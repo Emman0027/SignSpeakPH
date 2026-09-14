@@ -18,6 +18,12 @@ import json
 import os
 import time
 
+# MediaPipe tries GPU/EGL acceleration by default and silently falls back
+# to CPU when it fails - but it retries this failed attempt on EVERY frame,
+# wasting time each call. Render's servers have no GPU, so disable this
+# attempt entirely before mediapipe is imported (must be set before import).
+os.environ["MEDIAPIPE_DISABLE_GPU"] = "1"
+
 import cv2
 import numpy as np
 from flask import Flask, jsonify, render_template, request
