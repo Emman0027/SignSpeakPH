@@ -14,9 +14,9 @@
 
   <main>
     <section class="video-container">
-      <!-- Plain camera feed - your own browser's webcam, no landmark overlay -->
       <video id="webcam" autoplay playsinline muted width="640" height="480"></video>
-      <canvas id="captureCanvas" width="640" height="480" style="display:none;"></canvas>
+      <canvas id="captureCanvas" style="display:none;"></canvas>
+      <div id="recordingBadge" class="recording-badge" style="display:none;">● Recording sign...</div>
     </section>
 
     <section class="output-panel">
@@ -37,18 +37,21 @@
     const ctx = canvas.getContext('2d');
     const predictionText = document.getElementById('predictionText');
     const statusText = document.getElementById('statusText');
+    const recordingBadge = document.getElementById('recordingBadge');
 
-    // Frames are downscaled before sending - MediaPipe processing time
-    // scales with image size, and full 640x480 is unnecessarily slow on
-    // a shared/free-tier CPU. The visible <video> stays full resolution;
-    // only the sent copy is smaller.
     const SEND_WIDTH = 320;
     const SEND_HEIGHT = 240;
     canvas.width = SEND_WIDTH;
     canvas.height = SEND_HEIGHT;
 
+    const SEQUENCE_LENGTH = 30;
+    // Captured locally with no network involved, so this matches native
+    // webcam speed - close to how gesture data was originally recorded,
+    // instead of being stretched across many seconds by round-trip delay.
+    const CAPTURE_INTERVAL_MS = 33; // ~30fps
+
     let lastSpoken = "";
-    let sending = false;
+    let busy = false; // true while capturing OR waiting for server response
 
     function speak(text) {
       if (!document.getElementById('voiceToggle').checked) return;
@@ -62,52 +65,70 @@
         const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
         video.srcObject = stream;
         predictionText.innerText = "Waiting for sign...";
-        requestAnimationFrame(captureLoop);
+        captureAndPredictLoop();
       } catch (err) {
         predictionText.innerText = "Camera access denied or unavailable";
         console.error("getUserMedia error:", err);
       }
     }
 
-    async function sendFrame() {
-      if (sending) return;
-      sending = true;
-      const startTime = performance.now();
-
+    function captureFrame() {
       ctx.drawImage(video, 0, 0, SEND_WIDTH, SEND_HEIGHT);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+      return canvas.toDataURL('image/jpeg', 0.6);
+    }
+
+    async function captureSequence() {
+      recordingBadge.style.display = 'block';
+      const frames = [];
+      for (let i = 0; i < SEQUENCE_LENGTH; i++) {
+        frames.push(captureFrame());
+        await new Promise(resolve => setTimeout(resolve, CAPTURE_INTERVAL_MS));
+      }
+      recordingBadge.style.display = 'none';
+      return frames;
+    }
+
+    async function captureAndPredictLoop() {
+      if (busy) return;
+      busy = true;
+
+      const captureStart = performance.now();
+      const frames = await captureSequence();
+      const captureMs = Math.round(performance.now() - captureStart);
+
+      statusText.innerText = `Captured in ${captureMs}ms - processing...`;
 
       try {
-        const res = await fetch('/predict', {
+        const sendStart = performance.now();
+        const res = await fetch('/predict_batch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: dataUrl })
+          body: JSON.stringify({ images: frames })
         });
         const data = await res.json();
-        const elapsedMs = Math.round(performance.now() - startTime);
+        const processMs = Math.round(performance.now() - sendStart);
 
-        if (data.buffering) {
-          statusText.innerText = `Collecting frames... (${data.frames_collected}/30) - ${elapsedMs}ms/frame`;
+        if (data.error) {
+          statusText.innerText = `Error: ${data.error}`;
         } else if (data.text) {
           predictionText.innerText = data.text;
-          statusText.innerText = `Confidence: ${(data.confidence * 100).toFixed(1)}% - ${elapsedMs}ms/frame`;
-
+          statusText.innerText = `Confidence: ${(data.confidence * 100).toFixed(1)}% ` +
+            `(capture ${captureMs}ms + process ${processMs}ms)`;
           if (data.text !== lastSpoken) {
             speak(data.text);
             lastSpoken = data.text;
           }
         } else {
-          statusText.innerText = `Confidence too low: ${(data.confidence * 100).toFixed(1)}% - ${elapsedMs}ms/frame`;
+          statusText.innerText = `Confidence too low: ${(data.confidence * 100).toFixed(1)}% ` +
+            `(capture ${captureMs}ms + process ${processMs}ms)`;
         }
       } catch (err) {
         console.error('Prediction request failed:', err);
+        statusText.innerText = "Request failed - retrying...";
       } finally {
-        sending = false;
+        busy = false;
+        requestAnimationFrame(captureAndPredictLoop); // immediately start next cycle
       }
-    }
-
-    function captureLoop() {
-      sendFrame().finally(() => requestAnimationFrame(captureLoop));
     }
 
     startCamera();

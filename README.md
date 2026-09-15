@@ -1,78 +1,45 @@
-# SignSpeakPH - Filipino Sign Language Recognition Website
+# SignSpeakPH - Batch capture version
 
-Real-time Filipino Sign Language recognition with text and voice output.
-The browser captures the VISITOR's own webcam via `getUserMedia()` and sends
-frames to a Flask backend, which runs MediaPipe + a TFLite model and returns
-predictions. No landmark lines are drawn - the video is the plain camera feed.
+Fixes an accuracy problem caused by the streaming version's latency, not
+just speed. See app.py's top comment for the full explanation:
 
-## Why TFLite instead of full TensorFlow
-Full TensorFlow is several hundred MB and memory-hungry - this is what
-caused "out of memory" 502 errors on Render's free tier (512MB RAM) and
-what made every paid-tier-requiring host (Hugging Face Docker SDK, Google
-Cloud Run) seem necessary. Converting the trained model to `.tflite` and
-using the tiny `tflite-runtime` package (a few MB) instead removes that
-problem at the source - no card, no upgrade, no bigger host needed.
+Short version: streaming one frame per HTTP request meant a "30-frame"
+sequence was stretched across 10-15+ seconds of real time (300-500ms
+round trip x 30), while the model was trained on 30 frames captured in
+under a second. That mismatch degrades accuracy independent of whether
+MediaPipe/TFLite themselves are fast or correct.
 
-## 1. Convert your model to TFLite (one-time, in your notebook)
-Add this cell after `model.save('action.h5')`:
-```python
-import tensorflow as tf
+This version captures all 30 frames in the BROWSER first, at native
+webcam speed (~1 second, no network involved - matching how your
+gesture data was originally recorded), then sends them together in one
+request. The server processes all 30 and returns one prediction.
 
-converter = tf.lite.TFLiteConverter.from_keras_model(model)
-tflite_model = converter.convert()
-
-with open('action.tflite', 'wb') as f:
-    f.write(tflite_model)
-```
-This runs on your own machine, where full TensorFlow is already installed -
-only the much smaller `action.tflite` output needs to go to the server.
-
-## 2. Copy your files here
-Copy these into this folder (next to `app.py`):
-- `action.tflite`  <- NEW, replaces action.h5 for deployment
+## 1. Copy your trained files here
+- `action.tflite`
 - `labels.json`
-- `config.json`  <- must have `"num_features": 258`
+- `config.json`
 
-(Keep `action.h5` for your notebook/local training work - it's just not
-what gets deployed anymore.)
-
-## 3. Test locally first
+## 2. Test locally
 ```bash
 pip install -r requirements.txt
 python app.py
 ```
-Open http://127.0.0.1:5000
+Open http://127.0.0.1:5000 - you'll see a red "Recording sign..." badge
+for about 1 second, then "processing...", then the result. This cycle
+repeats automatically.
 
-## 4. Deploy to Render (free, no credit card)
+## 3. Deploy
+Same as before - push to your repo, redeploy on Render (or wherever
+you're hosting), using the same Dockerfile.
 
-1. Push this folder (including `action.tflite`, `labels.json`,
-   `config.json`) to a GitHub repo.
-2. Go to https://render.com, sign up (no card required), **New +** ->
-   **Web Service**, connect your repo.
-3. Settings:
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120`
-   - **Instance Type:** Free
-4. Add an environment variable so Render uses a TensorFlow/MediaPipe
-   compatible Python version:
-   - **Key:** `PYTHON_VERSION`   **Value:** `3.11.9`
-5. Deploy. Since the install is now just a few small packages instead of
-   full TensorFlow, both the earlier Python-version build error and the
-   memory crash should be resolved.
-
-## Free tier behavior to know about
-- Sleeps after 15 minutes idle; next visit takes ~30-60s to wake up. Open
-  the URL a few minutes before your defense/demo.
-- 750 free instance-hours/month - plenty for a demo project.
-
-## Notes
-- `opencv-python-headless` avoids missing system GUI libraries.
-- `sequence_buffer` in `app.py` is a single global buffer - fine for a solo
-  demo. For real multi-user support it would need to be keyed per session.
-- `utils/mediapipe_utils.py` uses a 258-feature vector (pose + both hands,
-  no face) - confirmed from the notebook's Cell 15 and the model's
-  `input_shape=(30,258)` in Cell 49.
-- If Render's build still shows any missing-system-library error (e.g.
-  `libGL.so.1`), that's a separate, unrelated issue to memory/version - see
-  the project history for the Docker + Cloud Run fallback path, which
-  remains available if ever needed, just not required for this fix.
+## What to expect
+- Each full cycle = ~1s capture + however long server-side processing
+  of 30 frames takes (check the terminal's [timing] line, or the
+  on-screen "capture Xms + process Yms" readout).
+- Recognition accuracy should now much more closely match what you saw
+  in your notebook's live test loop (Cell 70), since frame timing is
+  restored to near-native speed.
+- If processing time is still high, that's now purely a MediaPipe/TFLite
+  compute question (already using Pose+Hands, model_complexity=0,
+  320x240 frames, GPU disabled) - not a latency-accumulation problem
+  anymore.
