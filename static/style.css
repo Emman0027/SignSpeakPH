@@ -11,3 +11,16 @@ main { max-width: 900px; margin: 30px auto; padding: 0 20px; display: flex; flex
 .prediction-text { font-size: 36px; font-weight: 700; color: #0b3d91; min-height: 46px; }
 .confidence-text { margin-top: 6px; color: #888; font-size: 14px; }
 .toggle { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 14px; color: #444; cursor: pointer; }
+
+.video-container { position: relative; }
+.recording-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(220, 38, 38, 0.85);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}

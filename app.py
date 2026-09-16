@@ -1,16 +1,27 @@
 """
-SignSpeakPH - Flask backend (browser-camera version, Render-ready)
+SignSpeakPH - Flask backend (BATCH version)
 
-The browser captures the VISITOR's own webcam via getUserMedia() and POSTs
-frames here to /predict. No server-side camera is used, so this works when
-deployed online, not just on localhost.
+Fixes both the speed problem AND an accuracy problem caused by it:
+the old per-frame streaming design required a full network round trip for
+EACH of the 30 frames. At 300-500ms/frame, collecting a "30-frame" sequence
+took 10-15+ seconds of real time - but the model was trained on 30 frames
+captured in under a second (natural webcam speed). Stretching that same
+30-frame sequence across 15 seconds gives the LSTM a completely different,
+much slower motion pattern than what it learned, which degrades accuracy -
+independent of whether MediaPipe/TFLite themselves are fast or accurate.
+
+This version has the BROWSER capture all 30 frames locally first (fast,
+no network involved, matching how gesture data was originally recorded),
+then sends them together in ONE request. The server processes all 30 and
+returns a single prediction. This is fully stateless per request - no
+shared sequence_buffer between requests/visitors needed anymore, which
+also directly fixes the multi-instance slowdown you saw (no more
+contention over one global buffer).
 
 Local run:
     pip install -r requirements.txt
     python app.py
 Then open http://127.0.0.1:5000
-
-Render deployment: see README.md
 """
 
 import base64
@@ -18,12 +29,18 @@ import json
 import os
 import time
 
+# MediaPipe tries GPU/EGL acceleration by default and silently falls back
+# to CPU when it fails - but it retries this failed attempt on EVERY frame,
+# wasting time each call. Render's servers have no GPU, so disable this
+# attempt entirely before mediapipe is imported (must be set before import).
+os.environ["MEDIAPIPE_DISABLE_GPU"] = "1"
+
 import cv2
 import numpy as np
 from flask import Flask, jsonify, render_template, request
 import tflite_runtime.interpreter as tflite
 
-from utils.mediapipe_utils import mp_holistic, mediapipe_detection, extract_keypoints
+from utils.mediapipe_utils import create_models, mediapipe_detection, extract_keypoints
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -44,18 +61,8 @@ THRESHOLD = CONFIG["threshold"]               # 0.7
 
 app = Flask(__name__)
 
-# One Holistic instance reused across requests. model_complexity=0 uses
-# the lightest/fastest internal models - meaningfully faster on a shared
-# free-tier CPU, with a small accuracy trade-off that's usually fine for
-# landmark-based gesture recognition like this.
-# NOTE: sequence_buffer is a single global buffer - fine for a solo demo.
-# For multiple simultaneous visitors, key this by session/user ID instead.
-holistic = mp_holistic.Holistic(
-    model_complexity=0,
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5,
-)
-sequence_buffer = []
+# Pose + Hands models reused across requests.
+models = create_models()
 
 
 def decode_base64_image(data_url):
@@ -72,53 +79,46 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    global sequence_buffer
-
+@app.route("/predict_batch", methods=["POST"])
+def predict_batch():
+    """
+    Receives all SEQUENCE_LENGTH frames at once (captured locally by the
+    browser at native speed), processes them, returns a single prediction.
+    Fully stateless - no buffer shared across requests or visitors.
+    """
     payload = request.get_json()
-    if not payload or "image" not in payload:
-        return jsonify({"error": "no image provided"}), 400
+    if not payload or "images" not in payload:
+        return jsonify({"error": "no images provided"}), 400
 
-    frame = decode_base64_image(payload["image"])
-    if frame is None:
-        return jsonify({"error": "could not decode image"}), 400
+    images = payload["images"]
+    if len(images) != SEQUENCE_LENGTH:
+        return jsonify({"error": f"expected {SEQUENCE_LENGTH} frames, got {len(images)}"}), 400
 
     t0 = time.time()
-    _, results = mediapipe_detection(frame, holistic)
+    sequence = []
+    for data_url in images:
+        frame = decode_base64_image(data_url)
+        if frame is None:
+            return jsonify({"error": "could not decode an image"}), 400
+        _, results = mediapipe_detection(frame, models)
+        keypoints = extract_keypoints(results)
+        sequence.append(keypoints)
     t1 = time.time()
-    keypoints = extract_keypoints(results)
 
-    sequence_buffer.append(keypoints)
-    sequence_buffer = sequence_buffer[-SEQUENCE_LENGTH:]
-
-    if len(sequence_buffer) < SEQUENCE_LENGTH:
-        print(f"[timing] mediapipe={  (t1-t0)*1000:.0f}ms (buffering {len(sequence_buffer)}/30)")
-        return jsonify({"text": "", "confidence": 0.0, "buffering": True,
-                         "frames_collected": len(sequence_buffer)})
-
-    t2 = time.time()
-    input_data = np.expand_dims(sequence_buffer, axis=0).astype(np.float32)  # (1, 30, 258)
+    input_data = np.expand_dims(sequence, axis=0).astype(np.float32)  # (1, 30, 258)
     interpreter.set_tensor(input_details[0]['index'], input_data)
     interpreter.invoke()
     res = interpreter.get_tensor(output_details[0]['index'])[0]
-    t3 = time.time()
+    t2 = time.time()
+
     idx = int(np.argmax(res))
     confidence = float(res[idx])
 
-    print(f"[timing] mediapipe={(t1-t0)*1000:.0f}ms tflite={(t3-t2)*1000:.0f}ms")
+    print(f"[timing] mediapipe_total={(t1-t0)*1000:.0f}ms ({(t1-t0)*1000/SEQUENCE_LENGTH:.0f}ms/frame) tflite={(t2-t1)*1000:.0f}ms")
 
     if confidence > THRESHOLD:
-        return jsonify({"text": ACTIONS[idx], "confidence": confidence, "buffering": False})
-
-    return jsonify({"text": "", "confidence": confidence, "buffering": False})
-
-
-@app.route("/reset", methods=["POST"])
-def reset():
-    global sequence_buffer
-    sequence_buffer = []
-    return jsonify({"status": "reset"})
+        return jsonify({"text": ACTIONS[idx], "confidence": confidence})
+    return jsonify({"text": "", "confidence": confidence})
 
 
 if __name__ == "__main__":
