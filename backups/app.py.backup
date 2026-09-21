@@ -26,12 +26,8 @@ Then open http://127.0.0.1:5000
 
 import base64
 import json
-import logging
 import os
 import time
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger(__name__)
 
 # MediaPipe tries GPU/EGL acceleration by default and silently falls back
 # to CPU when it fails - but it retries this failed attempt on EVERY frame,
@@ -53,7 +49,7 @@ try:
 except ModuleNotFoundError:
     import tensorflow as tf
     tflite = tf.lite
-    logger.info("tflite_runtime not found - using tensorflow.lite.Interpreter instead (fine for local testing)")
+    print("[info] tflite_runtime not found - using tensorflow.lite.Interpreter instead (fine for local testing)")
 
 from utils.mediapipe_utils import create_models, mediapipe_detection, extract_keypoints
 
@@ -105,51 +101,23 @@ SIGN_INFO = {
 }
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB - generous for 30 small JPEGs, blocks abuse
 
 # Pose + Hands models reused across requests.
 models = create_models()
 
 
-def warm_up_model():
-    """
-    Run one dummy prediction at startup so the interpreter's internal graph
-    setup happens now, not on the first real request from a user - keeps
-    the very first live prediction from being slower than the rest.
-    """
-    try:
-        dummy_input = np.zeros((1, SEQUENCE_LENGTH, NUM_FEATURES), dtype=np.float32)
-        interpreter.set_tensor(input_details[0]['index'], dummy_input)
-        interpreter.invoke()
-        _ = interpreter.get_tensor(output_details[0]['index'])
-        logger.info("Model warm-up completed successfully")
-    except Exception as e:
-        logger.warning(f"Model warm-up failed (non-fatal): {e}")
-
-
-warm_up_model()
-
-
-def decode_base64_image(data_url: str) -> np.ndarray | None:
+def decode_base64_image(data_url):
     """Convert a data:image/jpeg;base64,... string from the browser into an OpenCV frame."""
-    try:
-        header, encoded = data_url.split(",", 1)
-        img_bytes = base64.b64decode(encoded)
-        np_arr = np.frombuffer(img_bytes, dtype=np.uint8)
-        return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-    except Exception as e:
-        logger.warning(f"Failed to decode image: {e}")
-        return None
+    header, encoded = data_url.split(",", 1)
+    img_bytes = base64.b64decode(encoded)
+    np_arr = np.frombuffer(img_bytes, dtype=np.uint8)
+    frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    return frame
 
 
 @app.route("/")
 def index():
     return render_template("index.html")
-
-
-@app.route("/health")
-def health():
-    return jsonify({"status": "ok"})
 
 
 @app.route("/signs")
@@ -202,7 +170,7 @@ def predict_batch():
     idx = int(np.argmax(res))
     confidence = float(res[idx])
 
-    logger.info(f"[timing] mediapipe_total={(t1-t0)*1000:.0f}ms ({(t1-t0)*1000/SEQUENCE_LENGTH:.0f}ms/frame) tflite={(t2-t1)*1000:.0f}ms")
+    print(f"[timing] mediapipe_total={(t1-t0)*1000:.0f}ms ({(t1-t0)*1000/SEQUENCE_LENGTH:.0f}ms/frame) tflite={(t2-t1)*1000:.0f}ms")
 
     if confidence > THRESHOLD:
         return jsonify({"text": ACTIONS[idx], "confidence": confidence})
