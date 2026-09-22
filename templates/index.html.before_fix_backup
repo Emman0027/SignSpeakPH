@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
   <header>
     <div class="header-row">
       <div>
@@ -26,7 +27,7 @@
     <button id="dismissTip" class="dismiss-tip" aria-label="Dismiss tip">Got it</button>
   </div>
 
-  <main>
+  <main id="main-content">
     <section class="video-container">
       <video id="webcam" autoplay playsinline muted aria-label="Live camera feed"></video>
       <canvas id="captureCanvas" style="display:none;"></canvas>
@@ -56,6 +57,7 @@
       </div>
 
       <p id="statusText" class="status-text" role="status"></p>
+      <div id="processingSpinner" class="processing-spinner" aria-label="Processing"></div>
 
       <label class="toggle">
         <input type="checkbox" id="voiceToggle" checked aria-label="Enable voice output">
@@ -75,7 +77,9 @@
         <h2>Sentence</h2>
         <div class="transcript-actions">
           <button id="copyTranscriptBtn" class="clear-btn" aria-label="Copy sentence to clipboard">Copy</button>
+          <button id="undoTranscriptBtn" class="clear-btn" aria-label="Undo last added sign">Undo</button>
           <button id="clearTranscriptBtn" class="clear-btn" aria-label="Clear sentence">Clear</button>
+          <span id="transcriptWordCount" class="word-count">0 words</span>
         </div>
       </div>
       <div id="transcriptText" class="transcript-text" contenteditable="true"
@@ -114,6 +118,9 @@
   </div>
 
   <script>
+    // ======================
+    // ELEMENT REFERENCES
+    // ======================
     const video = document.getElementById('webcam');
     const canvas = document.getElementById('captureCanvas');
     const ctx = canvas.getContext('2d');
@@ -132,7 +139,26 @@
     const clearTranscriptBtn = document.getElementById('clearTranscriptBtn');
     const copyTranscriptBtn = document.getElementById('copyTranscriptBtn');
     const recentSignsList = document.getElementById('recentSignsList');
+    const undoTranscriptBtn = document.getElementById('undoTranscriptBtn');
+    const transcriptWordCount = document.getElementById('transcriptWordCount');
+    const processingSpinner = document.getElementById('processingSpinner');
+    const settingsModal = document.getElementById('settingsModal');
+    const thresholdSlider = document.getElementById('thresholdSlider');
+    const thresholdValue = document.getElementById('thresholdValue');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const signSearch = document.getElementById('signSearch');
+    const signList = document.getElementById('signList');
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const openGuideBtn = document.getElementById('openGuideBtn');
+    const closeGuideBtn = document.getElementById('closeGuideBtn');
+    const guideModal = document.getElementById('guideModal');
+    const onboardTip = document.getElementById('onboardTip');
+    const dismissTip = document.getElementById('dismissTip');
 
+    // ======================
+    // CONFIGURATION CONSTANTS
+    // ======================
     const SEND_WIDTH = 320;
     const SEND_HEIGHT = 240;
     canvas.width = SEND_WIDTH;
@@ -141,6 +167,9 @@
     const SEQUENCE_LENGTH = 30;
     const CAPTURE_INTERVAL_MS = 33; // ~30fps, native speed, no network in the loop
 
+    // ======================
+    // STATE VARIABLES
+    // ======================
     let lastSpoken = "";
     let running = false;
     let busy = false;
@@ -148,11 +177,18 @@
     let lastFrames = null; // kept so Retry can resend without recapturing
     let threshold = 0.7;
     let recentSigns = []; // {text, time}
+    let transcriptHistory = []; // For undo functionality
 
+    // ======================
+    // STATE MANAGEMENT FUNCTIONS
+    // ======================
     function setState(state) {
       outputPanel.dataset.state = state; // 'idle' | 'recording' | 'processing' | 'error'
     }
 
+    // ======================
+    // SPEECH/VOICE FUNCTIONS
+    // ======================
     function speak(text) {
       if (!document.getElementById('voiceToggle').checked) return;
       const utterance = new SpeechSynthesisUtterance(text);
@@ -167,7 +203,9 @@
       confidenceLabel.innerText = `${pct.toFixed(1)}%`;
     }
 
-    // --- Theme toggle ---
+    // ======================
+    // THEME HANDLING
+    // ======================
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
@@ -182,7 +220,9 @@
       localStorage.setItem('signspeakph_theme', next);
     });
 
-    // --- Settings (adjustable confidence threshold) ---
+    // ======================
+    // SETTINGS HANDLING
+    // ======================
     const settingsModal = document.getElementById('settingsModal');
     const thresholdSlider = document.getElementById('thresholdSlider');
     const thresholdValue = document.getElementById('thresholdValue');
@@ -239,30 +279,55 @@
       });
     }
 
-    // --- Transcript (editable + copyable, preserves manual edits) ---
+    // ======================
+    // TRANSCRIPT FUNCTIONALITY
+    // ======================
     function appendToTranscript(word) {
+      // Save current state for undo
+      transcriptHistory.push(transcriptText.innerText);
+      // Limit history to prevent memory issues
+      if (transcriptHistory.length > 10) {
+        transcriptHistory.shift();
+      }
+
       const current = transcriptText.innerText.trim();
       transcriptText.innerText = current ? `${current} ${word}` : word;
+      updateWordCount();
+    }
+
+    function undoTranscript() {
+      if (transcriptHistory.length > 0) {
+        transcriptText.innerText = transcriptHistory.pop();
+        transcriptText.focus();
+        updateWordCount();
+      }
+    }
+
+    function updateWordCount() {
+      const text = transcriptText.innerText.trim();
+      const wordCount = text === '' ? 0 : text.split(/\s+/).length;
+      transcriptWordCount.innerText = `${wordCount} ${wordCount === 1 ? 'word' : 'words'}`;
     }
 
     clearTranscriptBtn.addEventListener('click', () => {
+      // Save current state for undo before clearing
+      transcriptHistory.push(transcriptText.innerText);
+      if (transcriptHistory.length > 10) {
+        transcriptHistory.shift();
+      }
       transcriptText.innerText = '';
       transcriptText.focus();
+      updateWordCount();
     });
 
-    copyTranscriptBtn.addEventListener('click', async () => {
-      const text = transcriptText.innerText.trim();
-      try {
-        await navigator.clipboard.writeText(text);
-        const original = copyTranscriptBtn.innerText;
-        copyTranscriptBtn.innerText = 'Copied!';
-        setTimeout(() => { copyTranscriptBtn.innerText = original; }, 1200);
-      } catch (err) {
-        console.error('Clipboard copy failed:', err);
-      }
-    });
+    undoTranscriptBtn.addEventListener('click', undoTranscript);
 
-    // --- Camera + capture ---
+    // Initialize word count
+    updateWordCount();
+
+    // ======================
+    // CAMERA AND CAPTURE FUNCTIONS
+    // ======================
     async function startCamera() {
       if (cameraStarted) return;
       try {
@@ -279,7 +344,7 @@
 
     function captureFrame() {
       ctx.drawImage(video, 0, 0, SEND_WIDTH, SEND_HEIGHT);
-      return canvas.toDataURL('image/jpeg', 0.6);
+      return canvas.toDataURL('image/jpeg', 0.5);
     }
 
     async function captureSequence() {
@@ -311,7 +376,16 @@
 
     function handleResult(data, captureMs, processMs) {
       if (data.error) {
-        statusText.innerText = `Error: ${data.error}`;
+        // Map backend error messages to more user-friendly frontend messages
+        let userMessage = data.error;
+        if (data.error.includes("no images provided")) {
+          userMessage = "No images received. Please try signing again.";
+        } else if (data.error.includes("expected")) {
+          userMessage = "Incorrect number of frames captured. Please try signing again.";
+        } else if (data.error.includes("could not decode")) {
+          userMessage = "Error processing images. Please check your camera and try again.";
+        }
+        statusText.innerText = userMessage;
         setConfidence(0);
         setState('error');
         return;
@@ -353,6 +427,10 @@
       const captureMs = Math.round(performance.now() - captureStart);
       lastFrames = frames;
 
+      await processPrediction(frames, captureMs);
+    }
+
+    async function processPrediction(frames, captureMs) {
       setState('processing');
       statusText.innerText = `Captured in ${captureMs}ms - processing...`;
 
@@ -361,7 +439,7 @@
         handleResult(data, captureMs, processMs);
       } catch (err) {
         console.error('Prediction request failed:', err);
-        statusText.innerText = "Request failed.";
+        statusText.innerText = "Connection error. Please check your internet connection and try again.";
         setState('error');
         retryBtn.style.display = 'inline-block';
       } finally {
@@ -381,7 +459,7 @@
         handleResult(data, 0, processMs);
       } catch (err) {
         console.error('Retry failed:', err);
-        statusText.innerText = "Retry failed.";
+        statusText.innerText = "Connection error during retry. Please check your internet connection and try again.";
         setState('error');
         retryBtn.style.display = 'inline-block';
       } finally {
