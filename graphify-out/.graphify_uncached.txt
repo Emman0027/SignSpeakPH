@@ -1,0 +1,6 @@
+C:\Users\user\Documents\GitHub\SignSpeakPH\README.md
+C:\Users\user\Documents\GitHub\SignSpeakPH\plan_1.txt
+C:\Users\user\Documents\GitHub\SignSpeakPH\render.yaml
+C:\Users\user\Documents\GitHub\SignSpeakPH\requirements.txt
+C:\Users\user\Documents\GitHub\SignSpeakPH\runtime.txt
+C:\Users\user\Documents\GitHub\SignSpeakPH\templates\index.html

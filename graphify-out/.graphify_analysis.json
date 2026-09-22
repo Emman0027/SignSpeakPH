@@ -1,0 +1,142 @@
+{
+  "communities": {
+    "0": [
+      "app",
+      "app_rationale_1",
+      "base64",
+      "flask",
+      "json",
+      "os",
+      "tflite_runtime_interpreter",
+      "time"
+    ],
+    "1": [
+      "app_decode_base64_image",
+      "app_index",
+      "app_predict_batch",
+      "app_rationale_69",
+      "app_rationale_84",
+      "route",
+      "utils_mediapipe_utils_extract_keypoints",
+      "utils_mediapipe_utils_rationale_57"
+    ],
+    "2": [
+      "compare_extraction",
+      "compare_extraction_extract_from_holistic",
+      "compare_extraction_extract_from_pose_hands",
+      "cv2",
+      "mediapipe",
+      "numpy",
+      "utils_mediapipe_utils",
+      "utils_mediapipe_utils_rationale_1"
+    ],
+    "3": [
+      "utils_mediapipe_utils_create_models",
+      "utils_mediapipe_utils_rationale_30"
+    ],
+    "4": [
+      "utils_mediapipe_utils_mediapipe_detection",
+      "utils_mediapipe_utils_rationale_46"
+    ]
+  },
+  "cohesion": {
+    "0": 0.25,
+    "1": 0.25,
+    "2": 0.32142857142857145,
+    "3": 1.0,
+    "4": 1.0
+  },
+  "gods": [
+    {
+      "id": "app_predict_batch",
+      "label": "predict_batch()",
+      "degree": 6
+    },
+    {
+      "id": "utils_mediapipe_utils_extract_keypoints",
+      "label": "extract_keypoints()",
+      "degree": 4
+    },
+    {
+      "id": "utils_mediapipe_utils_mediapipe_detection",
+      "label": "mediapipe_detection()",
+      "degree": 4
+    },
+    {
+      "id": "app_decode_base64_image",
+      "label": "decode_base64_image()",
+      "degree": 3
+    },
+    {
+      "id": "utils_mediapipe_utils_create_models",
+      "label": "create_models()",
+      "degree": 3
+    },
+    {
+      "id": "app_index",
+      "label": "index()",
+      "degree": 2
+    },
+    {
+      "id": "app_rationale_1",
+      "label": "SignSpeakPH - Flask backend (BATCH version) Fixes both the speed problem AND an…",
+      "degree": 1
+    },
+    {
+      "id": "app_rationale_69",
+      "label": "Convert a data:image/jpeg;base64,... string from the browser into an OpenCV…",
+      "degree": 1
+    },
+    {
+      "id": "app_rationale_84",
+      "label": "Receives all SEQUENCE_LENGTH frames at once (captured locally by the browser at…",
+      "degree": 1
+    },
+    {
+      "id": "utils_mediapipe_utils_rationale_57",
+      "label": "258-length feature vector: pose(33*4=132) + lh(21*3=63) + rh(21*3=63).…",
+      "degree": 1
+    }
+  ],
+  "surprises": [
+    {
+      "source": "predict_batch()",
+      "target": "mediapipe_detection()",
+      "source_files": [
+        "app.py",
+        "utils/mediapipe_utils.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "predict_batch()",
+      "target": "extract_keypoints()",
+      "source_files": [
+        "app.py",
+        "utils/mediapipe_utils.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `predict_batch()` connect `predict_batch` to `app.py`, `mediapipe_detection`?",
+      "why": "High betweenness centrality (0.134) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `mediapipe_detection()` connect `mediapipe_detection` to `app.py`, `predict_batch`, `mediapipe_utils.py`?",
+      "why": "High betweenness centrality (0.082) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `extract_keypoints()` connect `predict_batch` to `app.py`, `mediapipe_utils.py`?",
+      "why": "High betweenness centrality (0.082) - this node is a cross-community bridge."
+    }
+  ]
+}

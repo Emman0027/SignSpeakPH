@@ -1,0 +1,56 @@
+{
+  ".claude/.headroom_wrap_marker.json": {
+    "mtime": 1790075001.645977,
+    "seen": 1790075798.6817994,
+    "ast_hash": "35b183c8960d3db8377eeea653fc4ce2",
+    "semantic_hash": "35b183c8960d3db8377eeea653fc4ce2"
+  },
+  ".claude/.headroom_wrap_owners.json": {
+    "mtime": 1790075001.6479888,
+    "seen": 1790075798.6818073,
+    "ast_hash": "dc0f90aa6f40131eea7758b049ce4b77",
+    "semantic_hash": "dc0f90aa6f40131eea7758b049ce4b77"
+  },
+  ".claude/settings.local.json": {
+    "mtime": 1790075780.058297,
+    "seen": 1790075798.6818116,
+    "ast_hash": "56fc28f256e724873b7b68824784b1d1",
+    "semantic_hash": "56fc28f256e724873b7b68824784b1d1"
+  },
+  "app.py": {
+    "mtime": 1790074974.2537525,
+    "seen": 1790075798.6818154,
+    "ast_hash": "892475a16713c07367f6a780e0d848ec",
+    "semantic_hash": "892475a16713c07367f6a780e0d848ec"
+  },
+  "compare_extraction.py": {
+    "mtime": 1789526751.5820818,
+    "seen": 1790075798.6818187,
+    "ast_hash": "9914f30b07d1ddf3c1f56ea45ff8ff38",
+    "semantic_hash": "9914f30b07d1ddf3c1f56ea45ff8ff38"
+  },
+  "config.json": {
+    "mtime": 1789914600.0,
+    "seen": 1790075798.6818216,
+    "ast_hash": "8e7653bcc7b02f5acce7184ec774b82b",
+    "semantic_hash": "8e7653bcc7b02f5acce7184ec774b82b"
+  },
+  "graphify_output.json": {
+    "mtime": 1790075001.662036,
+    "seen": 1790075798.6818252,
+    "ast_hash": "550d86e117ddeeb71377ad91cf6da4b2",
+    "semantic_hash": "550d86e117ddeeb71377ad91cf6da4b2"
+  },
+  "labels.json": {
+    "mtime": 1789914600.0,
+    "seen": 1790075798.6818283,
+    "ast_hash": "ba307f98c46f168e273569658f78d59d",
+    "semantic_hash": "ba307f98c46f168e273569658f78d59d"
+  },
+  "utils/mediapipe_utils.py": {
+    "mtime": 1789914600.0,
+    "seen": 1790075798.6818314,
+    "ast_hash": "7c33e5607e02a9082f10a5869ad0dc6c",
+    "semantic_hash": "7c33e5607e02a9082f10a5869ad0dc6c"
+  }
+}

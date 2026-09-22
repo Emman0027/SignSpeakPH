@@ -1,0 +1,585 @@
+{
+  "nodes": [
+    {
+      "id": "app",
+      "label": "app.py",
+      "file_type": "code",
+      "source_file": "app.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "app_decode_base64_image",
+      "label": "decode_base64_image()",
+      "file_type": "code",
+      "source_file": "app.py",
+      "source_location": "L68",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "route",
+      "label": "route",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "app_index",
+      "label": "index()",
+      "file_type": "code",
+      "source_file": "app.py",
+      "source_location": "L78",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "app_predict_batch",
+      "label": "predict_batch()",
+      "file_type": "code",
+      "source_file": "app.py",
+      "source_location": "L83",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "app_rationale_1",
+      "label": "SignSpeakPH - Flask backend (BATCH version) Fixes both the speed problem AND an…",
+      "file_type": "rationale",
+      "source_file": "app.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "app_rationale_69",
+      "label": "Convert a data:image/jpeg;base64,... string from the browser into an OpenCV…",
+      "file_type": "rationale",
+      "source_file": "app.py",
+      "source_location": "L69",
+      "_origin": "ast"
+    },
+    {
+      "id": "app_rationale_84",
+      "label": "Receives all SEQUENCE_LENGTH frames at once (captured locally by the browser at…",
+      "file_type": "rationale",
+      "source_file": "app.py",
+      "source_location": "L84",
+      "_origin": "ast"
+    },
+    {
+      "id": "compare_extraction",
+      "label": "compare_extraction.py",
+      "file_type": "code",
+      "source_file": "compare_extraction.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "compare_extraction_extract_from_holistic",
+      "label": "extract_from_holistic()",
+      "file_type": "code",
+      "source_file": "compare_extraction.py",
+      "source_location": "L13",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "compare_extraction_extract_from_pose_hands",
+      "label": "extract_from_pose_hands()",
+      "file_type": "code",
+      "source_file": "compare_extraction.py",
+      "source_location": "L26",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "utils_mediapipe_utils",
+      "label": "mediapipe_utils.py",
+      "file_type": "code",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "utils_mediapipe_utils_create_models",
+      "label": "create_models()",
+      "file_type": "code",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L29",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "utils_mediapipe_utils_mediapipe_detection",
+      "label": "mediapipe_detection()",
+      "file_type": "code",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L45",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "utils_mediapipe_utils_extract_keypoints",
+      "label": "extract_keypoints()",
+      "file_type": "code",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L56",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "utils_mediapipe_utils_rationale_1",
+      "label": "MediaPipe helper functions - FAST version (Pose + Hands, no Holistic). Holistic…",
+      "file_type": "rationale",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "utils_mediapipe_utils_rationale_30",
+      "label": "Create the Pose and Hands model instances once, reused across requests.",
+      "file_type": "rationale",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L30",
+      "_origin": "ast"
+    },
+    {
+      "id": "utils_mediapipe_utils_rationale_46",
+      "label": "Run Pose + Hands on a single BGR frame. `models` is (pose_model, hands_model).",
+      "file_type": "rationale",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L46",
+      "_origin": "ast"
+    },
+    {
+      "id": "utils_mediapipe_utils_rationale_57",
+      "label": "258-length feature vector: pose(33*4=132) + lh(21*3=63) + rh(21*3=63).…",
+      "file_type": "rationale",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L57",
+      "_origin": "ast"
+    }
+  ],
+  "edges": [
+    {
+      "source": "app",
+      "target": "base64",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "json",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "time",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "cv2",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L38",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "numpy",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "flask",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "tflite_runtime_interpreter",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "utils_mediapipe_utils",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "app_decode_base64_image",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L68",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app_index",
+      "target": "route",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L77",
+      "weight": 1.0,
+      "context": "decorator",
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "app_index",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app_predict_batch",
+      "target": "route",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "context": "decorator",
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "app_predict_batch",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L83",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app_predict_batch",
+      "target": "app_decode_base64_image",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L100",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app_rationale_1",
+      "target": "app",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app_rationale_69",
+      "target": "app_decode_base64_image",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app_rationale_84",
+      "target": "app_predict_batch",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L84",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "compare_extraction",
+      "target": "cv2",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "compare_extraction.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "compare_extraction",
+      "target": "numpy",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "compare_extraction.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "compare_extraction",
+      "target": "mediapipe",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "compare_extraction.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "compare_extraction",
+      "target": "compare_extraction_extract_from_holistic",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "compare_extraction.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "compare_extraction",
+      "target": "compare_extraction_extract_from_pose_hands",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "compare_extraction.py",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "utils_mediapipe_utils",
+      "target": "cv2",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "utils_mediapipe_utils",
+      "target": "numpy",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "utils_mediapipe_utils",
+      "target": "mediapipe",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "utils_mediapipe_utils",
+      "target": "utils_mediapipe_utils_create_models",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "utils_mediapipe_utils",
+      "target": "utils_mediapipe_utils_mediapipe_detection",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "utils_mediapipe_utils",
+      "target": "utils_mediapipe_utils_extract_keypoints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "utils_mediapipe_utils_rationale_1",
+      "target": "utils_mediapipe_utils",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "utils_mediapipe_utils_rationale_30",
+      "target": "utils_mediapipe_utils_create_models",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "utils_mediapipe_utils_rationale_46",
+      "target": "utils_mediapipe_utils_mediapipe_detection",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "utils_mediapipe_utils_rationale_57",
+      "target": "utils_mediapipe_utils_extract_keypoints",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "utils/mediapipe_utils.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "utils_mediapipe_utils_create_models",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "utils_mediapipe_utils_mediapipe_detection",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app",
+      "target": "utils_mediapipe_utils_extract_keypoints",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app_predict_batch",
+      "target": "utils_mediapipe_utils_mediapipe_detection",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "app_predict_batch",
+      "target": "utils_mediapipe_utils_extract_keypoints",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app.py",
+      "source_location": "L104",
+      "weight": 1.0,
+      "_origin": "ast"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "failed_sources": [],
+  "extracted_sources": [
+    "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\.claude\\.headroom_wrap_marker.json",
+    "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\.claude\\.headroom_wrap_owners.json",
+    "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\.claude\\settings.local.json",
+    "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\app.py",
+    "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\compare_extraction.py",
+    "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\config.json",
+    "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\graphify_output.json",
+    "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\labels.json",
+    "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\utils\\mediapipe_utils.py"
+  ]
+}

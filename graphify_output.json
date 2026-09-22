@@ -1,0 +1,1077 @@
+{
+  "nodes": [
+    {
+      "id": "readme_file",
+      "label": "README.md",
+      "type": "file",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md",
+      "confidence": 1.0
+    },
+    {
+      "id": "signspeakph_project",
+      "label": "SignSpeakPH",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md",
+      "confidence": 0.95
+    },
+    {
+      "id": "batch_capture_solution",
+      "label": "Batch frame capture solution",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md",
+      "confidence": 0.9
+    },
+    {
+      "id": "timing_issue_problem",
+      "label": "Streaming latency timing issue",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md",
+      "confidence": 0.9
+    },
+    {
+      "id": "model_accuracy_issue",
+      "label": "Model accuracy degradation due to latency mismatch",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md",
+      "confidence": 0.85
+    },
+    {
+      "id": "required_model_files",
+      "label": "Required model files (action.tflite, labels.json, config.json)",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md",
+      "confidence": 0.9
+    },
+    {
+      "id": "local_test_command",
+      "label": "Local test command: pip install -r requirements.txt && python app.py",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md",
+      "confidence": 0.95
+    },
+    {
+      "id": "deployment_url",
+      "label": "Local deployment URL: http://127.0.0.1:5000",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md",
+      "confidence": 0.9
+    },
+    {
+      "id": "plan_1_file",
+      "label": "plan_1.txt",
+      "type": "file",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 1.0
+    },
+    {
+      "id": "improvement_plan",
+      "label": "SignSpeakPH Repository Improvement Plan",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.95
+    },
+    {
+      "id": "git_workflow_issues",
+      "label": "Git workflow & commit quality problems",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "model_data_mismatch",
+      "label": "Model-data mismatch (CRITICAL)",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.95
+    },
+    {
+      "id": "repository_structure_issues",
+      "label": "Repository structure issues",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "dependency_management_issues",
+      "label": "Dependency management problems",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "zero_test_coverage",
+      "label": "Zero test coverage",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.95
+    },
+    {
+      "id": "branch_cleanup_needed",
+      "label": "Branch cleanup needed",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "security_production_concerns",
+      "label": "Security & production concerns",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.85
+    },
+    {
+      "id": "labels_json_file",
+      "label": "labels.json",
+      "type": "file",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.8
+    },
+    {
+      "id": "constants_py_file",
+      "label": "constants.py",
+      "type": "file",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.8
+    },
+    {
+      "id": "action_tflite_model",
+      "label": "action.tflite model (1.1MB)",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "five_signs_in_labels",
+      "label": "5 signs in labels.json: [\"kamusta\", \"salamat\", \"mahalkita\", \"oo\", \"hindi\"]",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.95
+    },
+    {
+      "id": "twenty_two_signs_in_constants",
+      "label": "22 signs defined in constants.py",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.95
+    },
+    {
+      "id": "seventeen_missing_signs",
+      "label": "17 signs defined in UI but not recognizable by model",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "jupyter_notebooks",
+      "label": "Jupyter notebooks (5.4MB total)",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "backups_directory",
+      "label": "backups/ directory with 4 backup files",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "fix_scripts",
+      "label": "Temporary fix scripts: fix_import.py, fix_logging.py, fix_index_html.py",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "test_data_files",
+      "label": "Test data files: 0.npy, compare_extraction.py",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "requirements_txt_file",
+      "label": "requirements.txt (6 packages, production-focused)",
+      "type": "file",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.8
+    },
+    {
+      "id": "requirements_training_txt_file",
+      "label": "requirements-training.txt (149 packages, includes full TensorFlow)",
+      "type": "file",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.8
+    },
+    {
+      "id": "malformed_certifi_version",
+      "label": "Malformed certifi version: certifi==2026.1.4 (future date)",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "fetchtrial_branch",
+      "label": "fetchtrial branch",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.85
+    },
+    {
+      "id": "no_holistic_branch",
+      "label": "no-holistic branch",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.85
+    },
+    {
+      "id": "claude_nifty_fermi_branch",
+      "label": "claude/nifty-fermi-55947f branch",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.85
+    },
+    {
+      "id": "dockerfile_single_worker",
+      "label": "Single worker in Dockerfile (--workers 1)",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.85
+    },
+    {
+      "id": "missing_monitoring",
+      "label": "No monitoring/logging infrastructure",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.8
+    },
+    {
+      "id": "missing_error_tracking",
+      "label": "No error tracking (Sentry, etc.)",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt",
+      "confidence": 0.8
+    },
+    {
+      "id": "render_yaml_file",
+      "label": "render.yaml",
+      "type": "file",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml",
+      "confidence": 1.0
+    },
+    {
+      "id": "render_service",
+      "label": "Render service configuration",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml",
+      "confidence": 0.95
+    },
+    {
+      "id": "signspeakph_render_service",
+      "label": "signspeakph service on Render",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml",
+      "confidence": 0.9
+    },
+    {
+      "id": "render_build_command",
+      "label": "Render buildCommand: pip install -r requirements.txt",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml",
+      "confidence": 0.95
+    },
+    {
+      "id": "render_start_command",
+      "label": "Render startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml",
+      "confidence": 0.95
+    },
+    {
+      "id": "render_plan_free",
+      "label": "Render plan: free",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml",
+      "confidence": 0.9
+    },
+    {
+      "id": "render_python_version",
+      "label": "Render envVars: PYTHON_VERSION=3.11.9",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml",
+      "confidence": 0.95
+    },
+    {
+      "id": "requirements_txt_content",
+      "label": "requirements.txt content",
+      "type": "file",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt",
+      "confidence": 1.0
+    },
+    {
+      "id": "flask_dependency",
+      "label": "flask==3.0.3",
+      "type": "dependency",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt",
+      "confidence": 0.95
+    },
+    {
+      "id": "gunicorn_dependency",
+      "label": "gunicorn==22.0.0",
+      "type": "dependency",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt",
+      "confidence": 0.95
+    },
+    {
+      "id": "tflite_runtime_dependency",
+      "label": "tflite-runtime==2.14.0",
+      "type": "dependency",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt",
+      "confidence": 0.95
+    },
+    {
+      "id": "opencv_python_dependency",
+      "label": "opencv-python-headless==4.10.0.84",
+      "type": "dependency",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt",
+      "confidence": 0.95
+    },
+    {
+      "id": "mediapipe_dependency",
+      "label": "mediapipe==0.10.9",
+      "type": "dependency",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt",
+      "confidence": 0.95
+    },
+    {
+      "id": "numpy_dependency",
+      "label": "numpy<2.0",
+      "type": "dependency",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt",
+      "confidence": 0.9
+    },
+    {
+      "id": "runtime_txt_file",
+      "label": "runtime.txt",
+      "type": "file",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\runtime.txt",
+      "confidence": 1.0
+    },
+    {
+      "id": "python_runtime_version",
+      "label": "python-3.11.9",
+      "type": "runtime",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\runtime.txt",
+      "confidence": 0.95
+    },
+    {
+      "id": "templates_index_html_file",
+      "label": "templates/index.html",
+      "type": "file",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 1.0
+    },
+    {
+      "id": "signspeakph_html_structure",
+      "label": "HTML structure for SignSpeakPH",
+      "type": "concept",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "webcam_video_element",
+      "label": "Webcam video element",
+      "type": "element",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "capture_canvas_element",
+      "label": "Capture canvas element",
+      "type": "element",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "recording_badge_element",
+      "label": "Recording badge element",
+      "type": "element",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "prediction_text_element",
+      "label": "Prediction text element",
+      "type": "element",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "status_text_element",
+      "label": "Status text element",
+      "type": "element",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "voice_toggle_element",
+      "label": "Voice toggle checkbox element",
+      "type": "element",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "send_width_constant",
+      "label": "SEND_WIDTH = 320",
+      "type": "constant",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "send_height_constant",
+      "label": "SEND_HEIGHT = 240",
+      "type": "constant",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "sequence_length_constant",
+      "label": "SEQUENCE_LENGTH = 30",
+      "type": "constant",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "capture_interval_constant",
+      "label": "CAPTURE_INTERVAL_MS = 33",
+      "type": "constant",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "speak_function",
+      "label": "speak() function for voice output",
+      "type": "function",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "start_camera_function",
+      "label": "startCamera() function",
+      "type": "function",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "capture_frame_function",
+      "label": "captureFrame() function",
+      "type": "function",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "capture_sequence_function",
+      "label": "captureSequence() function",
+      "type": "function",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "capture_predict_loop_function",
+      "label": "captureAndPredictLoop() function",
+      "type": "function",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.95
+    },
+    {
+      "id": "predict_batch_endpoint",
+      "label": "/predict_batch API endpoint",
+      "type": "endpoint",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.9
+    },
+    {
+      "id": "speech_synthesis_api",
+      "label": "SpeechSynthesis API for voice output",
+      "type": "technology",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.9
+    },
+    {
+      "id": "fil_ph_locale",
+      "label": "fil-PH locale for speech synthesis",
+      "type": "constant",
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html",
+      "confidence": 0.9
+    }
+  ],
+  "edges": [
+    {
+      "source": "signspeakph_project",
+      "target": "batch_capture_solution",
+      "label": "implements",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md"
+    },
+    {
+      "source": "batch_capture_solution",
+      "target": "timing_issue_problem",
+      "label": "solves",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md"
+    },
+    {
+      "source": "timing_issue_problem",
+      "target": "model_accuracy_issue",
+      "label": "causes",
+      "confidence": 0.85,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md"
+    },
+    {
+      "source": "signspeakph_project",
+      "target": "required_model_files",
+      "label": "requires",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md"
+    },
+    {
+      "source": "signspeakph_project",
+      "target": "local_test_command",
+      "label": "tested_with",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md"
+    },
+    {
+      "source": "signspeakph_project",
+      "target": "deployment_url",
+      "label": "deployed_at",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\README.md"
+    },
+    {
+      "source": "improvement_plan",
+      "target": "git_workflow_issues",
+      "label": "identifies",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "improvement_plan",
+      "target": "model_data_mismatch",
+      "label": "identifies",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "improvement_plan",
+      "target": "repository_structure_issues",
+      "label": "identifies",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "improvement_plan",
+      "target": "dependency_management_issues",
+      "label": "identifies",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "improvement_plan",
+      "target": "zero_test_coverage",
+      "label": "identifies",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "improvement_plan",
+      "target": "branch_cleanup_needed",
+      "label": "identifies",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "improvement_plan",
+      "target": "security_production_concerns",
+      "label": "identifies",
+      "confidence": 0.85,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "model_data_mismatch",
+      "target": "labels_json_file",
+      "label": "involves",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "model_data_mismatch",
+      "target": "constants_py_file",
+      "label": "involves",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "model_data_mismatch",
+      "target": "action_tflite_model",
+      "label": "involves",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "labels_json_file",
+      "target": "five_signs_in_labels",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "constants_py_file",
+      "target": "twenty_two_signs_in_constants",
+      "label": "defines",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "model_data_mismatch",
+      "target": "seventeen_missing_signs",
+      "label": "results_in",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "repository_structure_issues",
+      "target": "jupyter_notebooks",
+      "label": "includes",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "repository_structure_issues",
+      "target": "backups_directory",
+      "label": "includes",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "repository_structure_issues",
+      "target": "fix_scripts",
+      "label": "includes",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "repository_structure_issues",
+      "target": "test_data_files",
+      "label": "includes",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "dependency_management_issues",
+      "target": "requirements_txt_file",
+      "label": "involves",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "dependency_management_issues",
+      "target": "requirements_training_txt_file",
+      "label": "involves",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "dependency_management_issues",
+      "target": "malformed_certifi_version",
+      "label": "includes",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "branch_cleanup_needed",
+      "target": "fetchtrial_branch",
+      "label": "includes",
+      "confidence": 0.85,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "branch_cleanup_needed",
+      "target": "no_holistic_branch",
+      "label": "includes",
+      "confidence": 0.85,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "branch_cleanup_needed",
+      "target": "claude_nifty_fermi_branch",
+      "label": "includes",
+      "confidence": 0.85,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "security_production_concerns",
+      "target": "dockerfile_single_worker",
+      "label": "includes",
+      "confidence": 0.85,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "security_production_concerns",
+      "target": "missing_monitoring",
+      "label": "includes",
+      "confidence": 0.8,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "security_production_concerns",
+      "target": "missing_error_tracking",
+      "label": "includes",
+      "confidence": 0.8,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "source": "render_service",
+      "target": "signspeakph_render_service",
+      "label": "configures",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml"
+    },
+    {
+      "source": "signspeakph_render_service",
+      "target": "render_build_command",
+      "label": "uses",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml"
+    },
+    {
+      "source": "signspeakph_render_service",
+      "target": "render_start_command",
+      "label": "uses",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml"
+    },
+    {
+      "source": "signspeakph_render_service",
+      "target": "render_plan_free",
+      "label": "has",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml"
+    },
+    {
+      "source": "signspeakph_render_service",
+      "target": "render_python_version",
+      "label": "uses",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml"
+    },
+    {
+      "source": "requirements_txt_content",
+      "target": "flask_dependency",
+      "label": "lists",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt"
+    },
+    {
+      "source": "requirements_txt_content",
+      "target": "gunicorn_dependency",
+      "label": "lists",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt"
+    },
+    {
+      "source": "requirements_txt_content",
+      "target": "tflite_runtime_dependency",
+      "label": "lists",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt"
+    },
+    {
+      "source": "requirements_txt_content",
+      "target": "opencv_python_dependency",
+      "label": "lists",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt"
+    },
+    {
+      "source": "requirements_txt_content",
+      "target": "mediapipe_dependency",
+      "label": "lists",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt"
+    },
+    {
+      "source": "requirements_txt_content",
+      "target": "numpy_dependency",
+      "label": "lists",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\requirements.txt"
+    },
+    {
+      "source": "python_runtime_version",
+      "target": "render_python_version",
+      "label": "matches",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\runtime.txt"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "webcam_video_element",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "capture_canvas_element",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "recording_badge_element",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "prediction_text_element",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "status_text_element",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "voice_toggle_element",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "send_width_constant",
+      "label": "defines",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "send_height_constant",
+      "label": "defines",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "sequence_length_constant",
+      "label": "defines",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "capture_interval_constant",
+      "label": "defines",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "speak_function",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "start_camera_function",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "capture_frame_function",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "capture_sequence_function",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "signspeakph_html_structure",
+      "target": "capture_predict_loop_function",
+      "label": "contains",
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "capture_predict_loop_function",
+      "target": "predict_batch_endpoint",
+      "label": "calls",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "speak_function",
+      "target": "speech_synthesis_api",
+      "label": "uses",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "source": "speak_function",
+      "target": "fil_ph_locale",
+      "label": "uses",
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "model_data_mismatch_situation",
+      "label": "Model-data mismatch situation involving labels, constants, and model",
+      "entity_ids": [
+        "labels_json_file",
+        "constants_py_file",
+        "action_tflite_model",
+        "five_signs_in_labels",
+        "twenty_two_signs_in_constants",
+        "seventeen_missing_signs"
+      ],
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "id": "repository_cleanup_needed",
+      "label": "Repository cleanup needed for development artifacts",
+      "entity_ids": [
+        "repository_structure_issues",
+        "jupyter_notebooks",
+        "backups_directory",
+        "fix_scripts",
+        "test_data_files"
+      ],
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "id": "dependency_issues",
+      "label": "Dependency management issues",
+      "entity_ids": [
+        "dependency_management_issues",
+        "requirements_txt_file",
+        "requirements_training_txt_file",
+        "malformed_certifi_version"
+      ],
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "id": "branch_cleanup_items",
+      "label": "Branches needing cleanup",
+      "entity_ids": [
+        "branch_cleanup_needed",
+        "fetchtrial_branch",
+        "no_holistic_branch",
+        "claude_nifty_fermi_branch"
+      ],
+      "confidence": 0.85,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\plan_1.txt"
+    },
+    {
+      "id": "render_service_configuration",
+      "label": "Render service configuration details",
+      "entity_ids": [
+        "render_service",
+        "signspeakph_render_service",
+        "render_build_command",
+        "render_start_command",
+        "render_plan_free",
+        "render_python_version"
+      ],
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\render.yaml"
+    },
+    {
+      "id": "python_version_consistency",
+      "label": "Python version consistency across files",
+      "entity_ids": [
+        "python_runtime_version",
+        "render_python_version"
+      ],
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\runtime.txt"
+    },
+    {
+      "id": "frontend_interface_elements",
+      "label": "Frontend interface elements in index.html",
+      "entity_ids": [
+        "signspeakph_html_structure",
+        "webcam_video_element",
+        "capture_canvas_element",
+        "recording_badge_element",
+        "prediction_text_element",
+        "status_text_element",
+        "voice_toggle_element"
+      ],
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "id": "frontend_constants_and_functions",
+      "label": "Frontend constants and functions in index.html",
+      "entity_ids": [
+        "signspeakph_html_structure",
+        "send_width_constant",
+        "send_height_constant",
+        "sequence_length_constant",
+        "capture_interval_constant",
+        "speak_function",
+        "start_camera_function",
+        "capture_frame_function",
+        "capture_sequence_function",
+        "capture_predict_loop_function"
+      ],
+      "confidence": 0.95,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "id": "frontend_api_integration",
+      "label": "Frontend integration with prediction API",
+      "entity_ids": [
+        "capture_predict_loop_function",
+        "predict_batch_endpoint"
+      ],
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    },
+    {
+      "id": "frontend_voice_output",
+      "label": "Frontend voice output functionality",
+      "entity_ids": [
+        "speak_function",
+        "speech_synthesis_api",
+        "fil_ph_locale"
+      ],
+      "confidence": 0.9,
+      "source_location": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH\\templates\\index.html"
+    }
+  ],
+  "input_tokens": 8500,
+  "output_tokens": 1500
+}
