@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignSpeakPH</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <div class="header-row">
+      <div>
+        <h1>SignSpeakPH</h1>
+        <p class="subtitle">Real-Time Filipino Sign Language Recognition with Text &amp; Voice Output</p>
+      </div>
+      <button id="openGuideBtn" class="guide-btn">📖 Learn the Signs</button>
+    </div>
+  </header>
+
+  <div id="onboardTip" class="onboard-tip" style="display:none;">
+    New here? Click <strong>"Learn the Signs"</strong> above to see what SignSpeakPH understands before you start.
+    <button id="dismissTip" class="dismiss-tip">Got it</button>
+  </div>
+
+  <main>
+    <section class="video-container">
+      <video id="webcam" autoplay playsinline muted></video>
+      <canvas id="captureCanvas" style="display:none;"></canvas>
+      <div id="recordingBadge" class="recording-badge" style="display:none;">
+        ● Recording <span id="frameCount">0</span>/30
+      </div>
+      <div class="progress-track">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+    </section>
+
+    <section class="control-row">
+      <button id="toggleBtn" class="toggle-btn">▶ Start Signing</button>
+    </section>
+
+    <section class="output-panel">
+      <h2>Recognized Sign</h2>
+      <p id="predictionText" class="prediction-text">Click "Start Signing" to begin</p>
+
+      <div class="confidence-row">
+        <div class="confidence-track">
+          <div id="confidenceFill" class="confidence-fill"></div>
+        </div>
+        <span id="confidenceLabel" class="confidence-label"></span>
+      </div>
+
+      <p id="statusText" class="status-text"></p>
+
+      <label class="toggle">
+        <input type="checkbox" id="voiceToggle" checked>
+        Voice output enabled
+      </label>
+    </section>
+
+    <section class="transcript-panel">
+      <div class="transcript-header">
+        <h2>Sentence</h2>
+        <button id="clearTranscriptBtn" class="clear-btn">Clear</button>
+      </div>
+      <p id="transcriptText" class="transcript-text">Recognized signs will build a sentence here...</p>
+    </section>
+  </main>
+
+  <!-- Sign guide modal -->
+  <div id="guideModal" class="modal-overlay" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Signs SignSpeakPH Understands</h2>
+        <button id="closeGuideBtn" class="close-btn">✕</button>
+      </div>
+      <input id="signSearch" class="sign-search" type="text" placeholder="Search signs...">
+      <div id="signList" class="sign-list">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('captureCanvas');
+    const ctx = canvas.getContext('2d');
+    const predictionText = document.getElementById('predictionText');
+    const statusText = document.getElementById('statusText');
+    const recordingBadge = document.getElementById('recordingBadge');
+    const frameCountEl = document.getElementById('frameCount');
+    const progressFill = document.getElementById('progressFill');
+    const confidenceFill = document.getElementById('confidenceFill');
+    const confidenceLabel = document.getElementById('confidenceLabel');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const transcriptText = document.getElementById('transcriptText');
+    const clearTranscriptBtn = document.getElementById('clearTranscriptBtn');
+
+    const SEND_WIDTH = 320;
+    const SEND_HEIGHT = 240;
+    canvas.width = SEND_WIDTH;
+    canvas.height = SEND_HEIGHT;
+
+    const SEQUENCE_LENGTH = 30;
+    const CAPTURE_INTERVAL_MS = 33; // ~30fps, native speed, no network in the loop
+
+    let lastSpoken = "";
+    let running = false;   // whether continuous recognition is active
+    let busy = false;      // true while capturing OR waiting for server response
+    let transcriptWords = [];
+    let cameraStarted = false;
+
+    function speak(text) {
+      if (!document.getElementById('voiceToggle').checked) return;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "fil-PH";
+      speechSynthesis.speak(utterance);
+    }
+
+    function setConfidence(pct) {
+      confidenceFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+      confidenceFill.classList.remove('conf-high', 'conf-low');
+      confidenceFill.classList.add(pct >= 70 ? 'conf-high' : 'conf-low');
+      confidenceLabel.innerText = `${pct.toFixed(1)}%`;
+    }
+
+    async function startCamera() {
+      if (cameraStarted) return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+        video.srcObject = stream;
+        cameraStarted = true;
+      } catch (err) {
+        predictionText.innerText = "Camera access denied or unavailable";
+        console.error("getUserMedia error:", err);
+        throw err;
+      }
+    }
+
+    function captureFrame() {
+      ctx.drawImage(video, 0, 0, SEND_WIDTH, SEND_HEIGHT);
+      return canvas.toDataURL('image/jpeg', 0.6);
+    }
+
+    async function captureSequence() {
+      recordingBadge.style.display = 'flex';
+      const frames = [];
+      for (let i = 0; i < SEQUENCE_LENGTH; i++) {
+        frames.push(captureFrame());
+        frameCountEl.innerText = i + 1;
+        progressFill.style.width = `${((i + 1) / SEQUENCE_LENGTH) * 100}%`;
+        await new Promise(resolve => setTimeout(resolve, CAPTURE_INTERVAL_MS));
+      }
+      recordingBadge.style.display = 'none';
+      progressFill.style.width = '0%';
+      return frames;
+    }
+
+    function addToTranscript(word) {
+      transcriptWords.push(word);
+      transcriptText.innerText = transcriptWords.join(' ');
+    }
+
+    async function captureAndPredictLoop() {
+      if (!running || busy) return;
+      busy = true;
+
+      const captureStart = performance.now();
+      const frames = await captureSequence();
+      const captureMs = Math.round(performance.now() - captureStart);
+
+      statusText.innerText = `Captured in ${captureMs}ms - processing...`;
+
+      try {
+        const sendStart = performance.now();
+        const res = await fetch('/predict_batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ images: frames })
+        });
+        const data = await res.json();
+        const processMs = Math.round(performance.now() - sendStart);
+
+        if (data.error) {
+          statusText.innerText = `Error: ${data.error}`;
+          setConfidence(0);
+        } else if (data.text) {
+          predictionText.innerText = data.text;
+          setConfidence(data.confidence * 100);
+          statusText.innerText = `(capture ${captureMs}ms + process ${processMs}ms)`;
+          if (data.text !== lastSpoken) {
+            speak(data.text);
+            lastSpoken = data.text;
+          }
+          addToTranscript(data.text);
+        } else {
+          setConfidence(data.confidence * 100);
+          statusText.innerText = `Confidence too low (capture ${captureMs}ms + process ${processMs}ms)`;
+        }
+      } catch (err) {
+        console.error('Prediction request failed:', err);
+        statusText.innerText = "Request failed - retrying...";
+      } finally {
+        busy = false;
+        if (running) requestAnimationFrame(captureAndPredictLoop);
+      }
+    }
+
+    toggleBtn.addEventListener('click', async () => {
+      if (!running) {
+        try {
+          await startCamera();
+        } catch {
+          return; // camera failed, stay stopped
+        }
+        running = true;
+        toggleBtn.innerText = '■ Stop Signing';
+        toggleBtn.classList.add('active');
+        predictionText.innerText = 'Waiting for sign...';
+        captureAndPredictLoop();
+      } else {
+        running = false;
+        toggleBtn.innerText = '▶ Start Signing';
+        toggleBtn.classList.remove('active');
+        statusText.innerText = 'Stopped';
+      }
+    });
+
+    clearTranscriptBtn.addEventListener('click', () => {
+      transcriptWords = [];
+      transcriptText.innerText = 'Recognized signs will build a sentence here...';
+    });
+
+    // --- Sign guide modal ---
+    const guideModal = document.getElementById('guideModal');
+    const signList = document.getElementById('signList');
+    const signSearch = document.getElementById('signSearch');
+    let signsCache = null;
+
+    async function openGuide() {
+      guideModal.style.display = 'flex';
+      if (!signsCache) {
+        try {
+          const res = await fetch('/signs');
+          signsCache = await res.json();
+        } catch (err) {
+          signList.innerHTML = '<p>Could not load sign list.</p>';
+          return;
+        }
+      }
+      renderSignList(signsCache);
+    }
+
+    function renderSignList(signs) {
+      if (signs.length === 0) {
+        signList.innerHTML = '<p>No signs available.</p>';
+        return;
+      }
+      signList.innerHTML = signs.map(s => `
+        <div class="sign-card">
+          <h3>${s.display}</h3>
+          <p>${s.description}</p>
+        </div>
+      `).join('');
+    }
+
+    signSearch.addEventListener('input', () => {
+      if (!signsCache) return;
+      const q = signSearch.value.toLowerCase();
+      renderSignList(signsCache.filter(s => s.display.toLowerCase().includes(q)));
+    });
+
+    document.getElementById('openGuideBtn').addEventListener('click', openGuide);
+    document.getElementById('closeGuideBtn').addEventListener('click', () => {
+      guideModal.style.display = 'none';
+    });
+    guideModal.addEventListener('click', (e) => {
+      if (e.target === guideModal) guideModal.style.display = 'none';
+    });
+
+    // --- First-visit onboarding tip ---
+    if (!localStorage.getItem('signspeakph_tip_dismissed')) {
+      document.getElementById('onboardTip').style.display = 'flex';
+    }
+    document.getElementById('dismissTip').addEventListener('click', () => {
+      document.getElementById('onboardTip').style.display = 'none';
+      localStorage.setItem('signspeakph_tip_dismissed', '1');
+    });
+  </script>
+</body>
+</html>
