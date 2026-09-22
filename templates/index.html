@@ -7,26 +7,31 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
   <header>
     <div class="header-row">
       <div>
         <h1>SignSpeakPH</h1>
         <p class="subtitle">Real-Time Filipino Sign Language Recognition with Text &amp; Voice Output</p>
       </div>
-      <button id="openGuideBtn" class="guide-btn">📖 Learn the Signs</button>
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="icon-btn" aria-label="Toggle dark and light theme" title="Toggle theme">🌙</button>
+        <button id="openSettingsBtn" class="guide-btn" aria-label="Open recognition settings" aria-haspopup="dialog">⚙ Settings</button>
+        <button id="openGuideBtn" class="guide-btn" aria-label="Open sign language guide" aria-haspopup="dialog">📖 Learn the Signs</button>
+      </div>
     </div>
   </header>
 
-  <div id="onboardTip" class="onboard-tip" style="display:none;">
+  <div id="onboardTip" class="onboard-tip" style="display:none;" role="status">
     New here? Click <strong>"Learn the Signs"</strong> above to see what SignSpeakPH understands before you start.
-    <button id="dismissTip" class="dismiss-tip">Got it</button>
+    <button id="dismissTip" class="dismiss-tip" aria-label="Dismiss tip">Got it</button>
   </div>
 
-  <main>
+  <main id="main-content">
     <section class="video-container">
-      <video id="webcam" autoplay playsinline muted></video>
+      <video id="webcam" autoplay playsinline muted aria-label="Live camera feed"></video>
       <canvas id="captureCanvas" style="display:none;"></canvas>
-      <div id="recordingBadge" class="recording-badge" style="display:none;">
+      <div id="recordingBadge" class="recording-badge" style="display:none;" role="status">
         ● Recording <span id="frameCount">0</span>/30
       </div>
       <div class="progress-track">
@@ -35,12 +40,14 @@
     </section>
 
     <section class="control-row">
-      <button id="toggleBtn" class="toggle-btn">▶ Start Signing</button>
+      <button id="toggleBtn" class="toggle-btn" aria-label="Start or stop sign recognition (spacebar shortcut)">▶ Start Signing</button>
+      <button id="retryBtn" class="retry-btn" style="display:none;" aria-label="Retry last request">↻ Retry</button>
     </section>
 
-    <section class="output-panel">
+    <section class="output-panel" id="outputPanel" data-state="idle">
       <h2>Recognized Sign</h2>
       <p id="predictionText" class="prediction-text">Click "Start Signing" to begin</p>
+      <p id="suggestionText" class="suggestion-text" style="display:none;"></p>
 
       <div class="confidence-row">
         <div class="confidence-track">
@@ -49,40 +56,76 @@
         <span id="confidenceLabel" class="confidence-label"></span>
       </div>
 
-      <p id="statusText" class="status-text"></p>
+      <p id="statusText" class="status-text" role="status"></p>
+      <div id="processingSpinner" class="processing-spinner" aria-label="Processing"></div>
 
       <label class="toggle">
-        <input type="checkbox" id="voiceToggle" checked>
+        <input type="checkbox" id="voiceToggle" checked aria-label="Enable voice output">
         Voice output enabled
       </label>
+    </section>
+
+    <section class="history-panel">
+      <h2>Recent Signs</h2>
+      <div id="recentSignsList" class="recent-signs-list">
+        <p class="empty-hint">Recognized signs will appear here - click one to add it to your sentence.</p>
+      </div>
     </section>
 
     <section class="transcript-panel">
       <div class="transcript-header">
         <h2>Sentence</h2>
-        <button id="clearTranscriptBtn" class="clear-btn">Clear</button>
+        <div class="transcript-actions">
+          <button id="copyTranscriptBtn" class="clear-btn" aria-label="Copy sentence to clipboard">Copy</button>
+          <button id="undoTranscriptBtn" class="clear-btn" aria-label="Undo last added sign">Undo</button>
+          <button id="clearTranscriptBtn" class="clear-btn" aria-label="Clear sentence">Clear</button>
+          <span id="transcriptWordCount" class="word-count">0 words</span>
+        </div>
       </div>
-      <p id="transcriptText" class="transcript-text">Recognized signs will build a sentence here...</p>
+      <div id="transcriptText" class="transcript-text" contenteditable="true"
+           aria-label="Editable sentence built from recognized signs"
+           data-placeholder="Recognized signs will build a sentence here..."></div>
     </section>
   </main>
 
+  <!-- Settings modal -->
+  <div id="settingsModal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Recognition settings">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button id="closeSettingsBtn" class="close-btn" aria-label="Close settings">✕</button>
+      </div>
+      <div class="settings-body">
+        <label for="thresholdSlider" class="settings-label">
+          Confidence threshold: <span id="thresholdValue">70%</span>
+        </label>
+        <input type="range" id="thresholdSlider" min="0" max="100" value="70" aria-label="Confidence threshold percentage">
+        <p class="settings-hint">Lower this to accept less-certain guesses; raise it to require higher confidence before a sign is recognized.</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Sign guide modal -->
-  <div id="guideModal" class="modal-overlay" style="display:none;">
+  <div id="guideModal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Sign language guide">
     <div class="modal">
       <div class="modal-header">
         <h2>Signs SignSpeakPH Understands</h2>
-        <button id="closeGuideBtn" class="close-btn">✕</button>
+        <button id="closeGuideBtn" class="close-btn" aria-label="Close sign guide">✕</button>
       </div>
-      <input id="signSearch" class="sign-search" type="text" placeholder="Search signs...">
+      <input id="signSearch" class="sign-search" type="text" placeholder="Search signs..." aria-label="Search signs">
       <div id="signList" class="sign-list">Loading...</div>
     </div>
   </div>
 
   <script>
+    // ======================
+    // ELEMENT REFERENCES
+    // ======================
     const video = document.getElementById('webcam');
     const canvas = document.getElementById('captureCanvas');
     const ctx = canvas.getContext('2d');
     const predictionText = document.getElementById('predictionText');
+    const suggestionText = document.getElementById('suggestionText');
     const statusText = document.getElementById('statusText');
     const recordingBadge = document.getElementById('recordingBadge');
     const frameCountEl = document.getElementById('frameCount');
@@ -90,9 +133,32 @@
     const confidenceFill = document.getElementById('confidenceFill');
     const confidenceLabel = document.getElementById('confidenceLabel');
     const toggleBtn = document.getElementById('toggleBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const outputPanel = document.getElementById('outputPanel');
     const transcriptText = document.getElementById('transcriptText');
     const clearTranscriptBtn = document.getElementById('clearTranscriptBtn');
+    const copyTranscriptBtn = document.getElementById('copyTranscriptBtn');
+    const recentSignsList = document.getElementById('recentSignsList');
+    const undoTranscriptBtn = document.getElementById('undoTranscriptBtn');
+    const transcriptWordCount = document.getElementById('transcriptWordCount');
+    const processingSpinner = document.getElementById('processingSpinner');
+    const settingsModal = document.getElementById('settingsModal');
+    const thresholdSlider = document.getElementById('thresholdSlider');
+    const thresholdValue = document.getElementById('thresholdValue');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const signSearch = document.getElementById('signSearch');
+    const signList = document.getElementById('signList');
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const openGuideBtn = document.getElementById('openGuideBtn');
+    const closeGuideBtn = document.getElementById('closeGuideBtn');
+    const guideModal = document.getElementById('guideModal');
+    const onboardTip = document.getElementById('onboardTip');
+    const dismissTip = document.getElementById('dismissTip');
 
+    // ======================
+    // CONFIGURATION CONSTANTS
+    // ======================
     const SEND_WIDTH = 320;
     const SEND_HEIGHT = 240;
     canvas.width = SEND_WIDTH;
@@ -101,12 +167,28 @@
     const SEQUENCE_LENGTH = 30;
     const CAPTURE_INTERVAL_MS = 33; // ~30fps, native speed, no network in the loop
 
+    // ======================
+    // STATE VARIABLES
+    // ======================
     let lastSpoken = "";
-    let running = false;   // whether continuous recognition is active
-    let busy = false;      // true while capturing OR waiting for server response
-    let transcriptWords = [];
+    let running = false;
+    let busy = false;
     let cameraStarted = false;
+    let lastFrames = null; // kept so Retry can resend without recapturing
+    let threshold = 0.7;
+    let recentSigns = []; // {text, time}
+    let transcriptHistory = []; // For undo functionality
 
+    // ======================
+    // STATE MANAGEMENT FUNCTIONS
+    // ======================
+    function setState(state) {
+      outputPanel.dataset.state = state; // 'idle' | 'recording' | 'processing' | 'error'
+    }
+
+    // ======================
+    // SPEECH/VOICE FUNCTIONS
+    // ======================
     function speak(text) {
       if (!document.getElementById('voiceToggle').checked) return;
       const utterance = new SpeechSynthesisUtterance(text);
@@ -121,6 +203,131 @@
       confidenceLabel.innerText = `${pct.toFixed(1)}%`;
     }
 
+    // ======================
+    // THEME HANDLING
+    // ======================
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      themeToggleBtn.innerText = theme === 'dark' ? '☀️' : '🌙';
+    }
+    const savedTheme = localStorage.getItem('signspeakph_theme') || 'light';
+    applyTheme(savedTheme);
+    themeToggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = current === 'light' ? 'dark' : 'light';
+      applyTheme(next);
+      localStorage.setItem('signspeakph_theme', next);
+    });
+
+    // ======================
+    // SETTINGS HANDLING
+    // ======================
+    const settingsModal = document.getElementById('settingsModal');
+    const thresholdSlider = document.getElementById('thresholdSlider');
+    const thresholdValue = document.getElementById('thresholdValue');
+
+    async function loadConfig() {
+      try {
+        const res = await fetch('/config');
+        const data = await res.json();
+        threshold = data.threshold;
+        const pct = Math.round(threshold * 100);
+        thresholdSlider.value = pct;
+        thresholdValue.innerText = `${pct}%`;
+      } catch (err) {
+        console.error('Failed to load config, using default threshold', err);
+      }
+    }
+    loadConfig();
+
+    thresholdSlider.addEventListener('input', () => {
+      threshold = thresholdSlider.value / 100;
+      thresholdValue.innerText = `${thresholdSlider.value}%`;
+    });
+
+    document.getElementById('openSettingsBtn').addEventListener('click', () => {
+      settingsModal.style.display = 'flex';
+    });
+    document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+      settingsModal.style.display = 'none';
+    });
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) settingsModal.style.display = 'none';
+    });
+
+    // --- Recent signs history ---
+    function addToHistory(text) {
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      recentSigns.unshift({ text, time });
+      recentSigns = recentSigns.slice(0, 6);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      if (recentSigns.length === 0) {
+        recentSignsList.innerHTML = '<p class="empty-hint">Recognized signs will appear here - click one to add it to your sentence.</p>';
+        return;
+      }
+      recentSignsList.innerHTML = recentSigns.map(s => `
+        <button class="history-chip" data-word="${s.text}" aria-label="Add '${s.text}' to sentence, recognized at ${s.time}">
+          ${s.text} <span class="chip-time">${s.time}</span>
+        </button>
+      `).join('');
+      recentSignsList.querySelectorAll('.history-chip').forEach(chip => {
+        chip.addEventListener('click', () => appendToTranscript(chip.dataset.word));
+      });
+    }
+
+    // ======================
+    // TRANSCRIPT FUNCTIONALITY
+    // ======================
+    function appendToTranscript(word) {
+      // Save current state for undo
+      transcriptHistory.push(transcriptText.innerText);
+      // Limit history to prevent memory issues
+      if (transcriptHistory.length > 10) {
+        transcriptHistory.shift();
+      }
+
+      const current = transcriptText.innerText.trim();
+      transcriptText.innerText = current ? `${current} ${word}` : word;
+      updateWordCount();
+    }
+
+    function undoTranscript() {
+      if (transcriptHistory.length > 0) {
+        transcriptText.innerText = transcriptHistory.pop();
+        transcriptText.focus();
+        updateWordCount();
+      }
+    }
+
+    function updateWordCount() {
+      const text = transcriptText.innerText.trim();
+      const wordCount = text === '' ? 0 : text.split(/\s+/).length;
+      transcriptWordCount.innerText = `${wordCount} ${wordCount === 1 ? 'word' : 'words'}`;
+    }
+
+    clearTranscriptBtn.addEventListener('click', () => {
+      // Save current state for undo before clearing
+      transcriptHistory.push(transcriptText.innerText);
+      if (transcriptHistory.length > 10) {
+        transcriptHistory.shift();
+      }
+      transcriptText.innerText = '';
+      transcriptText.focus();
+      updateWordCount();
+    });
+
+    undoTranscriptBtn.addEventListener('click', undoTranscript);
+
+    // Initialize word count
+    updateWordCount();
+
+    // ======================
+    // CAMERA AND CAPTURE FUNCTIONS
+    // ======================
     async function startCamera() {
       if (cameraStarted) return;
       try {
@@ -129,6 +336,7 @@
         cameraStarted = true;
       } catch (err) {
         predictionText.innerText = "Camera access denied or unavailable";
+        setState('error');
         console.error("getUserMedia error:", err);
         throw err;
       }
@@ -136,10 +344,11 @@
 
     function captureFrame() {
       ctx.drawImage(video, 0, 0, SEND_WIDTH, SEND_HEIGHT);
-      return canvas.toDataURL('image/jpeg', 0.6);
+      return canvas.toDataURL('image/jpeg', 0.5);
     }
 
     async function captureSequence() {
+      setState('recording');
       recordingBadge.style.display = 'flex';
       const frames = [];
       for (let i = 0; i < SEQUENCE_LENGTH; i++) {
@@ -153,79 +362,146 @@
       return frames;
     }
 
-    function addToTranscript(word) {
-      transcriptWords.push(word);
-      transcriptText.innerText = transcriptWords.join(' ');
+    async function sendFrames(frames) {
+      const sendStart = performance.now();
+      const res = await fetch('/predict_batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: frames, threshold })
+      });
+      const data = await res.json();
+      const processMs = Math.round(performance.now() - sendStart);
+      return { data, processMs };
+    }
+
+    function handleResult(data, captureMs, processMs) {
+      if (data.error) {
+        // Map backend error messages to more user-friendly frontend messages
+        let userMessage = data.error;
+        if (data.error.includes("no images provided")) {
+          userMessage = "No images received. Please try signing again.";
+        } else if (data.error.includes("expected")) {
+          userMessage = "Incorrect number of frames captured. Please try signing again.";
+        } else if (data.error.includes("could not decode")) {
+          userMessage = "Error processing images. Please check your camera and try again.";
+        }
+        statusText.innerText = userMessage;
+        setConfidence(0);
+        setState('error');
+        return;
+      }
+
+      setState('idle');
+      retryBtn.style.display = 'none';
+
+      if (data.text) {
+        predictionText.innerText = data.text;
+        suggestionText.style.display = 'none';
+        setConfidence(data.confidence * 100);
+        statusText.innerText = `(capture ${captureMs}ms + process ${processMs}ms)`;
+        if (data.text !== lastSpoken) {
+          speak(data.text);
+          lastSpoken = data.text;
+        }
+        addToHistory(data.text);
+        appendToTranscript(data.text);
+      } else {
+        setConfidence(data.confidence * 100);
+        statusText.innerText = `Confidence too low (capture ${captureMs}ms + process ${processMs}ms)`;
+        if (data.suggestion) {
+          suggestionText.style.display = 'block';
+          suggestionText.innerText = `Did you mean "${data.suggestion}"? (${(data.confidence * 100).toFixed(1)}%)`;
+        } else {
+          suggestionText.style.display = 'none';
+        }
+      }
     }
 
     async function captureAndPredictLoop() {
       if (!running || busy) return;
       busy = true;
+      retryBtn.style.display = 'none';
 
       const captureStart = performance.now();
       const frames = await captureSequence();
       const captureMs = Math.round(performance.now() - captureStart);
+      lastFrames = frames;
 
+      await processPrediction(frames, captureMs);
+    }
+
+    async function processPrediction(frames, captureMs) {
+      setState('processing');
       statusText.innerText = `Captured in ${captureMs}ms - processing...`;
 
       try {
-        const sendStart = performance.now();
-        const res = await fetch('/predict_batch', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ images: frames })
-        });
-        const data = await res.json();
-        const processMs = Math.round(performance.now() - sendStart);
-
-        if (data.error) {
-          statusText.innerText = `Error: ${data.error}`;
-          setConfidence(0);
-        } else if (data.text) {
-          predictionText.innerText = data.text;
-          setConfidence(data.confidence * 100);
-          statusText.innerText = `(capture ${captureMs}ms + process ${processMs}ms)`;
-          if (data.text !== lastSpoken) {
-            speak(data.text);
-            lastSpoken = data.text;
-          }
-          addToTranscript(data.text);
-        } else {
-          setConfidence(data.confidence * 100);
-          statusText.innerText = `Confidence too low (capture ${captureMs}ms + process ${processMs}ms)`;
-        }
+        const { data, processMs } = await sendFrames(frames);
+        handleResult(data, captureMs, processMs);
       } catch (err) {
         console.error('Prediction request failed:', err);
-        statusText.innerText = "Request failed - retrying...";
+        statusText.innerText = "Connection error. Please check your internet connection and try again.";
+        setState('error');
+        retryBtn.style.display = 'inline-block';
       } finally {
         busy = false;
         if (running) requestAnimationFrame(captureAndPredictLoop);
       }
     }
 
-    toggleBtn.addEventListener('click', async () => {
+    retryBtn.addEventListener('click', async () => {
+      if (!lastFrames || busy) return;
+      busy = true;
+      retryBtn.style.display = 'none';
+      setState('processing');
+      statusText.innerText = 'Retrying...';
+      try {
+        const { data, processMs } = await sendFrames(lastFrames);
+        handleResult(data, 0, processMs);
+      } catch (err) {
+        console.error('Retry failed:', err);
+        statusText.innerText = "Connection error during retry. Please check your internet connection and try again.";
+        setState('error');
+        retryBtn.style.display = 'inline-block';
+      } finally {
+        busy = false;
+        if (running) requestAnimationFrame(captureAndPredictLoop);
+      }
+    });
+
+    async function toggleRunning() {
       if (!running) {
         try {
           await startCamera();
         } catch {
-          return; // camera failed, stay stopped
+          return;
         }
         running = true;
         toggleBtn.innerText = '■ Stop Signing';
         toggleBtn.classList.add('active');
         predictionText.innerText = 'Waiting for sign...';
+        suggestionText.style.display = 'none';
+        setState('idle');
         captureAndPredictLoop();
       } else {
         running = false;
         toggleBtn.innerText = '▶ Start Signing';
         toggleBtn.classList.remove('active');
         statusText.innerText = 'Stopped';
+        setState('idle');
       }
-    });
+    }
 
-    clearTranscriptBtn.addEventListener('click', () => {
-      transcriptWords = [];
-      transcriptText.innerText = 'Recognized signs will build a sentence here...';
+    toggleBtn.addEventListener('click', toggleRunning);
+
+    // --- Keyboard accessibility: spacebar toggles start/stop, but not when
+    // focus is in an editable field (transcript, search box, slider) ---
+    document.addEventListener('keydown', (e) => {
+      if (e.code !== 'Space') return;
+      const tag = document.activeElement.tagName;
+      const isEditable = document.activeElement.isContentEditable;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || isEditable) return;
+      e.preventDefault();
+      toggleRunning();
     });
 
     // --- Sign guide modal ---
@@ -246,6 +522,7 @@
         }
       }
       renderSignList(signsCache);
+      signSearch.focus();
     }
 
     function renderSignList(signs) {
@@ -273,6 +550,13 @@
     });
     guideModal.addEventListener('click', (e) => {
       if (e.target === guideModal) guideModal.style.display = 'none';
+    });
+
+    // Escape closes whichever modal is open
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (guideModal.style.display !== 'none') guideModal.style.display = 'none';
+      if (settingsModal.style.display !== 'none') settingsModal.style.display = 'none';
     });
 
     // --- First-visit onboarding tip ---
