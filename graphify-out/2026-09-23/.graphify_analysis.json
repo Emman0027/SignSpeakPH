@@ -86,8 +86,8 @@
       "degree": 3
     },
     {
-      "id": "src_utils_mediapipe_utils_extract_keypoints",
-      "label": "extract_keypoints()",
+      "id": "app_handle_feedback",
+      "label": "handle_feedback()",
       "degree": 3
     },
     {
@@ -96,13 +96,13 @@
       "degree": 3
     },
     {
-      "id": "app_handle_feedback",
-      "label": "handle_feedback()",
+      "id": "src_utils_mediapipe_utils_extract_keypoints",
+      "label": "extract_keypoints()",
       "degree": 3
     },
     {
-      "id": "src_utils_mediapipe_utils_create_models",
-      "label": "create_models()",
+      "id": "app_index",
+      "label": "index()",
       "degree": 2
     },
     {
@@ -111,18 +111,18 @@
       "degree": 2
     },
     {
-      "id": "app_index",
-      "label": "index()",
+      "id": "src_utils_mediapipe_utils_create_models",
+      "label": "create_models()",
       "degree": 2
     },
     {
       "id": "app_rationale_1",
-      "label": "SignSpeakPH - Flask backend (BATCH version) Fixes both the speed problem AND an…",
+      "label": "SignSpeakPH - Flask backend (BATCH version) Fixes both the speed problem AND an\u2026",
       "degree": 1
     },
     {
-      "id": "config_settings_rationale_1",
-      "label": "Configuration management for SignSpeakPH",
+      "id": "app_rationale_71",
+      "label": "Convert a data:image/jpeg;base64,... string from the browser into an OpenCV\u2026",
       "degree": 1
     }
   ],
@@ -150,16 +150,8 @@
       "why": "connects across different repos/directories"
     }
   ],
-  "questions": [
-    {
-      "type": "bridge_node",
-      "question": "Why does `predict_batch()` connect `predict_batch` to `app.py`, `handle_feedback`?",
-      "why": "High betweenness centrality (0.066) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `handle_feedback()` connect `handle_feedback` to `app.py`?",
-      "why": "High betweenness centrality (0.056) - this node is a cross-community bridge."
-    }
-  ]
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
 }
