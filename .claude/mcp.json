@@ -1,0 +1,213 @@
+{
+  "version": "0.1.0",
+  "servers": {
+    "python": {
+      "name": "Python Development Workflow MCP",
+      "description": "MCP server for Python development workflow improvements - running scripts, managing venvs, executing app.py",
+      "commands": {
+        "run_script": {
+          "description": "Run a Python script",
+          "args": [
+            {"name": "script_path", "description": "Path to the Python script to run", "required": true},
+            {"name": "args", "description": "Arguments to pass to the script", "required": false}
+          ],
+          "command": "python {script_path} {args}"
+        },
+        "create_venv": {
+          "description": "Create a Python virtual environment",
+          "args": [
+            {"name": "venv_path", "description": "Path where to create the virtual environment", "required": true}
+          ],
+          "command": "python -m venv {venv_path}"
+        },
+        "activate_venv": {
+          "description": "Activate Python virtual environment (Windows)",
+          "args": [
+            {"name": "venv_path", "description": "Path to the virtual environment", "required": true}
+          ],
+          "command": "{venv_path}\\Scripts\\activate"
+        },
+        "install_package": {
+          "description": "Install a Python package",
+          "args": [
+            {"name": "package", "description": "Package name to install", "required": true},
+            {"name": "version", "description": "Specific version to install (optional)", "required": false}
+          ],
+          "command": "pip install {package}{version_spec}"
+        },
+        "run_app": {
+          "description": "Run the SignSpeakPH Flask application",
+          "args": [],
+          "command": "python app.py"
+        },
+        "run_tests": {
+          "description": "Run tests for the project",
+          "args": [
+            {"name": "test_path", "description": "Specific test path to run (optional)", "required": false}
+          ],
+          "command": "pytest {test_path}"
+        }
+      }
+    },
+    "git": {
+      "name": "Git Version Control MCP",
+      "description": "MCP server for Git version control integration - commits, branches, PRs, etc.",
+      "commands": {
+        "status": {
+          "description": "Get current git status",
+          "args": [],
+          "command": "git status --porcelain"
+        },
+        "add": {
+          "description": "Add files to git staging area",
+          "args": [
+            {"name": "files", "description": "Files to add (use . for all)", "required": true}
+          ],
+          "command": "git add {files}"
+        },
+        "commit": {
+          "description": "Commit staged changes",
+          "args": [
+            {"name": "message", "description": "Commit message", "required": true},
+            {"name": "author", "description": "Author override (optional)", "required": false}
+          ],
+          "command": "git commit -m \"{message}\" {author_flag}"
+        },
+        "branch": {
+          "description": "List, create, or delete branches",
+          "args": [
+            {"name": "action", "description": "Action: list, create, delete", "required": true},
+            {"name": "branch_name", "description": "Branch name (for create/delete)", "required": false}
+          ],
+          "command": "git branch {action} {branch_name}"
+        },
+        "checkout": {
+          "description": "Checkout branch or restore files",
+          "args": [
+            {"name": "target", "description": "Branch name, commit hash, or file path", "required": true}
+          ],
+          "command": "git checkout {target}"
+        },
+        "log": {
+          "description": "Show commit history",
+          "args": [
+            {"name": "limit", "description": "Number of commits to show (optional)", "required": false},
+            {"name": "oneline", "description": "Show condensed output (true/false)", "required": false}
+          ],
+          "command": "git log {limit_flag} {oneline_flag}"
+        },
+        "diff": {
+          "description": "Show changes between commits, working tree, etc.",
+          "args": [
+            {"name": "target1", "description": "First target (optional)", "required": false},
+            {"name": "target2", "description": "Second target (optional)", "required": false}
+          ],
+          "command": "git diff {target1} {target2}"
+        },
+        "push": {
+          "description": "Push commits to remote repository",
+          "args": [
+            {"name": "remote", "description": "Remote name (optional, defaults to origin)", "required": false},
+            {"name": "branch", "description": "Branch name (optional)", "required": false}
+          ],
+          "command": "git push {remote} {branch}"
+        },
+        "pull": {
+          "description": "Pull from remote repository",
+          "args": [
+            {"name": "remote", "description": "Remote name (optional, defaults to origin)", "required": false},
+            {"name": "branch", "description": "Branch name (optional)", "required": false}
+          ],
+          "command": "git pull {remote} {branch}"
+        }
+      }
+    },
+    "opencv": {
+      "name": "Computer Vision/OpenCV MCP",
+      "description": "MCP server for MediaPipe testing and visualization - pose/hand detection, keypoint visualization, etc.",
+      "commands": {
+        "test_mediapipe": {
+          "description": "Test MediaPipe pose and hand detection on sample image",
+          "args": [
+            {"name": "image_path", "description": "Path to test image", "required": true}
+          ],
+          "command": "python -c \"import cv2; import mediapipe as mp; print('MediaPipe and OpenCV available')\""
+        },
+        "visualize_keypoints": {
+          "description": "Visualize MediaPipe pose and hand keypoints on image",
+          "args": [
+            {"name": "image_path", "description": "Path to input image", "required": true},
+            {"name": "output_path", "description": "Path to save output visualization", "required": true}
+          ],
+          "command": "python scripts/visualize_keypoints.py {image_path} {output_path}"
+        },
+        "extract_keypoints": {
+          "description": "Extract keypoints from video or image sequence",
+          "args": [
+            {"name": "input_path", "description": "Path to input video or image directory", "required": true},
+            {"name": "output_path", "description": "Path to save extracted keypoints", "required": true}
+          ],
+          "command": "python scripts/extract_keypoints.py {input_path} {output_path}"
+        },
+        "test_camera": {
+          "description": "Test webcam access and MediaPipe detection",
+          "args": [
+            {"name": "duration", "description": "Test duration in seconds (optional, default 5)", "required": false}
+          ],
+          "command": "python scripts/test_camera.py {duration}"
+        },
+        "benchmark_detection": {
+          "description": "Benchmark MediaPipe detection performance",
+          "args": [
+            {"name": "num_frames", "description": "Number of frames to process for benchmark", "required": true}
+          ],
+          "command": "python scripts/benchmark_detection.py {num_frames}"
+        }
+      }
+    },
+    "http": {
+      "name": "HTTP API MCP",
+      "description": "MCP server for direct Flask endpoint testing - testing /predict endpoint, etc.",
+      "commands": {
+        "predict": {
+          "description": "Test the /predict_batch endpoint with sample data",
+          "args": [
+            {"name": "data_file", "description": "Path to JSON file containing test data", "required": true},
+            {"name": "url", "description": "Flask app URL (default: http://localhost:5000)", "required": false}
+          ],
+          "command": "curl -X POST {url}/predict_batch -H \"Content-Type: application/json\" -d @{data_file}"
+        },
+        "health": {
+          "description": "Check Flask app health/status",
+          "args": [
+            {"name": "url", "description": "Flask app URL (default: http://localhost:5000)", "required": false}
+          ],
+          "command": "curl {url}/"
+        },
+        "feedback": {
+          "description": "Test feedback endpoints",
+          "args": [
+            {"name": "action", "description": "Action: get, post, put, delete", "required": true},
+            {"name": "data_file", "description": "Path to JSON data (for post/put)", "required": false},
+            {"name": "feedback_id", "description": "Feedback ID (for put/delete)", "required": false},
+            {"name": "url", "description": "Flask app URL (default: http://localhost:5000)", "required": false}
+          ],
+          "command": "curl -X {action} {url}/feedback{feedback_id_suffix} -H \"Content-Type: application/json\" {data_flag}"
+        },
+        "start_server": {
+          "description": "Start the Flask development server",
+          "args": [
+            {"name": "port", "description": "Port to run on (default: 5000)", "required": false},
+            {"name": "host", "description": "Host to bind to (default: 0.0.0.0)", "required": false}
+          ],
+          "command": "python app.py --port {port} --host {host}"
+        },
+        "stop_server": {
+          "description": "Stop the running Flask server",
+          "args": [],
+          "command": "pkill -f \"python app.py\""
+        }
+      }
+    }
+  }
+}

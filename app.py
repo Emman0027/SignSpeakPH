@@ -33,31 +33,38 @@ import time
 # to CPU when it fails - but it retries this failed attempt on EVERY frame,
 # wasting time each call. Render's servers have no GPU, so disable this
 # attempt entirely before mediapipe is imported (must be set before import).
-os.environ["MEDIAPIPE_DISABLE_GPU"] = "1"
+os.environ["MEDIAPIPE_DISABLE_GPU"] = os.environ.get(
+    "MEDIAPIPE_DISABLE_GPU", "1"
+)
 
 import cv2
 import numpy as np
 from flask import Flask, jsonify, render_template, request
-import tflite_runtime.interpreter as tflite
 
-from utils.mediapipe_utils import create_models, mediapipe_detection, extract_keypoints
+try:
+    import tflite_runtime.interpreter as tflite
+except ModuleNotFoundError:
+    import tensorflow as tf
+    tflite = tf.lite
+
+from config.settings import (CONFIG_PATH, LABELS_PATH, MODEL_PATH,
+                             NUM_FEATURES, PROHIBITED_SIGNS, SEQUENCE_LENGTH,
+                             THRESHOLD)
+from src.utils.mediapipe_utils import (create_models, extract_keypoints,
+                                       mediapipe_detection)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-interpreter = tflite.Interpreter(model_path=os.path.join(BASE_DIR, "action.tflite"))
+interpreter = tflite.Interpreter(model_path=str(MODEL_PATH))
 interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
-with open(os.path.join(BASE_DIR, "labels.json")) as f:
+with open(LABELS_PATH, "r") as f:
     ACTIONS = json.load(f)
 
-with open(os.path.join(BASE_DIR, "config.json")) as f:
+with open(CONFIG_PATH, "r") as f:
     CONFIG = json.load(f)
-
-SEQUENCE_LENGTH = CONFIG["sequence_length"]   # 30
-NUM_FEATURES = CONFIG["num_features"]         # 258 - must match model input_shape
-THRESHOLD = CONFIG["threshold"]               # 0.7
 
 app = Flask(__name__)
 
@@ -66,7 +73,8 @@ models = create_models()
 
 
 def decode_base64_image(data_url):
-    """Convert a data:image/jpeg;base64,... string from the browser into an OpenCV frame."""
+    """Convert a data:image/jpeg;base64,... string from the
+    browser into an OpenCV frame."""
     header, encoded = data_url.split(",", 1)
     img_bytes = base64.b64decode(encoded)
     np_arr = np.frombuffer(img_bytes, dtype=np.uint8)
@@ -92,7 +100,13 @@ def predict_batch():
 
     images = payload["images"]
     if len(images) != SEQUENCE_LENGTH:
-        return jsonify({"error": f"expected {SEQUENCE_LENGTH} frames, got {len(images)}"}), 400
+        return (
+            jsonify(
+                {"error": f"expected {SEQUENCE_LENGTH} frames, "
+                f"got {len(images)}"}
+            ),
+            400,
+        )
 
     t0 = time.time()
     sequence = []
@@ -105,20 +119,179 @@ def predict_batch():
         sequence.append(keypoints)
     t1 = time.time()
 
-    input_data = np.expand_dims(sequence, axis=0).astype(np.float32)  # (1, 30, 258)
-    interpreter.set_tensor(input_details[0]['index'], input_data)
+    input_data = np.expand_dims(sequence, axis=0).astype(
+        np.float32
+    )  # (1, 30, 258)
+    interpreter.set_tensor(input_details[0]["index"], input_data)
     interpreter.invoke()
-    res = interpreter.get_tensor(output_details[0]['index'])[0]
+    res = interpreter.get_tensor(output_details[0]["index"])[0]
     t2 = time.time()
 
     idx = int(np.argmax(res))
     confidence = float(res[idx])
 
-    print(f"[timing] mediapipe_total={(t1-t0)*1000:.0f}ms ({(t1-t0)*1000/SEQUENCE_LENGTH:.0f}ms/frame) tflite={(t2-t1)*1000:.0f}ms")
+    # Check if the predicted sign is prohibited
+    predicted_sign = ACTIONS[idx]
+    if predicted_sign in PROHIBITED_SIGNS:
+        return jsonify(
+            {
+                "text": "",
+                "confidence": confidence,
+                "prohibited": True,
+                "message": "This sign is not allowed",
+            }
+        )
+
+    print(
+        f"[timing] mediapipe_total={(t1-t0)*1000:.0f}ms "
+        f"({(t1-t0)*1000/SEQUENCE_LENGTH:.0f}ms/frame) "
+        f"tflite={(t2-t1)*1000:.0f}ms"
+    )
 
     if confidence > THRESHOLD:
         return jsonify({"text": ACTIONS[idx], "confidence": confidence})
     return jsonify({"text": "", "confidence": confidence})
+
+
+@app.route("/feedback", methods=["POST"])
+def handle_feedback():
+    """Handle customer satisfaction feedback"""
+    try:
+        feedback_data = request.get_json()
+        if not feedback_data:
+            return jsonify({"error": "no feedback data provided"}), 400
+
+        # Validate rating is between 1-5
+        rating = feedback_data.get("rating")
+        if rating is not None:
+            try:
+                rating = int(rating)
+                if rating < 1 or rating > 5:
+                    return jsonify({"error": "rating must be between 1 and 5"}), 400
+                feedback_data["rating"] = rating
+            except (ValueError, TypeError):
+                return (
+                    jsonify({"error": "rating must be a number between 1 and 5"}),
+                    400,
+                )
+
+        # Add timestamp
+        feedback_data["timestamp"] = time.time()
+        feedback_data["datetime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+        # Store feedback (simple JSON file approach)
+        feedback_file = os.path.join(BASE_DIR, "data", "feedback", "feedback.json")
+
+        # Read existing feedback or create empty list
+        if os.path.exists(feedback_file):
+            with open(feedback_file, "r") as f:
+                feedbacks = json.load(f)
+        else:
+            feedbacks = []
+
+        # Add new feedback
+        feedbacks.append(feedback_data)
+
+        # Write back to file
+        with open(feedback_file, "w") as f:
+            json.dump(feedbacks, f, indent=2)
+
+        return jsonify({"status": "success", "message": "Feedback received"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/feedback/<int:feedback_id>", methods=["PUT"])
+def update_feedback(feedback_id):
+    """Update existing feedback"""
+    try:
+        feedback_data = request.get_json()
+        if not feedback_data:
+            return jsonify({"error": "no feedback data provided"}), 400
+
+        # Validate rating is between 1-5 if provided
+        if "rating" in feedback_data:
+            try:
+                rating = int(feedback_data["rating"])
+                if rating < 1 or rating > 5:
+                    return jsonify({"error": "rating must be between 1 and 5"}), 400
+                feedback_data["rating"] = rating
+            except (ValueError, TypeError):
+                return (
+                    jsonify({"error": "rating must be a number between 1 and 5"}),
+                    400,
+                )
+
+        # Update timestamp
+        feedback_data["timestamp"] = time.time()
+        feedback_data["datetime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+        # Store feedback (simple JSON file approach)
+        feedback_file = os.path.join(BASE_DIR, "data", "feedback", "feedback.json")
+
+        # Read existing feedback
+        if not os.path.exists(feedback_file):
+            return jsonify({"error": "feedback not found"}), 404
+
+        with open(feedback_file, "r") as f:
+            feedbacks = json.load(f)
+
+        # Check if feedback_id exists
+        if feedback_id < 0 or feedback_id >= len(feedbacks):
+            return jsonify({"error": "feedback not found"}), 404
+
+        # Update the feedback
+        feedbacks[feedback_id] = feedback_data
+
+        # Write back to file
+        with open(feedback_file, "w") as f:
+            json.dump(feedbacks, f, indent=2)
+
+        return jsonify({"status": "success", "message": "Feedback updated"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/feedback/<int:feedback_id>", methods=["DELETE"])
+def delete_feedback(feedback_id):
+    """Delete existing feedback"""
+    try:
+        # Store feedback (simple JSON file approach)
+        feedback_file = os.path.join(BASE_DIR, "data", "feedback", "feedback.json")
+
+        # Read existing feedback
+        if not os.path.exists(feedback_file):
+            return jsonify({"error": "feedback not found"}), 404
+
+        with open(feedback_file, "r") as f:
+            feedbacks = json.load(f)
+
+        # Check if feedback_id exists
+        if feedback_id < 0 or feedback_id >= len(feedbacks):
+            return jsonify({"error": "feedback not found"}), 404
+
+        # Remove the feedback
+        deleted_feedback = feedbacks.pop(feedback_id)
+
+        # Write back to file
+        with open(feedback_file, "w") as f:
+            json.dump(feedbacks, f, indent=2)
+
+        return (
+            jsonify(
+                {
+                    "status": "success",
+                    "message": "Feedback deleted",
+                    "deleted": deleted_feedback,
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":

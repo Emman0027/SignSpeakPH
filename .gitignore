@@ -5,3 +5,10 @@ __pycache__/
 *.pyc
 venv/
 .env
+
+# Ignore large model and binary files to prevent bloating git history
+*.h5
+*.keras
+*.tflite
+*.npy
+action.*
