@@ -33,25 +33,29 @@ import time
 # to CPU when it fails - but it retries this failed attempt on EVERY frame,
 # wasting time each call. Render's servers have no GPU, so disable this
 # attempt entirely before mediapipe is imported (must be set before import).
-os.environ["MEDIAPIPE_DISABLE_GPU"] = os.environ.get(
-    "MEDIAPIPE_DISABLE_GPU", "1"
-)
+os.environ["MEDIAPIPE_DISABLE_GPU"] = os.environ.get("MEDIAPIPE_DISABLE_GPU", "1")
 
-import cv2
-import numpy as np
-from flask import Flask, jsonify, render_template, request
+import cv2  # noqa: E402
+import numpy as np  # noqa: E402
+from flask import Flask, jsonify, render_template, request  # noqa: E402
 
 try:
     import tflite_runtime.interpreter as tflite
 except ModuleNotFoundError:
     import tensorflow as tf
+
     tflite = tf.lite
 
-from config.settings import (CONFIG_PATH, LABELS_PATH, MODEL_PATH,
-                             NUM_FEATURES, PROHIBITED_SIGNS, SEQUENCE_LENGTH,
-                             THRESHOLD)
-from src.utils.mediapipe_utils import (create_models, extract_keypoints,
-                                       mediapipe_detection)
+from config.settings import LABELS_PATH  # noqa: E402
+from config.settings import (
+    CONFIG_PATH,
+    MODEL_PATH,
+    PROHIBITED_SIGNS,
+    SEQUENCE_LENGTH,
+    THRESHOLD,
+)
+from src.utils.mediapipe_utils import create_models  # noqa: E402
+from src.utils.mediapipe_utils import extract_keypoints, mediapipe_detection
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -102,8 +106,7 @@ def predict_batch():
     if len(images) != SEQUENCE_LENGTH:
         return (
             jsonify(
-                {"error": f"expected {SEQUENCE_LENGTH} frames, "
-                f"got {len(images)}"}
+                {"error": f"expected {SEQUENCE_LENGTH} frames, " f"got {len(images)}"}
             ),
             400,
         )
@@ -119,9 +122,7 @@ def predict_batch():
         sequence.append(keypoints)
     t1 = time.time()
 
-    input_data = np.expand_dims(sequence, axis=0).astype(
-        np.float32
-    )  # (1, 30, 258)
+    input_data = np.expand_dims(sequence, axis=0).astype(np.float32)  # (1, 30, 258)
     interpreter.set_tensor(input_details[0]["index"], input_data)
     interpreter.invoke()
     res = interpreter.get_tensor(output_details[0]["index"])[0]
@@ -167,7 +168,10 @@ def handle_feedback():
             try:
                 rating = int(rating)
                 if rating < 1 or rating > 5:
-                    return jsonify({"error": "rating must be between 1 and 5"}), 400
+                    return (
+                        jsonify({"error": "rating must be between 1 and 5"}),
+                        400,
+                    )
                 feedback_data["rating"] = rating
             except (ValueError, TypeError):
                 return (
@@ -196,7 +200,10 @@ def handle_feedback():
         with open(feedback_file, "w") as f:
             json.dump(feedbacks, f, indent=2)
 
-        return jsonify({"status": "success", "message": "Feedback received"}), 200
+        return (
+            jsonify({"status": "success", "message": "Feedback received"}),
+            200,
+        )
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -215,7 +222,10 @@ def update_feedback(feedback_id):
             try:
                 rating = int(feedback_data["rating"])
                 if rating < 1 or rating > 5:
-                    return jsonify({"error": "rating must be between 1 and 5"}), 400
+                    return (
+                        jsonify({"error": "rating must be between 1 and 5"}),
+                        400,
+                    )
                 feedback_data["rating"] = rating
             except (ValueError, TypeError):
                 return (
@@ -248,7 +258,10 @@ def update_feedback(feedback_id):
         with open(feedback_file, "w") as f:
             json.dump(feedbacks, f, indent=2)
 
-        return jsonify({"status": "success", "message": "Feedback updated"}), 200
+        return (
+            jsonify({"status": "success", "message": "Feedback updated"}),
+            200,
+        )
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
