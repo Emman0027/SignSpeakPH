@@ -5,10 +5,30 @@
       "mtime": 1790215482,
       "size": 856123
     },
+    ".flake8": {
+      "hash": "358660c978e738e6f284cb53a100993b5b16c91e318825b59c7f5af8bc3f3532",
+      "mtime": 1790231294,
+      "size": 68
+    },
     ".gitignore": {
-      "hash": "aafde2f9d21fea562621ba44a205bb0d0241d3cfd02fd37130cf9099016655f7",
-      "mtime": 1790151931,
-      "size": 172
+      "hash": "61b9dd2a9b9c15d3e3230c93afb78ed08c5bfe75b90effdcf856b3bbf93b1ff0",
+      "mtime": 1790230159,
+      "size": 185
+    },
+    ".gitmessage": {
+      "hash": "4f6ddab81ba867c37b3dc4b212f99808c3165a27ced778cd56dfa38d2789d58c",
+      "mtime": 1790230084,
+      "size": 749
+    },
+    ".isort.cfg": {
+      "hash": "e0498a31c6b6273adbea9235430e6b39c59c7790cd5a99a9c2af1978f7124fce",
+      "mtime": 1790231418,
+      "size": 27
+    },
+    ".pre-commit-config.yaml": {
+      "hash": "b3a7c79be60bcbb07b4b13569ecfb4f71243c293e75675c31cb6fe46e0f87021",
+      "mtime": 1790226925,
+      "size": 398
     },
     ".yuki-dori-briefing.md": {
       "hash": "4c8ac160be37aea49672a5c88d946fdb09a38f73a73f4aa9b6fbaaf11bba4869",
@@ -66,14 +86,14 @@
       "size": 2896774
     },
     "app.py": {
-      "hash": "ff6ba182742bb9adbe7bd80e8a2009795c0a449fb750cc85fc7ddd874e149b60",
-      "mtime": 1790125286,
-      "size": 9860
+      "hash": "9498040b9dd6ab7b88f733ba0ad3726a0cfc5b5ccaa1dd9e9a536978c1c41353",
+      "mtime": 1790231440,
+      "size": 10587
     },
     "config/settings.py": {
-      "hash": "7bbb3b8ea7399706d2ee6799dcd0cc90790448846cbdcfd49ea0df014205e721",
-      "mtime": 1790099215,
-      "size": 1398
+      "hash": "72054b4d28bbca4f22ddf337fbad52a067fd6879c457e8d13dd24fae17a4e6ac",
+      "mtime": 1790230610,
+      "size": 1405
     },
     "data/feedback/feedback.json": {
       "hash": "7760e98a4ddf6b5a8fdc41746f445b67ff4d6d95f9c89cd69948da2cfd899006",
@@ -81,8 +101,8 @@
       "size": 552
     },
     "data/models/production/0.npy": {
-      "hash": "7f0e76dffd84293cf1127b18a1d68aba6cf2dbdeecb55bea96879e7f53d49a57",
-      "mtime": 1790220707,
+      "hash": "a7b547f8ae193a42978f401d54ae3e91f9f8adca76122d244a578fddefa867d1",
+      "mtime": 1789526582,
       "size": 2192
     },
     "data/models/production/MP_Data/hindi/0/0.npy": {
@@ -21261,18 +21281,18 @@
       "size": 2192
     },
     "data/models/production/action.h5": {
-      "hash": "4fc4aebe32ee4b6c1ce4c76b71c1d1fdc35d5c0906a2d6c66b6b0f159d51a417",
-      "mtime": 1790157315,
-      "size": 989872
+      "hash": "size-mtime:2913240:1789526582",
+      "mtime": 1789526582,
+      "size": 2913240
     },
     "data/models/production/action.keras": {
-      "hash": "c62fabc2e4e408808e3f962062813d5380beae927c9d0fe1f4f51726351c43e7",
-      "mtime": 1790157315,
-      "size": 996097
+      "hash": "size-mtime:2896774:1789526582",
+      "mtime": 1789526582,
+      "size": 2896774
     },
     "data/models/production/action.tflite": {
       "hash": "556a8552ad57bcace01df74fa2e87ed3bdf03ebf72abb2e32279ed4b739056ac",
-      "mtime": 1789297095,
+      "mtime": 1789526582,
       "size": 1198380
     },
     "data/models/production/config.json": {
@@ -21491,9 +21511,9 @@
       "size": 264
     },
     "requirements.txt": {
-      "hash": "c1592ec22c752f50a688a7e658061dc018c835961385c58e15cfbdf16935f27c",
-      "mtime": 1790098012,
-      "size": 69
+      "hash": "98de8eeec54939a359046c9013e20e74f6885f856b8c9e373ff2c049605b2382",
+      "mtime": 1790230324,
+      "size": 72
     },
     "requirements/base.txt": {
       "hash": "c1592ec22c752f50a688a7e658061dc018c835961385c58e15cfbdf16935f27c",
@@ -21521,9 +21541,9 @@
       "size": 2315
     },
     "scripts/scan_index.py": {
-      "hash": "3e6db8ecd48f5233a43e2032f8ec4a5a6908e285c84b35ed0d9dc24fe98df944",
-      "mtime": 1790128033,
-      "size": 5278
+      "hash": "00870760518403bad013106b3d02560400af18ecb88cfa2fd42ccbbb3b8e91ec",
+      "mtime": 1790230750,
+      "size": 5410
     },
     "scripts/yuki-dori-ready.sh": {
       "hash": "3ee09861dd16fc171aa871096708bf0d68753d91cd81ddee73eecf0a105665ce",
@@ -21556,19 +21576,19 @@
       "size": 0
     },
     "src/utils/mediapipe_utils.py": {
-      "hash": "651c3e4611c7504bc106d335b151638a7e4d5d2b98557688395def460ca3615a",
-      "mtime": 1789914600,
-      "size": 2997
+      "hash": "3cc97256fdc4f3d51e07aa679155e705d54e97b902a4e6395d28bf1e69aa4ffe",
+      "mtime": 1790230750,
+      "size": 3109
     },
     "static/style.css": {
-      "hash": "0d2e895a2b8ab647797ec6859acb8ab5996e5ab8eb40acd352d768c6300636b6",
-      "mtime": 1790125374,
-      "size": 12412
+      "hash": "9c7eb8d527fc914f0039ba90289d3c53f236e9bce3e722e2d6d5ae55894a771d",
+      "mtime": 1790230324,
+      "size": 12810
     },
     "templates/index.html": {
-      "hash": "ba2a2028dc4a6222870a08e15efeb294d1d8084a7ed3a1168b8004375b4a1d22",
-      "mtime": 1790125364,
-      "size": 30577
+      "hash": "5cb6c61c86f374cdf184cfd9be1a1018d175d5d27d6be9e454ed955c373cd67d",
+      "mtime": 1790230324,
+      "size": 31364
     },
     "yuki_status.sh": {
       "hash": "a56c427421acab10aba011a868f55f8a6e0e8a909e5062e7230071d7d26b9bbc",
@@ -21576,6 +21596,6 @@
       "size": 2088
     }
   },
-  "generated_at": "2026-09-24T04:21:27Z",
+  "generated_at": "2026-09-24T07:12:06Z",
   "root": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH"
 }
