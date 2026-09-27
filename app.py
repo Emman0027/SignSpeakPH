@@ -46,9 +46,9 @@ except ModuleNotFoundError:
 
     tflite = tf.lite
 
-from config.settings import LABELS_PATH  # noqa: E402
 from config.settings import (
     CONFIG_PATH,
+    LABELS_PATH,
     MODEL_PATH,
     PROHIBITED_SIGNS,
     SEQUENCE_LENGTH,

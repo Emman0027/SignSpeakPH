@@ -12,3 +12,18 @@ venv/
 *.tflite
 *.npy
 action.*
+.aider*
+
+# Internal system directories (should not be committed)
+.base/
+.serena/
+ECC/
+
+# Graphify cache and internal state (regenerable)
+graphify-out/cache/
+graphify-out/.graphify_root
+graphify-out/*/cache/
+*.graphify_labels.json.sig
+
+# Temporary/regenerable analysis files (keep reports and visualizations)
+# Keeping GRAPH_REPORT.md, graph.html, manifest.json, graph.json as they show results

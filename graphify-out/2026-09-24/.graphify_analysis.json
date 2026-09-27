@@ -120,11 +120,6 @@
       "degree": 6
     },
     {
-      "id": "scripts_file_index_sh__entry",
-      "label": "file_index.sh script",
-      "degree": 4
-    },
-    {
       "id": "scripts_scan_index_main",
       "label": "main()",
       "degree": 4
@@ -140,8 +135,18 @@
       "degree": 4
     },
     {
-      "id": "app_decode_base64_image",
-      "label": "decode_base64_image()",
+      "id": "scripts_file_index_sh__entry",
+      "label": "file_index.sh script",
+      "degree": 4
+    },
+    {
+      "id": "scripts_scan_index_fingerprint",
+      "label": "fingerprint()",
+      "degree": 3
+    },
+    {
+      "id": "app_delete_feedback",
+      "label": "delete_feedback()",
       "degree": 3
     },
     {
@@ -155,13 +160,8 @@
       "degree": 3
     },
     {
-      "id": "app_delete_feedback",
-      "label": "delete_feedback()",
-      "degree": 3
-    },
-    {
-      "id": "scripts_scan_index_fingerprint",
-      "label": "fingerprint()",
+      "id": "app_decode_base64_image",
+      "label": "decode_base64_image()",
       "degree": 3
     }
   ],
@@ -189,8 +189,26 @@
       "why": "connects across different repos/directories"
     }
   ],
-  "tokens": {
-    "input": 0,
-    "output": 0
-  }
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `predict_batch()` connect `predict_batch` to `route`, `app.py`, `extract_keypoints`?",
+      "why": "High betweenness centrality (0.035) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `delete_feedback()` connect `route` to `app.py`?",
+      "why": "High betweenness centrality (0.028) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `handle_feedback()` connect `route` to `app.py`?",
+      "why": "High betweenness centrality (0.028) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `yuki_status.sh script` to the rest of the system?",
+      "why": "1 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ]
 }

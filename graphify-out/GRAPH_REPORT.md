@@ -1,42 +1,49 @@
 # Graph Report - SignSpeakPH  (2026-09-24)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 31 files · ~51,188 words
+- Verdict: corpus is large enough that graph structure adds value.
+- Unclassified: 23 file(s) not represented in the graph (top: (none) 10, .toml 2, .jsonl 2)
 
 ## Summary
-- 62 nodes · 77 edges · 16 communities (7 shown, 9 thin omitted)
+- 129 nodes · 134 edges · 21 communities (12 shown, 9 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0adb785a`
+- Built from commit: `84f49dbe`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - scan_index.py
 - route
+- SignSpeakPH Project Structure
 - app.py
-- settings.py
-- predict_batch
-- mediapipe_utils.py
+- $(date '+%Y-%m-%d %H:%M:%S')
+- PROJECT_INDEX.md — example (SignSpeakPH)
 - file_index.sh
 - yuki-dori-ready.sh
-- create_models
-- extract_keypoints
+- CLAUDE.md
+- pull_request_template.md
 - yuki_status.sh
+- SignSpeakPH - Batch capture version
+- ROADMAP.md
+- Scripts Directory
+- TASKS.md
+- CHANGELOG.md
 
 ## God Nodes (most connected - your core abstractions)
-1. `predict_batch()` - 6 edges
-2. `main()` - 4 edges
-3. `mediapipe_detection()` - 4 edges
-4. `extract_keypoints()` - 4 edges
-5. `file_index.sh script` - 4 edges
-6. `fingerprint()` - 3 edges
-7. `delete_feedback()` - 3 edges
-8. `handle_feedback()` - 3 edges
-9. `update_feedback()` - 3 edges
-10. `decode_base64_image()` - 3 edges
+1. `SignSpeakPH Project Structure` - 8 edges
+2. `PROJECT_INDEX.md — example (SignSpeakPH)` - 7 edges
+3. `predict_batch()` - 6 edges
+4. `$(date '+%Y-%m-%d %H:%M:%S')` - 6 edges
+5. `SignSpeakPH - Batch capture version` - 5 edges
+6. `Key Improvements` - 5 edges
+7. `file_index.sh script` - 4 edges
+8. `main()` - 4 edges
+9. `mediapipe_detection()` - 4 edges
+10. `extract_keypoints()` - 4 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `predict_batch()` --calls--> `extract_keypoints()`  [EXTRACTED]
@@ -47,49 +54,69 @@
 ## Import Cycles
 - None detected.
 
-## Communities (16 total, 9 thin omitted)
+## Communities (21 total, 9 thin omitted)
 
 ### Community 0 - "scan_index.py"
-Cohesion: 0.29
-Nodes (9): argparse, hashlib, fingerprint(), load_state(), main(), scan_index.py — incremental repo state tracker. Purpose: let an AI agent know…, sha256_of(), walk_repo() (+1 more)
+Cohesion: 0.25
+Nodes (10): argparse, hashlib, fingerprint(), load_state(), main(), scan_index.py — incremental repo state tracker. Purpose: let an AI agent know…, sha256_of(), walk_repo() (+2 more)
 
 ### Community 1 - "route"
 Cohesion: 0.25
 Nodes (8): delete_feedback(), handle_feedback(), index(), Handle customer satisfaction feedback, Update existing feedback, Delete existing feedback, update_feedback(), route
 
-### Community 2 - "app.py"
-Cohesion: 0.29
-Nodes (6): SignSpeakPH - Flask backend (BATCH version) Fixes both the speed problem AND an…, base64, flask, tensorflow, tflite_runtime_interpreter, time
+### Community 2 - "SignSpeakPH Project Structure"
+Cohesion: 0.15
+Nodes (12): 1. **Separation of Concerns**, 2. **Improved Configuration Management**, 3. **Enhanced ML Workflow**, 4. **Better Development Workflow**, Directory Structure, Feedback Storage, Getting Started, Key Improvements (+4 more)
 
-### Community 3 - "settings.py"
-Cohesion: 0.29
-Nodes (6): load_model_config(), Configuration management for SignSpeakPH, Load model labels and config, json, os, pathlib
+### Community 3 - "app.py"
+Cohesion: 0.10
+Nodes (25): decode_base64_image(), predict_batch(), SignSpeakPH - Flask backend (BATCH version) Fixes both the speed problem AND an…, Convert a data:image/jpeg;base64,... string from the browser into an OpenCV…, Receives all SEQUENCE_LENGTH frames at once (captured locally by the browser at…, base64, load_model_config(), Configuration management for SignSpeakPH (+17 more)
 
-### Community 4 - "predict_batch"
-Cohesion: 0.33
-Nodes (6): decode_base64_image(), predict_batch(), Convert a data:image/jpeg;base64,... string from the browser into an OpenCV…, Receives all SEQUENCE_LENGTH frames at once (captured locally by the browser at…, mediapipe_detection(), Run Pose + Hands on a single BGR frame. `models` is (pose_model, hands_model).
+### Community 4 - "$(date '+%Y-%m-%d %H:%M:%S')"
+Cohesion: 0.18
+Nodes (10): $(date '+%Y-%m-%d %H:%M:%S'), PROJECT_INDEX.md — example (SignSpeakPH), 🏗️ Project Overview, 📊 Project Status (Project-Dori), 📚 Quick Reference, 📝 Recent Changes, 🎯 Today's Focus (from TODOs), 🚀 Yuki-Dori Session Briefing (+2 more)
 
-### Community 5 - "mediapipe_utils.py"
-Cohesion: 0.40
-Nodes (4): cv2, mediapipe, numpy, MediaPipe helper functions - FAST version (Pose + Hands, no Holistic). Holistic…
+### Community 5 - "PROJECT_INDEX.md — example (SignSpeakPH)"
+Cohesion: 0.25
+Nodes (7): Decisions log, Key files/folders (what each is for — not what's inside it), Known limitations (don't re-discover these — they're already known), Model architecture (stable — rarely needs re-reading), PROJECT_INDEX.md — example (SignSpeakPH), Tech stack, What this is
 
 ### Community 6 - "file_index.sh"
 Cohesion: 0.70
 Nodes (4): build_index(), search_index(), file_index.sh script, show_help()
 
+### Community 8 - "CLAUDE.md"
+Cohesion: 0.33
+Nodes (4): 1. Think Before Coding, 2. Simplicity First, 3. Surgical Changes, 4. Goal-Driven Execution
+
+### Community 9 - "pull_request_template.md"
+Cohesion: 0.33
+Nodes (5): Checklist, Related Issue, Screenshots (if applicable):, Summary, Type of change
+
+### Community 16 - "SignSpeakPH - Batch capture version"
+Cohesion: 0.33
+Nodes (5): 1. Copy your trained files here, 2. Test locally, 3. Deploy, SignSpeakPH - Batch capture version, What to expect
+
+### Community 17 - "ROADMAP.md"
+Cohesion: 0.40
+Nodes (3): Blocked / waiting on, Next steps, Open decisions
+
+### Community 18 - "Scripts Directory"
+Cohesion: 0.40
+Nodes (4): Available Scripts, file_index.sh, Scripts Directory, Usage
+
 ## Knowledge Gaps
-- **1 isolated node(s):** `yuki_status.sh script`
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 29 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **45 isolated node(s):** `yuki_status.sh script`, `YYYY-MM-DD`, `What this is`, `Tech stack`, `Key files/folders (what each is for — not what's inside it)` (+40 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 81 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `predict_batch()` connect `predict_batch` to `route`, `app.py`, `extract_keypoints`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
-- **Why does `delete_feedback()` connect `route` to `app.py`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
+- **Why does `predict_batch()` connect `app.py` to `route`?**
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Why does `handle_feedback()` connect `route` to `app.py`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **What connects `yuki_status.sh script` to the rest of the system?**
-  _1 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **What connects `yuki_status.sh script`, `YYYY-MM-DD`, `What this is` to the rest of the system?**
+  _45 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `app.py` be split into smaller, more focused modules?**
+  _Cohesion score 0.09788359788359788 - nodes in this community are weakly interconnected._
