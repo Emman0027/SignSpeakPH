@@ -585,6 +585,8 @@ let userHasSubmittedFeedback = false; // Track if user has already submitted fee
           feedbackStatus.innerText = "Thank you for your feedback!";
           feedbackStatus.style.color = '#4caf50';
           userHasSubmittedFeedback = true;
+          // Remember which entry this is so Edit/Delete can target it
+          currentFeedbackId = Number.isInteger(result.id) ? result.id : null;
 
           // Show edit/delete buttons after successful submission
           setTimeout(() => {

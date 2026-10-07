@@ -195,6 +195,15 @@ def health():
     return jsonify({"status": "ok"}), 200
 
 
+@app.route("/config")
+@limiter.exempt
+def get_config():
+    """Client settings. templates/index.html calls this on page load to set the
+    confidence-threshold slider to the server's value. Exempt from rate
+    limiting so loading the page does not use up the visitor's quota."""
+    return jsonify({"threshold": THRESHOLD}), 200
+
+
 @app.route("/predict_batch", methods=["POST"])
 def predict_batch():
     """
@@ -299,15 +308,23 @@ def handle_feedback():
         else:
             feedbacks = []
 
-        # Add new feedback
+        # Add new feedback; its ID is its position in the list, which is what
+        # PUT/DELETE /feedback/<id> use. The UI needs it to edit/delete.
         feedbacks.append(feedback_data)
+        feedback_id = len(feedbacks) - 1
 
         # Write back to file
         with open(feedback_file, "w") as f:
             json.dump(feedbacks, f, indent=2)
 
         return (
-            jsonify({"status": "success", "message": "Feedback received"}),
+            jsonify(
+                {
+                    "status": "success",
+                    "message": "Feedback received",
+                    "id": feedback_id,
+                }
+            ),
             200,
         )
 
