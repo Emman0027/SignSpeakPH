@@ -187,6 +187,14 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/health")
+@limiter.exempt
+def health():
+    """Liveness probe for the Docker HEALTHCHECK. Exempt from rate limiting so
+    frequent probes are never answered with 429."""
+    return jsonify({"status": "ok"}), 200
+
+
 @app.route("/predict_batch", methods=["POST"])
 def predict_batch():
     """

@@ -1,120 +1,37 @@
-# SignSpeakPH Project Structure
-
-## Overview
-This document describes the organized project structure for SignSpeakPH, a Filipino Sign Language recognition system.
-
-## Directory Structure
-```
 SignSpeakPH/
-├── app.py                    # Application entry point
-├── config/                   # Configuration management
-│   └── settings.py           # Centralized configuration
-├── src/                      # Source code
+├── app.py                          # all routes live here (415 lines)
+├── Dockerfile, render.yaml, runtime.txt, pyproject.toml
+├── requirements.txt, requirements-dev.txt, requirements-training.txt
+├── requirements/            base.txt, dev.txt
+├── .flake8, .isort.cfg, .pre-commit-config.yaml, .gitignore, .gitmessage.txt
+├── CLAUDE.md, README.md
+├── src/
 │   ├── __init__.py
-│   ├── api/                  # Flask routes and API
-│   │   ├── __init__.py
-│   │   └── routes.py         # Route definitions
-│   ├── models/               # ML model handling
-│   │   ├── __init__.py
-│   │   ├── model_loader.py   # Model loading and prediction
-│   │   └── trainer.py        # Model training functions
-│   ├── utils/                # Utility functions
-│   │   ├── __init__.py
-│   │   └── mediapipe_utils.py # MediaPipe processing
-│   └── services/             # Business logic
-│       ├── __init__.py
-│       ├── prediction_service.py
-│       └── feedback_service.py
-├── templates/                # HTML templates
-│   └── index.html            # Main template
-├── static/                   # Static assets (CSS, JS, images)
-│   ├── css/
-│   │   └── style.css
-│   ├── js/
-│   └── images/
-├── data/                     # Data storage
-│   ├── feedback/             # User feedback storage
-│   ├── logs/                 # Application logs
-│   └── models/               # ML models
-│       ├── production/       # Production-ready models
-│       ├── staging/          # Staging models
-│       └── experiments/      # Experimental models
-├── docs/                     # Documentation
-│   └── STRUCTURE.md          # This file
-├── scripts/                  # Utility scripts
-│   ├── train.py              # Model training script
-│   ├── evaluate.py           # Model evaluation script
-│   └── deploy.py             # Deployment script
-├── tests/                    # Test suite
-│   ├── unit/                 # Unit tests
-│   ├── integration/          # Integration tests
-│   └── conftest.py           # Test configuration
-├── notebooks/                # Jupyter Lab notebooks for experimentation
-├── experiments/              # Experiment tracking and results
-├── requirements/             # Dependency files
-│   ├── base.txt              # Production dependencies
-│   └── dev.txt               # Development dependencies
-├── Dockerfile                # Docker configuration
-├── docker-compose.yml        # Docker Compose (if needed)
-└── README.md                 # Project overview and instructions
-```
-
-## Key Improvements
-
-### 1. **Separation of Concerns**
-- **Configuration**: Centralized in `config/` directory
-- **Source Code**: Organized by concern in `src/` directory
-- **Data**: Separated by type in `data/` directory
-- **Tests**: Isolated in `tests/` directory
-- **Documentation**: Maintained in `docs/` directory
-
-### 2. **Improved Configuration Management**
-- Environment-based configuration
-- Centralized settings in `config/settings.py`
-- Easy deployment across different environments
-
-### 3. **Enhanced ML Workflow**
-- Organized model storage (`data/models/`)
-- Separation of production, staging, and experimental models
-- Dedicated directories for notebooks and experiment tracking
-
-### 4. **Better Development Workflow**
-- Clear separation between code, config, and data
-- Structured approach to testing and documentation
-- Standardized locations for scripts and utilities
-
-## Getting Started
-
-1. **Install dependencies**:
-   ```bash
-   pip install -r requirements/base.txt
-   ```
-
-2. **Run the application**:
-   ```bash
-   python app.py
-   ```
-
-3. **Access the application**:
-   Open http://localhost:5000 in your browser
-
-## Model Management
-
-- **Production models**: `data/models/production/`
-- **Staging models**: `data/models/staging/`
-- **Experimental models**: `data/models/experiments/`
-
-## Feedback Storage
-
-User feedback is stored in:
-- `data/feedback/feedback.json`
-
-## Notes
-
-This structure follows software engineering best practices for:
-- Maintainability
-- Scalability
-- Collaboration
-- Deployment readiness
-
-The application entry point remains `app.py` in the project root for simplicity.
+│   ├── constants.py
+│   ├── config/settings.py
+│   ├── utils/        __init__.py, mediapipe_utils.py
+│   └── api/, models/, services/    # each holds only an empty __init__.py
+├── data/
+│   ├── feedback/feedback.json
+│   └── models/production/
+│       ├── README.md, VERSION
+│       ├── config.json, config_v1.0.0.json
+│       └── labels.json, labels_v1.0.0.json    # no .tflite
+├── templates/index.html
+├── static/style.css
+├── tests/    conftest.py, unit/test_endpoints.py, unit/test_mediapipe_utils.py
+├── notebooks/
+│   ├── Action Detection Refined_noholistic.ipynb
+│   └── data/models/production/   config.json, labels.json   # duplicate copy
+├── docs/STRUCTURE.md
+├── scripts/      README.md, file_index.sh, scan_index.py, yuki-dori-ready.sh
+├── .github/      workflows/ci.yml, dependabot.yml, pull_request_template.md, commit-message-template.md
+├── .ai-context/  CHANGELOG, PRIORITIES, PROJECT_INDEX, ROADMAP, TASKS.md, STATE.json
+├── .vibe-wise/   profile.md, progress.md, project-map.md
+├── .claude/      mcp.json, .headroom_wrap_settings.lock
+├── .yuki-dori-briefing.md, yuki_status.sh
+├── graphify-out/ graph.html/json, GRAPH_REPORT.md, manifest.json, dated 2026-09-23 and 09-24 snapshots, cache/ (21 files)
+├── graphify_output.json, .file_index (880 KB)
+├── action.h5, action.keras, 0.npy  # gitignored but tracked
+├── mv                              # empty file
+└── utils/__pycache__/mediapipe_utils.cpython-310.pyc   # stale, no source

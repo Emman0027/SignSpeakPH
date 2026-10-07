@@ -5,7 +5,8 @@ import json
 import os
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parent.parent
+# settings.py lives in <repo>/src/config/, so the repo root is three levels up.
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MODELS_DIR = BASE_DIR / "data" / "models" / "production"
 
 

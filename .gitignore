@@ -10,6 +10,8 @@ venv/
 *.h5
 *.keras
 *.tflite
+# ...but the deployed, versioned production model MUST be tracked
+!data/models/production/*.tflite
 *.npy
 action.*
 .aider*

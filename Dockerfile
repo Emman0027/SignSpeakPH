@@ -12,18 +12,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user
-RUN adduser --disabled-password --gecos '' --shell /bin/bash appuser && \
-    chown -R appuser:appuser /app
+# Create the app folder first, then the non-root user
+# (the old order ran `chown /app` before /app existed, which failed the build)
 WORKDIR /app
+RUN adduser --disabled-password --gecos '' --shell /bin/bash appuser
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# MediaPipe's lite pose model (model_complexity=0, used in
+# src/utils/mediapipe_utils.py) is NOT bundled in the pip package: it is
+# downloaded into site-packages on first use. Do it now, as root, so the
+# non-root appuser never needs network access or write permission at runtime.
+RUN python -c "import mediapipe as mp; mp.solutions.pose.Pose(model_complexity=0).close()"
 
-# Change ownership of application files to non-root user
-RUN chown -R appuser:appuser /app
+# Copy the code owned by the non-root user so the app can write data/feedback
+COPY --chown=appuser:appuser . .
 
 # Switch to non-root user
 USER appuser
@@ -47,6 +51,7 @@ else \
 fi; \
 gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers $workers --worker-class sync"
 
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${PORT}/health || exit 1
+# Healthcheck (uses Python because curl is not installed in python:3.11-slim).
+# start-period is long because MediaPipe and the model load at startup.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD ["python", "-c", "import os, urllib.request as u; u.urlopen('http://localhost:%s/health' % os.environ.get('PORT', '10000'), timeout=3)"]

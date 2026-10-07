@@ -1,8 +1,20 @@
+# Web app
 flask>=2.0.0
-opencv-python>=4.0.0
-numpy>=1.20.0
-tflite-runtime>=2.0.0
-sentry-sdk>=1.0.0
-prometheus-client>=0.0.0
 flask-cors>=3.0.0
 flask-limiter>=2.0.0
+gunicorn>=21.2.0
+prometheus-client>=0.0.0
+sentry-sdk>=1.0.0
+
+# Vision. mediapipe MUST stay pinned: releases after 0.10.21 removed the
+# legacy `mp.solutions` API that src/utils/mediapipe_utils.py uses (an
+# unpinned install currently gives 1.1.0 and the app fails with
+# AttributeError). 0.10.21 also requires numpy<2.
+mediapipe==0.10.21
+opencv-contrib-python>=4.5.0,<4.12
+numpy>=1.23.5,<2
+
+# TFLite runtime. tflite-runtime has no Windows wheels, so Windows
+# (local development) falls back to full TensorFlow, which app.py also supports.
+tflite-runtime>=2.14.0; platform_system != "Windows"
+tensorflow>=2.14,<2.17; platform_system == "Windows"
