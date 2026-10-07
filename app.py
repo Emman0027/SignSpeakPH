@@ -26,7 +26,9 @@ Then open http://127.0.0.1:5000
 
 import base64
 import json
+import logging
 import os
+import sys
 import time
 
 # MediaPipe tries GPU/EGL acceleration by default and silently falls back
@@ -37,7 +39,43 @@ os.environ["MEDIAPIPE_DISABLE_GPU"] = os.environ.get("MEDIAPIPE_DISABLE_GPU", "1
 
 import cv2  # noqa: E402
 import numpy as np  # noqa: E402
+
+# Monitoring and error tracking imports
+import sentry_sdk
 from flask import Flask, jsonify, render_template, request  # noqa: E402
+
+# Security hardening imports
+from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+logger = logging.getLogger(__name__)
+
+# Prometheus metrics
+REQUEST_COUNT = Counter(
+    "httpserver_requests_total",
+    "Total HTTP Requests",
+    ["method", "endpoint", "http_status"],
+)
+REQUEST_LATENCY = Histogram(
+    "httpserver_request_duration_seconds",
+    "HTTP Request Latency",
+    ["method", "endpoint"],
+)
+PREDICTION_CONFIDENCE = Histogram(
+    "prediction_confidence_scores", "Confidence scores of predictions", ["sign"]
+)
+FEEDBACK_SUBMISSIONS = Counter(
+    "feedback_submissions_total", "Total feedback submissions", ["rating"]
+)
 
 try:
     import tflite_runtime.interpreter as tflite
@@ -46,7 +84,7 @@ except ModuleNotFoundError:
 
     tflite = tf.lite
 
-from config.settings import (
+from src.config.settings import (
     CONFIG_PATH,
     LABELS_PATH,
     MODEL_PATH,
@@ -59,7 +97,7 @@ from src.utils.mediapipe_utils import extract_keypoints, mediapipe_detection
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-interpreter = tflite.Interpreter(model_path=str(MODEL_PATH))
+interpreter = tflite.Interpreter(model_path=str(MODEL_PATH), num_threads=2)
 interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
@@ -72,8 +110,53 @@ with open(CONFIG_PATH, "r") as f:
 
 app = Flask(__name__)
 
+# Initialize CORS
+CORS(app)
+
+# Initialize rate limiter
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=["100 per hour"],
+    storage_uri="memory://",
+)
+
 # Pose + Hands models reused across requests.
 models = create_models()
+
+# Initialize Sentry for error tracking
+sentry_dsn = os.environ.get("SENTRY_DSN")
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        integrations=[FlaskIntegration()],
+        traces_sample_rate=float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
+        environment=os.environ.get("FLASK_ENV", "production"),
+    )
+    logger.info("Sentry initialized for error tracking")
+else:
+    logger.warning("SENTRY_DSN not set, Sentry error tracking disabled")
+
+
+# Middleware to collect metrics
+@app.before_request
+def before_request():
+    request.start_time = time.time()
+
+
+@app.after_request
+def after_request(response):
+    if hasattr(request, "start_time"):
+        request_latency = time.time() - request.start_time
+        REQUEST_LATENCY.labels(
+            method=request.method, endpoint=request.endpoint or request.path
+        ).observe(request_latency)
+        REQUEST_COUNT.labels(
+            method=request.method,
+            endpoint=request.endpoint or request.path,
+            http_status=response.status_code,
+        ).inc()
+    return response
 
 
 def decode_base64_image(data_url):
@@ -84,6 +167,19 @@ def decode_base64_image(data_url):
     np_arr = np.frombuffer(img_bytes, dtype=np.uint8)
     frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
     return frame
+
+
+# Security headers
+@app.after_request
+def add_security_headers(response):
+    response.headers[
+        "Strict-Transport-Security"
+    ] = "max-age=31536000; includeSubDomains"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
 
 
 @app.route("/")
@@ -185,6 +281,8 @@ def handle_feedback():
 
         # Store feedback (simple JSON file approach)
         feedback_file = os.path.join(BASE_DIR, "data", "feedback", "feedback.json")
+
+        os.makedirs(os.path.dirname(feedback_file), exist_ok=True)
 
         # Read existing feedback or create empty list
         if os.path.exists(feedback_file):
@@ -305,6 +403,11 @@ def delete_feedback(feedback_id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/metrics")
+def metrics():
+    return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
 
 
 if __name__ == "__main__":

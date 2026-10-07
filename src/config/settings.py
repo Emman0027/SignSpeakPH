@@ -8,10 +8,22 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent.parent
 MODELS_DIR = BASE_DIR / "data" / "models" / "production"
 
+
+def _get_version():
+    """Read version from VERSION file, default to v1.0.0 if not found."""
+    version_file = MODELS_DIR / "VERSION"
+    try:
+        with open(version_file, "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return "v1.0.0"
+
+
 # Model configuration
-MODEL_PATH = MODELS_DIR / "action.tflite"
-LABELS_PATH = MODELS_DIR / "labels.json"
-CONFIG_PATH = MODELS_DIR / "config.json"
+_version = _get_version()
+MODEL_PATH = MODELS_DIR / f"action_{_version}.tflite"
+LABELS_PATH = MODELS_DIR / f"labels_{_version}.json"
+CONFIG_PATH = MODELS_DIR / f"config_{_version}.json"
 
 # Flask configuration
 FLASK_HOST = os.environ.get("FLASK_HOST", "0.0.0.0")

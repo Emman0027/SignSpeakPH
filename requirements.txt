@@ -2,3 +2,7 @@ flask>=2.0.0
 opencv-python>=4.0.0
 numpy>=1.20.0
 tflite-runtime>=2.0.0
+sentry-sdk>=1.0.0
+prometheus-client>=0.0.0
+flask-cors>=3.0.0
+flask-limiter>=2.0.0
