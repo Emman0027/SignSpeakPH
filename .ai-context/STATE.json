@@ -11,16 +11,16 @@
       "size": 880857
     },
     ".flake8": {
-      "hash": "358660c978e738e6f284cb53a100993b5b16c91e318825b59c7f5af8bc3f3532",
-      "mtime": 1790231294,
-      "size": 68
+      "hash": "eb7825754e3e28a497c035efb56dd309f4e5edff1af63c0085d016c5aa918b15",
+      "mtime": 1791343059,
+      "size": 92
     },
     ".gitignore": {
-      "hash": "d1b063e4dfd5ded738f1b9d63bfe2883b402f70f02e1cd5af8f8ef5434c06508",
-      "mtime": 1790422326,
-      "size": 196
+      "hash": "94a8f78e5307572ea75e95c0ba3892cb5dfa91d4cf6e4c16286ea494afac3dc8",
+      "mtime": 1791350027,
+      "size": 697
     },
-    ".gitmessage": {
+    ".gitmessage.txt": {
       "hash": "4f6ddab81ba867c37b3dc4b212f99808c3165a27ced778cd56dfa38d2789d58c",
       "mtime": 1790230084,
       "size": 749
@@ -46,14 +46,14 @@
       "size": 2192
     },
     "CLAUDE.md": {
-      "hash": "694a2d721e41c385f3db492838c23299826df5ba9809e3b0721aac70021e196a",
-      "mtime": 1790095583,
-      "size": 2357
+      "hash": "e6a64895cbf59c16c3e63a2fd8bab77eddc2175a0fd70c5cf4cac7c12fcafba6",
+      "mtime": 1791437457,
+      "size": 3632
     },
     "Dockerfile": {
-      "hash": "f6108829b6b6e3463f6a64e466ec97b61186760736716630d69b846182ca3665",
-      "mtime": 1789914600,
-      "size": 625
+      "hash": "b6b1e2bcccc99e6505ee6e860bd2ebfb1c428c002e7f04652ed5b12ce5c54998",
+      "mtime": 1791350027,
+      "size": 2224
     },
     "ECC/.coderabbit.yaml": {
       "hash": "4b9f501d72342ab70ef808253bd7aa9d332a9326073f817a84e005603cde2cfa",
@@ -16411,9 +16411,9 @@
       "size": 86948
     },
     "README.md": {
-      "hash": "db22ff0461429566643c68bb02281a994769802867cb4a7756551dd875bee051",
-      "mtime": 1789526751,
-      "size": 1873
+      "hash": "cc5061cdf4b4e713537e1b6942000ca2f911bd8ac38d615a0e558c20ddbd6b2e",
+      "mtime": 1790566704,
+      "size": 7592
     },
     "action.h5": {
       "hash": "size-mtime:2913240:1789526751",
@@ -16426,24 +16426,19 @@
       "size": 2896774
     },
     "app.py": {
-      "hash": "b12a9bd140ae8f040d9feeb031fa297780a90b88addb93afded1ccc4d1633fed",
-      "mtime": 1790265288,
-      "size": 10550
+      "hash": "32632c488cebd7c8b4e912444a61444ce7771e900884a401f2ee98b120c51770",
+      "mtime": 1791616770,
+      "size": 14837
     },
-    "config/settings.py": {
-      "hash": "72054b4d28bbca4f22ddf337fbad52a067fd6879c457e8d13dd24fae17a4e6ac",
-      "mtime": 1790230610,
-      "size": 1405
-    },
-    "constants.py": {
-      "hash": "711e5e71bbed02926e1fe4017d850537b805d2550ab5a4c95c74d73179357af8",
-      "mtime": 1790265279,
-      "size": 234
+    "d": {
+      "hash": "c48d1976ecd7de89e9f8ee8249000f3e546c2da00f6631ab8d7925217ad4d7bc",
+      "mtime": 1791616219,
+      "size": 2790
     },
     "data/feedback/feedback.json": {
-      "hash": "7760e98a4ddf6b5a8fdc41746f445b67ff4d6d95f9c89cd69948da2cfd899006",
-      "mtime": 1790125484,
-      "size": 552
+      "hash": "dcae7a513749c4a5e693dca4cd26ad554d2a42d588880b690d220554ce5175a1",
+      "mtime": 1790565871,
+      "size": 1079
     },
     "data/models/production/0.npy": {
       "hash": "a7b547f8ae193a42978f401d54ae3e91f9f8adca76122d244a578fddefa867d1",
@@ -37625,6 +37620,16 @@
       "mtime": 1789526582,
       "size": 2192
     },
+    "data/models/production/README.md": {
+      "hash": "88fc44750c9186e0da620a7295253accc5aface4b641f08b7115f674ee86970c",
+      "mtime": 1790563330,
+      "size": 46
+    },
+    "data/models/production/VERSION": {
+      "hash": "86f0555bccd069ac54e4c54a19a0f1aed9d328e13aa34aa090f3f3d43aaad441",
+      "mtime": 1791257802,
+      "size": 7
+    },
     "data/models/production/action.h5": {
       "hash": "size-mtime:2913240:1789526582",
       "mtime": 1789526582,
@@ -37637,23 +37642,38 @@
     },
     "data/models/production/action.tflite": {
       "hash": "556a8552ad57bcace01df74fa2e87ed3bdf03ebf72abb2e32279ed4b739056ac",
-      "mtime": 1789526582,
+      "mtime": 1791257350,
       "size": 1198380
+    },
+    "data/models/production/action_v1.0.0.tflite": {
+      "hash": "22d8458fededd31a4ea7b3412c7e5c0de36ff79b62a43e9340dbbd00936cae13",
+      "mtime": 1791349935,
+      "size": 995500
     },
     "data/models/production/config.json": {
       "hash": "c38c87295960d310aac1f850a79f9566ce951bc05f7462c51ee7893fbd2187cc",
-      "mtime": 1789914600,
+      "mtime": 1791257350,
+      "size": 62
+    },
+    "data/models/production/config_v1.0.0.json": {
+      "hash": "c38c87295960d310aac1f850a79f9566ce951bc05f7462c51ee7893fbd2187cc",
+      "mtime": 1791257350,
       "size": 62
     },
     "data/models/production/labels.json": {
       "hash": "3c29f4bb1fe7ac0053fd2c34665e9239e10cee9b97a3c3ccb1653d43fc463c55",
-      "mtime": 1789914600,
+      "mtime": 1791257350,
+      "size": 50
+    },
+    "data/models/production/labels_v1.0.0.json": {
+      "hash": "3c29f4bb1fe7ac0053fd2c34665e9239e10cee9b97a3c3ccb1653d43fc463c55",
+      "mtime": 1791257350,
       "size": 50
     },
     "docs/STRUCTURE.md": {
-      "hash": "b266a6638df8bc3f0d30dbdc510ed1020fb21a09634067bb264c19b1bee3261c",
-      "mtime": 1790098006,
-      "size": 4564
+      "hash": "b52eaaf9027400072abd71935d1e7f80d9ef8554e6de0538a2f15c318a0a54de",
+      "mtime": 1791344494,
+      "size": 2082
     },
     "graphify-out/.graphify_analysis.json": {
       "hash": "39033672f65efb12e4a42b4690860770439007cee7e8cb6a499b74167199403b",
@@ -37930,11 +37950,6 @@
       "mtime": 1790075001,
       "size": 37526
     },
-    "mv": {
-      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "mtime": 1790152117,
-      "size": 0
-    },
     "notebooks/Action Detection Refined_noholistic.ipynb": {
       "hash": "6bfffec1c6e49adf397d3c822c395c133282a4a9c8ae0b1ee42b763cc1e5cb11",
       "mtime": 1790265442,
@@ -37960,20 +37975,35 @@
       "mtime": 1790157520,
       "size": 212
     },
+    "pyproject.toml": {
+      "hash": "af9cb3afc072b8fbead1ef7a22a4d25877b4c54d2f0fd047569fbe5ad8a7eb07",
+      "mtime": 1790562595,
+      "size": 327
+    },
     "render.yaml": {
-      "hash": "09051d964bd853f6499d44a40e7562cbdadd54f7827384e1a511e0b0df15e28c",
-      "mtime": 1789288594,
-      "size": 264
+      "hash": "adff441442086b03420c6991205e41b6e4657f7b87e0f5372bd994d4fc79cf7b",
+      "mtime": 1791615506,
+      "size": 542
+    },
+    "requirements-dev.txt": {
+      "hash": "8bde9c701810c6273d75e5073ef236592e4fef57686af68ae86ae8d77ae7bdd2",
+      "mtime": 1790562575,
+      "size": 41
+    },
+    "requirements-training.txt": {
+      "hash": "9c9dfbac34501333dd4b82cdf9641c767e116503f872f72f4b168b4992d742ba",
+      "mtime": 1790570240,
+      "size": 4096
     },
     "requirements.txt": {
-      "hash": "98de8eeec54939a359046c9013e20e74f6885f856b8c9e373ff2c049605b2382",
-      "mtime": 1790230324,
-      "size": 72
+      "hash": "5eb68568c48994518e5aab677c6646e6bd4fec6e0955dfe3595b43ddb22164af",
+      "mtime": 1791350027,
+      "size": 727
     },
     "requirements/base.txt": {
-      "hash": "c1592ec22c752f50a688a7e658061dc018c835961385c58e15cfbdf16935f27c",
-      "mtime": 1790098015,
-      "size": 69
+      "hash": "5e9807cbd7c79bec4a1966059da06b9a122daed00bd5f28c97ab9c83582707e2",
+      "mtime": 1791615506,
+      "size": 157
     },
     "requirements/dev.txt": {
       "hash": "8e0b0f4f67b3a0dc1677732c961d40f07ab5b3989eecf4d379a9e6f6a7c47506",
@@ -37990,6 +38020,11 @@
       "mtime": 1790178228,
       "size": 803
     },
+    "scripts/export_tflite.py": {
+      "hash": "8f902d4bdda8d0efcde8b494dbd23b14dd36ff37e0b517d625883b4baa145542",
+      "mtime": 1791350027,
+      "size": 4896
+    },
     "scripts/file_index.sh": {
       "hash": "189cd7f30197a6a6e7e57e7db719eed708170e58e3be73da5dcfaae4d335eab3",
       "mtime": 1790178150,
@@ -38005,6 +38040,11 @@
       "mtime": 1790181127,
       "size": 5449
     },
+    "signspeakph-patch-7-plan-leftovers.patch": {
+      "hash": "a3868217cc42347d9094f8fde23fb4d28602f0dede4750599569ea2956b34e82",
+      "mtime": 1791615464,
+      "size": 4364
+    },
     "src/__init__.py": {
       "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "mtime": 1790097932,
@@ -38014,6 +38054,16 @@
       "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "mtime": 1790097932,
       "size": 0
+    },
+    "src/config/settings.py": {
+      "hash": "4844b6a7d17f3cff1cf56ca68cb74aea515ac25c5c3d388c0714290a7fd534e8",
+      "mtime": 1791350027,
+      "size": 1910
+    },
+    "src/constants.py": {
+      "hash": "b1e236b9082e7ee09a9ce00b93ab597edd01dfdc75cd3a60a3fab62e5d7d2437",
+      "mtime": 1791616776,
+      "size": 873
     },
     "src/models/__init__.py": {
       "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -38041,9 +38091,34 @@
       "size": 12810
     },
     "templates/index.html": {
-      "hash": "5cb6c61c86f374cdf184cfd9be1a1018d175d5d27d6be9e454ed955c373cd67d",
-      "mtime": 1790230324,
-      "size": 31364
+      "hash": "739adf6af71cdddd5464e52cd95c281dbd76199cdd87c051f1b3853d017afd59",
+      "mtime": 1791615506,
+      "size": 31541
+    },
+    "tests/conftest.py": {
+      "hash": "2e2b79ac0a8c01e07c050d9f5871ec875700e9f7b62e601b0a8387711d29a4d8",
+      "mtime": 1791342366,
+      "size": 188
+    },
+    "tests/unit/test_config_and_feedback_id.py": {
+      "hash": "86b4f06f31accfb54acf7f336831574fce464141c3020241674db3186a72d357",
+      "mtime": 1791370894,
+      "size": 1853
+    },
+    "tests/unit/test_endpoints.py": {
+      "hash": "1216b49792fb6f31d6b43b12e4543a01f0884dc7f247489698529172f57c981c",
+      "mtime": 1791342366,
+      "size": 3505
+    },
+    "tests/unit/test_mediapipe_utils.py": {
+      "hash": "c06ffdb54b9f70bc8ec6cc1eab616fd555c645876848f29aa4e35c19712b19e7",
+      "mtime": 1791342366,
+      "size": 6136
+    },
+    "tests/unit/test_signs.py": {
+      "hash": "0497de4246b7bc463951da5a92a90173f2714e54fdae95b9f5ae86a9ddc15a9d",
+      "mtime": 1791615506,
+      "size": 734
     },
     "yuki_status.sh": {
       "hash": "a56c427421acab10aba011a868f55f8a6e0e8a909e5062e7230071d7d26b9bbc",
@@ -38051,6 +38126,6 @@
       "size": 2088
     }
   },
-  "generated_at": "2026-09-26T13:11:48Z",
+  "generated_at": "2026-10-10T07:30:17Z",
   "root": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH"
 }

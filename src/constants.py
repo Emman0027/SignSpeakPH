@@ -1,6 +1,18 @@
 """
 Constants for SignSpeakPH deployment.
-Defines the signs that are deployed in production.
+
+SIGN_INFO lists the signs deployed in production. Its labels MUST match
+data/models/production/labels_<version>.json (tests/unit/test_signs.py checks
+this). It feeds the "Learn the Signs" guide through GET /signs.
 """
-# Align with labels.json - only deploy these 5 signs
-SIGN_INFO = ["kamusta", "salamat", "mahalkita", "oo", "hindi"]
+
+# "description" is shown in the guide under each sign. It currently gives the
+# meaning of the sign; add how to perform it later, checked against an FSL
+# reference. An empty description is simply not shown.
+SIGN_INFO = [
+    {"label": "kamusta", "display": "Kamusta", "description": "Hello / How are you?"},
+    {"label": "salamat", "display": "Salamat", "description": "Thank you"},
+    {"label": "mahalkita", "display": "Mahalkita", "description": "I love you"},
+    {"label": "oo", "display": "Oo", "description": "Yes"},
+    {"label": "hindi", "display": "Hindi", "description": "No"},
+]

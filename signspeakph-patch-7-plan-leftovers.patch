@@ -1,0 +1,126 @@
+diff --git a/app.py b/app.py
+index 5478fe5..addf9df 100644
+--- a/app.py
++++ b/app.py
+@@ -92,6 +92,7 @@ from src.config.settings import (
+     SEQUENCE_LENGTH,
+     THRESHOLD,
+ )
++from src.constants import SIGN_INFO
+ from src.utils.mediapipe_utils import create_models  # noqa: E402
+ from src.utils.mediapipe_utils import extract_keypoints, mediapipe_detection
+ 
+@@ -204,6 +205,14 @@ def get_config():
+     return jsonify({"threshold": THRESHOLD}), 200
+ 
+ 
++@app.route("/signs")
++@limiter.exempt
++def get_signs():
++    """Sign vocabulary for the 'Learn the Signs' guide in templates/index.html.
++    Exempt from rate limiting because the guide loads it on demand."""
++    return jsonify(SIGN_INFO), 200
++
++
+ @app.route("/predict_batch", methods=["POST"])
+ def predict_batch():
+     """
+diff --git a/mv b/mv
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/render.yaml b/render.yaml
+index 18f6b18..fc648ac 100644
+--- a/render.yaml
++++ b/render.yaml
+@@ -2,7 +2,9 @@ services:
+   - type: web
+     name: signspeakph
+     env: python
+-    buildCommand: "pip install -r requirements.txt"
++    # mediapipe pulls in the full opencv-contrib-python, which needs libGL.so.1 and
++    # crashes on Render's minimal image. Swap it for the headless build.
++    buildCommand: "pip install -r requirements.txt && pip uninstall -y opencv-contrib-python && pip install --no-deps opencv-contrib-python-headless==4.11.0.86"
+     startCommand: "gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120"
+     plan: free
+     envVars:
+diff --git a/requirements/base.txt b/requirements/base.txt
+index f8e0591..5708b8a 100644
+--- a/requirements/base.txt
++++ b/requirements/base.txt
+@@ -1,4 +1,3 @@
+-flask>=2.0.0
+-opencv-python>=4.0.0
+-numpy>=1.20.0
+-tflite-runtime>=2.0.0
+\ No newline at end of file
++# Runtime dependencies live in the root requirements.txt; this keeps
++# requirements/dev.txt (-r base.txt) installing the full app.
++-r ../requirements.txt
+diff --git a/src/constants.py b/src/constants.py
+index c0b5a4c..8314b9f 100644
+--- a/src/constants.py
++++ b/src/constants.py
+@@ -1,6 +1,18 @@
+ """
+ Constants for SignSpeakPH deployment.
+-Defines the signs that are deployed in production.
++
++SIGN_INFO lists the signs deployed in production. Its labels MUST match
++data/models/production/labels_<version>.json (tests/unit/test_signs.py checks
++this). It feeds the "Learn the Signs" guide through GET /signs.
+ """
+-# Align with labels.json - only deploy these 5 signs
+-SIGN_INFO = ["kamusta", "salamat", "mahalkita", "oo", "hindi"]
++
++# "description" is shown in the guide under each sign. TODO: write how to
++# perform each sign and check it against an FSL reference; an empty
++# description is simply not shown.
++SIGN_INFO = [
++    {"label": "kamusta", "display": "Kamusta", "description": ""},
++    {"label": "salamat", "display": "Salamat", "description": ""},
++    {"label": "mahalkita", "display": "Mahal kita", "description": ""},
++    {"label": "oo", "display": "Oo", "description": ""},
++    {"label": "hindi", "display": "Hindi", "description": ""},
++]
+diff --git a/templates/index.html b/templates/index.html
+index 9e4d93e..a8571c0 100644
+--- a/templates/index.html
++++ b/templates/index.html
+@@ -536,7 +536,7 @@
+       signList.innerHTML = signs.map(s => `
+         <div class="sign-card">
+           <h3>${s.display}</h3>
+-          <p>${s.description}</p>
++          ${s.description ? `<p>${s.description}</p>` : ''}
+         </div>
+       `).join('');
+     }
+diff --git a/tests/unit/test_signs.py b/tests/unit/test_signs.py
+new file mode 100644
+index 0000000..546367f
+--- /dev/null
++++ b/tests/unit/test_signs.py
+@@ -0,0 +1,23 @@
++"""Tests for GET /signs and for keeping SIGN_INFO in sync with the model labels."""
++
++import json
++
++from app import app
++from src.config.settings import LABELS_PATH
++from src.constants import SIGN_INFO
++
++
++def test_signs_endpoint_returns_guide_entries():
++    response = app.test_client().get("/signs")
++    assert response.status_code == 200
++    signs = response.get_json()
++    assert len(signs) == len(SIGN_INFO)
++    for sign in signs:
++        assert isinstance(sign["display"], str) and sign["display"]
++        assert isinstance(sign["description"], str)
++
++
++def test_sign_info_matches_model_labels():
++    with open(LABELS_PATH) as f:
++        labels = json.load(f)
++    assert [s["label"] for s in SIGN_INFO] == labels

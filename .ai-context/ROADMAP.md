@@ -16,3 +16,8 @@ CHANGELOG.md, not here).
 ## Blocked / waiting on
 - (example) nothing right now
 
+
+## Capstone evaluation gates
+- Gate 1, Alpha-ready: all 8 Table 2 areas pass with logged evidence; held-out accuracy >=90% with confusion matrix and misclassification list; fps and latency measured on the deployed host; test suite and CI green on improv; no P1 task open.
+- Gate 2, Beta-ready: stable public URL; beta test plan; evaluation forms for Table 4 (IT experts) and Table 5 (users); a script that scores responses using Table 6.
+- Gate 3, Expert-ready: no known high-severity issue in the 7 Table 4 characteristics; manuscript and code agree; vocabulary listed in the manuscript.

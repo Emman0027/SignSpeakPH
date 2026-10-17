@@ -2,7 +2,9 @@ services:
   - type: web
     name: signspeakph
     env: python
-    buildCommand: "pip install -r requirements.txt"
+    # mediapipe pulls in the full opencv-contrib-python, which needs libGL.so.1 and
+    # crashes on Render's minimal image. Swap it for the headless build.
+    buildCommand: "pip install -r requirements.txt && pip uninstall -y opencv-contrib-python && pip install --no-deps opencv-contrib-python-headless==4.11.0.86"
     startCommand: "gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120"
     plan: free
     envVars:

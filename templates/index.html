@@ -536,7 +536,7 @@
       signList.innerHTML = signs.map(s => `
         <div class="sign-card">
           <h3>${s.display}</h3>
-          <p>${s.description}</p>
+          ${s.description ? `<p>${s.description}</p>` : ''}
         </div>
       `).join('');
     }

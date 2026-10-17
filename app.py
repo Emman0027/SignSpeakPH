@@ -92,6 +92,7 @@ from src.config.settings import (
     SEQUENCE_LENGTH,
     THRESHOLD,
 )
+from src.constants import SIGN_INFO
 from src.utils.mediapipe_utils import create_models  # noqa: E402
 from src.utils.mediapipe_utils import extract_keypoints, mediapipe_detection
 
@@ -202,6 +203,14 @@ def get_config():
     confidence-threshold slider to the server's value. Exempt from rate
     limiting so loading the page does not use up the visitor's quota."""
     return jsonify({"threshold": THRESHOLD}), 200
+
+
+@app.route("/signs")
+@limiter.exempt
+def get_signs():
+    """Sign vocabulary for the 'Learn the Signs' guide in templates/index.html.
+    Exempt from rate limiting because the guide loads it on demand."""
+    return jsonify(SIGN_INFO), 200
 
 
 @app.route("/predict_batch", methods=["POST"])
