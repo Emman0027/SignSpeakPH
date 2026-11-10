@@ -16,9 +16,9 @@
       "size": 92
     },
     ".gitignore": {
-      "hash": "94a8f78e5307572ea75e95c0ba3892cb5dfa91d4cf6e4c16286ea494afac3dc8",
-      "mtime": 1791350027,
-      "size": 697
+      "hash": "075c88847dce490cb7f271426a2544ea8e4db750ac0f8faa2fe03bf138710a58",
+      "mtime": 1792200531,
+      "size": 698
     },
     ".gitmessage.txt": {
       "hash": "4f6ddab81ba867c37b3dc4b212f99808c3165a27ced778cd56dfa38d2789d58c",
@@ -46,9 +46,9 @@
       "size": 2192
     },
     "CLAUDE.md": {
-      "hash": "e6a64895cbf59c16c3e63a2fd8bab77eddc2175a0fd70c5cf4cac7c12fcafba6",
-      "mtime": 1791437457,
-      "size": 3632
+      "hash": "f71bfefb4822a0dd6ca0f40d42be07315866a75ebf59bec22e243506af5c1284",
+      "mtime": 1791617597,
+      "size": 4762
     },
     "Dockerfile": {
       "hash": "b6b1e2bcccc99e6505ee6e860bd2ebfb1c428c002e7f04652ed5b12ce5c54998",
@@ -37676,9 +37676,9 @@
       "size": 2082
     },
     "graphify-out/.graphify_analysis.json": {
-      "hash": "39033672f65efb12e4a42b4690860770439007cee7e8cb6a499b74167199403b",
-      "mtime": 1790234050,
-      "size": 5347
+      "hash": "ddd3fc47cc516830987a1a15885d868323a625210fba127f32cfb658a676851c",
+      "mtime": 1792383466,
+      "size": 12057
     },
     "graphify-out/.graphify_ast.json": {
       "hash": "30b7e38ace949f084f38f16aed31f569470c937f23c3c86874cb1191866815f8",
@@ -37706,9 +37706,9 @@
       "size": 536
     },
     "graphify-out/.graphify_root": {
-      "hash": "cdb4ee2aea69cc6a83331bbe96dc2caa9a299d21329efb0336fc02a82e1839a8",
-      "mtime": 1790264488,
-      "size": 1
+      "hash": "a23951605f2780719e60adff49423f5efff83bde4423d149ddfbbbbbe2490da9",
+      "mtime": 1792383466,
+      "size": 42
     },
     "graphify-out/.graphify_semantic.json": {
       "hash": "802d501cd854b9065d965f8474d03256b3d3e0e79c2bdcdea6da97e7533721d1",
@@ -37770,6 +37770,31 @@
       "mtime": 1790234038,
       "size": 4304
     },
+    "graphify-out/2026-10-19/.graphify_analysis.json": {
+      "hash": "39033672f65efb12e4a42b4690860770439007cee7e8cb6a499b74167199403b",
+      "mtime": 1790234050,
+      "size": 5347
+    },
+    "graphify-out/2026-10-19/.graphify_labels.json": {
+      "hash": "f65f903d7792d26aa0b5ceb9f8d68d2183dcd04195c6ca966c92ed959b5f4e4e",
+      "mtime": 1790264488,
+      "size": 636
+    },
+    "graphify-out/2026-10-19/GRAPH_REPORT.md": {
+      "hash": "83a7471777cfbbb3e62ca850de31ee64d5a5f866d70afe5e3c3344e758744848",
+      "mtime": 1790264488,
+      "size": 5829
+    },
+    "graphify-out/2026-10-19/graph.json": {
+      "hash": "e82c22beb394c35fb4661db0e01df9ab7e4d72c2e5b31aac61b7580e53c3f0f3",
+      "mtime": 1790264488,
+      "size": 93859
+    },
+    "graphify-out/2026-10-19/manifest.json": {
+      "hash": "09e591955f338f8354f3af692642b514b506e4cebbe877a9d68ecebb343e246c",
+      "mtime": 1790264488,
+      "size": 7633
+    },
     "graphify-out/GRAPH_REPORT.md": {
       "hash": "83a7471777cfbbb3e62ca850de31ee64d5a5f866d70afe5e3c3344e758744848",
       "mtime": 1790264488,
@@ -37810,6 +37835,16 @@
       "mtime": 1790234036,
       "size": 852
     },
+    "graphify-out/cache/ast/v0.9.65-s4/413bd5cd96cbf9492df43bd4af40227f2cfd2eba9f9bae8b3df94e9ba783075e.json": {
+      "hash": "37fe7149e92f69f98c27140840ddab3e9ae779b9554f590449a188a3763cf85d",
+      "mtime": 1792383462,
+      "size": 9858
+    },
+    "graphify-out/cache/ast/v0.9.65-s4/42952b2e2e5ec0ff2fbe964152ffb0f29f49b9438e6a536ff6ca53a0a1918ca7.json": {
+      "hash": "b17e191bde4a755d9a8dbd2b51c740221d57ff2b0147dff26dfe34c1b273f093",
+      "mtime": 1792383461,
+      "size": 13151
+    },
     "graphify-out/cache/ast/v0.9.65-s4/47d2004386470b4cef734ec7554db6c3638ee10dfe1a47b06df44da36163519f.json": {
       "hash": "c3e768c45dcca3ea6012e38e10de3addce986e47754c53fe19b59852ae80ae93",
       "mtime": 1790234036,
@@ -37825,6 +37860,11 @@
       "mtime": 1790234036,
       "size": 3421
     },
+    "graphify-out/cache/ast/v0.9.65-s4/644b1f00cbcb521498fc41672e2e1bf2605fd969b8b2ef0c9ac379c84ca1da7c.json": {
+      "hash": "643579e700d927b5eb2893094ebc7b2fd0e38e77c395acdb9e55fc312a1d83cb",
+      "mtime": 1792383461,
+      "size": 4882
+    },
     "graphify-out/cache/ast/v0.9.65-s4/6ce4d97536c711bc716d6179df047861a9af66322cc634d543f30750acc170b6.json": {
       "hash": "591ecc77e98d0f4ca24db4bef74552edb2ba56ce4f2f502d3d5d5f6b1c705fc4",
       "mtime": 1790264488,
@@ -37834,6 +37874,11 @@
       "hash": "26613f7e1c563fedc5534c9461cfab63fbd048a45fd499da2c2697d2bdcb70a2",
       "mtime": 1790124202,
       "size": 186
+    },
+    "graphify-out/cache/ast/v0.9.65-s4/768e11797403340a2767c1dd498683a23d9be4bfbe8a7fc39b82f6ec1eca893b.json": {
+      "hash": "1fe46ddb416bef5601ca723992f9446faef04142371b13959bfbf8b28666faa9",
+      "mtime": 1792383461,
+      "size": 656
     },
     "graphify-out/cache/ast/v0.9.65-s4/7ba46113ac0da34fc9a53f14eb257921688da1ec0a26b920f3986ac06a484e27.json": {
       "hash": "97a187d60dfd572b44fd77e963423ab7aca0540b01af38fbb5fd41fcbddedc2f",
@@ -37860,6 +37905,11 @@
       "mtime": 1790264488,
       "size": 1993
     },
+    "graphify-out/cache/ast/v0.9.65-s4/91bd947a096be5a328e561128a42c1f463c41642c9a5366ec2881195578ec8ba.json": {
+      "hash": "e63fd997e4e20c7e8b5f1a9977361c5ca1665a0d7092c9967c62f1db34c4f183",
+      "mtime": 1792383462,
+      "size": 19219
+    },
     "graphify-out/cache/ast/v0.9.65-s4/955e936b7900cb502f9698de37154a0be20c7d0d640115bbc1fec0b8808993a2.json": {
       "hash": "f6713000cc463d2fbf1b5356b7e520e34c19a9cbb55a5718db03aa29b46a7252",
       "mtime": 1790264488,
@@ -37875,6 +37925,11 @@
       "mtime": 1790234036,
       "size": 4999
     },
+    "graphify-out/cache/ast/v0.9.65-s4/bdabae13c2941ff673e5c4683160b2f8870d6207dd58e848a5849d498dfdd7ac.json": {
+      "hash": "dd92d1861f055c45a0861dbcd057455d6ba5e96f0be284e04d9d6118666c19af",
+      "mtime": 1792383462,
+      "size": 14246
+    },
     "graphify-out/cache/ast/v0.9.65-s4/c558c40c85d90679f61bb5c3e772f690cca5bcdac56508512623273a59c5d708.json": {
       "hash": "e5075b199925103f99ddc62e724f254c9bbe0bf4942f126b4bbc1ed774ec533b",
       "mtime": 1790124202,
@@ -37889,6 +37944,16 @@
       "hash": "0435f659d788876761dddaedb0df5fe5c29b60151422fc37ed5d7242a19930af",
       "mtime": 1790124202,
       "size": 192
+    },
+    "graphify-out/cache/ast/v0.9.65-s4/d3657aa9590a6ac62d6815c5e0a755c47aff5d4644c8c34a652617244b187e03.json": {
+      "hash": "089f82680d26f9205d6e0b01a8b71aa7cdd1109bf3dc4dbd1e119612c2174e34",
+      "mtime": 1792383462,
+      "size": 831
+    },
+    "graphify-out/cache/ast/v0.9.65-s4/d54040608b14cc7d5b5a9923d5c8859bbf65dec206ae7a107ea282edcc74c2a0.json": {
+      "hash": "0cce93fc8e26d9259916c1e5b3436dd7f17d0beba82788d6d037a3e95de86ec4",
+      "mtime": 1792383462,
+      "size": 4899
     },
     "graphify-out/cache/ast/v0.9.65-s4/d9f55ec1b3094daf9f9b7eb83653dc366426ce3527a7a5c9e0937ea63a16986b.json": {
       "hash": "abb5e857ebc39ea7032b6b9309e133f48885cec906ad33885efeb516d3a1152b",
@@ -37920,15 +37985,20 @@
       "mtime": 1790124202,
       "size": 184
     },
+    "graphify-out/cache/ast/v0.9.65-s4/fc9a033855cbb9dc70d79142fa6c6c15f6a8e87374af2150f14d1cdc0d83e6b1.json": {
+      "hash": "9c1529f96daf58e067932bdc9012925161f9f6f213b6d64190487eca94c9f467",
+      "mtime": 1792383462,
+      "size": 33918
+    },
     "graphify-out/cache/last_query_stamp": {
       "hash": "af2ef5a9da732488c9a7130ecfc8985181461d50ba2f41ea4a97652fa5a19745",
       "mtime": 1790178643,
       "size": 17
     },
     "graphify-out/cache/stat-index.json": {
-      "hash": "ca6f616c0caf033ed1a8a70c795f073867ba2f13d60de7fc9fe72b9757ff9b3d",
-      "mtime": 1790264488,
-      "size": 8964
+      "hash": "be42f0ff6f31e9e3b1795214462086cb329de8605349fb2354238f019109a7d0",
+      "mtime": 1792383466,
+      "size": 13656
     },
     "graphify-out/graph.html": {
       "hash": "2871d47049dea0b5593e6c7d7f15e3368a5ab8b6de8955b8618195d878aa1b95",
@@ -37936,14 +38006,14 @@
       "size": 98462
     },
     "graphify-out/graph.json": {
-      "hash": "e82c22beb394c35fb4661db0e01df9ab7e4d72c2e5b31aac61b7580e53c3f0f3",
-      "mtime": 1790264488,
-      "size": 93859
+      "hash": "99b276d985c402f10b01151585ea46c2e125fc7aa4848bf8cd34ee1ce3fbfad1",
+      "mtime": 1792383466,
+      "size": 150291
     },
     "graphify-out/manifest.json": {
-      "hash": "09e591955f338f8354f3af692642b514b506e4cebbe877a9d68ecebb343e246c",
-      "mtime": 1790264488,
-      "size": 7633
+      "hash": "fb2fccb8f9b3baf9ae6a613a016c0a08e45eed2c90f91419b592938c12192e24",
+      "mtime": 1792383466,
+      "size": 9637
     },
     "graphify_output.json": {
       "hash": "b66527f7fdcbc16c7f3c35dc9cf961d9cbed8656c2eeaa50ba7621fc8bc67738",
@@ -37951,9 +38021,9 @@
       "size": 37526
     },
     "notebooks/Action Detection Refined_noholistic.ipynb": {
-      "hash": "6bfffec1c6e49adf397d3c822c395c133282a4a9c8ae0b1ee42b763cc1e5cb11",
-      "mtime": 1790265442,
-      "size": 29120
+      "hash": "01856c0658e3738a29511a12d31280ab0cc1a4f27b7accf95ba03578432a90d1",
+      "mtime": 1792091888,
+      "size": 401584
     },
     "notebooks/data/models/production/action.h5": {
       "hash": "3a353d7ed2cd62987f018be087bbc74ae5482876adb8fc11dc0968ca60c9de12",
@@ -38126,6 +38196,6 @@
       "size": 2088
     }
   },
-  "generated_at": "2026-10-10T07:30:17Z",
+  "generated_at": "2026-10-22T15:48:47Z",
   "root": "C:\\Users\\user\\Documents\\GitHub\\SignSpeakPH"
 }

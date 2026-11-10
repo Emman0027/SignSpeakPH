@@ -1,7 +1,152 @@
 {
   "communities": {
     "0": [
+      "app",
+      "app_add_security_headers",
+      "app_after_request",
+      "app_before_request",
+      "app_decode_base64_image",
+      "app_delete_feedback",
+      "app_get_config",
+      "app_get_signs",
+      "app_handle_feedback",
+      "app_health",
+      "app_index",
+      "app_metrics",
+      "app_predict_batch",
+      "app_rationale_1",
+      "app_rationale_164",
+      "app_rationale_194",
+      "app_rationale_202",
+      "app_rationale_211",
+      "app_rationale_218",
+      "app_rationale_281",
+      "app_rationale_346",
+      "app_rationale_404",
+      "app_update_feedback",
+      "base64",
+      "exempt",
+      "flask",
+      "flask_cors",
+      "flask_limiter",
+      "flask_limiter_util",
+      "logging",
+      "prometheus_client",
+      "route",
+      "sentry_sdk",
+      "sentry_sdk_integrations_flask",
+      "tflite_runtime_interpreter"
+    ],
+    "1": [
+      "cv2",
+      "mediapipe",
+      "numpy",
+      "src_utils_mediapipe_utils",
+      "src_utils_mediapipe_utils_create_models",
+      "src_utils_mediapipe_utils_extract_keypoints",
+      "src_utils_mediapipe_utils_mediapipe_detection",
+      "src_utils_mediapipe_utils_rationale_1",
+      "src_utils_mediapipe_utils_rationale_30",
+      "src_utils_mediapipe_utils_rationale_46",
+      "src_utils_mediapipe_utils_rationale_57",
+      "tests_unit_test_mediapipe_utils",
+      "tests_unit_test_mediapipe_utils_rationale_14",
+      "tests_unit_test_mediapipe_utils_rationale_158",
+      "tests_unit_test_mediapipe_utils_rationale_27",
+      "tests_unit_test_mediapipe_utils_rationale_51",
+      "tests_unit_test_mediapipe_utils_rationale_72",
+      "tests_unit_test_mediapipe_utils_test_create_models",
+      "tests_unit_test_mediapipe_utils_test_extract_keypoints_no_detection",
+      "tests_unit_test_mediapipe_utils_test_extract_keypoints_shape_consistency",
+      "tests_unit_test_mediapipe_utils_test_extract_keypoints_with_detection",
+      "tests_unit_test_mediapipe_utils_test_mediapipe_detection"
+    ],
+    "2": [
       "argparse",
+      "json",
+      "os",
+      "pathlib",
+      "scripts_export_tflite",
+      "scripts_export_tflite_find_h5",
+      "scripts_export_tflite_main",
+      "scripts_export_tflite_rationale_1",
+      "scripts_export_tflite_read_version",
+      "src_config_settings",
+      "src_config_settings_get_version",
+      "src_config_settings_load_model_config",
+      "src_config_settings_rationale_14",
+      "src_constants",
+      "src_constants_rationale_1",
+      "tensorflow",
+      "tests_unit_test_signs",
+      "tests_unit_test_signs_rationale_1",
+      "tests_unit_test_signs_test_sign_info_matches_model_labels",
+      "tests_unit_test_signs_test_signs_endpoint_returns_guide_entries",
+      "tf_keras"
+    ],
+    "3": [
+      "tests_unit_test_endpoints",
+      "tests_unit_test_endpoints_client",
+      "tests_unit_test_endpoints_py_fixture",
+      "tests_unit_test_endpoints_rationale_17",
+      "tests_unit_test_endpoints_rationale_25",
+      "tests_unit_test_endpoints_rationale_35",
+      "tests_unit_test_endpoints_rationale_53",
+      "tests_unit_test_endpoints_rationale_62",
+      "tests_unit_test_endpoints_rationale_76",
+      "tests_unit_test_endpoints_rationale_87",
+      "tests_unit_test_endpoints_rationale_97",
+      "tests_unit_test_endpoints_test_feedback_delete_nonexistent",
+      "tests_unit_test_endpoints_test_feedback_post_invalid_rating",
+      "tests_unit_test_endpoints_test_feedback_post_missing_data",
+      "tests_unit_test_endpoints_test_feedback_post_valid_data",
+      "tests_unit_test_endpoints_test_feedback_put_nonexistent",
+      "tests_unit_test_endpoints_test_index_route",
+      "tests_unit_test_endpoints_test_predict_batch_no_images",
+      "tests_unit_test_endpoints_test_predict_batch_wrong_length"
+    ],
+    "4": [
+      "docs_structure",
+      "docs_structure_1_separation_of_concerns",
+      "docs_structure_2_improved_configuration_management",
+      "docs_structure_3_enhanced_ml_workflow",
+      "docs_structure_4_better_development_workflow",
+      "docs_structure_directory_structure",
+      "docs_structure_feedback_storage",
+      "docs_structure_getting_started",
+      "docs_structure_key_improvements",
+      "docs_structure_model_management",
+      "docs_structure_notes",
+      "docs_structure_overview",
+      "docs_structure_signspeakph_project_structure"
+    ],
+    "5": [
+      "pytest",
+      "sys",
+      "tests_conftest",
+      "tests_unit_test_config_and_feedback_id",
+      "tests_unit_test_config_and_feedback_id_client",
+      "tests_unit_test_config_and_feedback_id_py_fixture",
+      "tests_unit_test_config_and_feedback_id_rationale_1",
+      "tests_unit_test_config_and_feedback_id_stored",
+      "tests_unit_test_config_and_feedback_id_test_config_returns_server_threshold",
+      "tests_unit_test_config_and_feedback_id_test_post_feedback_returns_id_of_new_entry",
+      "tests_unit_test_config_and_feedback_id_test_returned_id_works_for_put_and_delete"
+    ],
+    "6": [
+      "yuki_dori_briefing",
+      "yuki_dori_briefing_date_y_m_d_h_m_s",
+      "yuki_dori_briefing_project_index_md_example_signspeakph",
+      "yuki_dori_briefing_project_overview",
+      "yuki_dori_briefing_project_status_project_dori",
+      "yuki_dori_briefing_quick_reference",
+      "yuki_dori_briefing_recent_changes",
+      "yuki_dori_briefing_today_s_focus_from_todos",
+      "yuki_dori_briefing_yuki_dori_session_briefing",
+      "yuki_dori_briefing_yuki_systems_ready",
+      "yuki_dori_briefing_yyyy_mm_dd"
+    ],
+    "7": [
       "hashlib",
       "scripts_scan_index",
       "scripts_scan_index_fingerprint",
@@ -10,114 +155,151 @@
       "scripts_scan_index_rationale_2",
       "scripts_scan_index_sha256_of",
       "scripts_scan_index_walk_repo",
-      "sys"
-    ],
-    "1": [
-      "app_delete_feedback",
-      "app_handle_feedback",
-      "app_index",
-      "app_rationale_159",
-      "app_rationale_214",
-      "app_rationale_272",
-      "app_update_feedback",
-      "route"
-    ],
-    "2": [
-      "app",
-      "app_rationale_1",
-      "base64",
-      "flask",
-      "tensorflow",
-      "tflite_runtime_interpreter",
       "time"
     ],
-    "3": [
-      "config_settings",
-      "config_settings_load_model_config",
-      "config_settings_rationale_1",
-      "config_settings_rationale_43",
-      "json",
-      "os",
-      "pathlib"
+    "8": [
+      "ai_context_project_index",
+      "ai_context_project_index_decisions_log",
+      "ai_context_project_index_key_files_folders_what_each_is_for_not_what_s_inside_it",
+      "ai_context_project_index_known_limitations_don_t_re_discover_these_they_re_already_known",
+      "ai_context_project_index_model_architecture_stable_rarely_needs_re_reading",
+      "ai_context_project_index_project_index_md_example_signspeakph",
+      "ai_context_project_index_tech_stack",
+      "ai_context_project_index_what_this_is"
     ],
-    "4": [
-      "app_decode_base64_image",
-      "app_predict_batch",
-      "app_rationale_80",
-      "app_rationale_96",
-      "src_utils_mediapipe_utils_mediapipe_detection",
-      "src_utils_mediapipe_utils_rationale_46"
+    "9": [
+      "claude",
+      "claude_1_think_before_coding",
+      "claude_2_simplicity_first",
+      "claude_3_surgical_changes",
+      "claude_4_goal_driven_execution",
+      "claude_claude_md"
     ],
-    "5": [
-      "cv2",
-      "mediapipe",
-      "numpy",
-      "src_utils_mediapipe_utils",
-      "src_utils_mediapipe_utils_rationale_1"
+    "10": [
+      "readme",
+      "readme_1_copy_your_trained_files_here",
+      "readme_2_test_locally",
+      "readme_3_deploy",
+      "readme_signspeakph_batch_capture_version",
+      "readme_what_to_expect"
     ],
-    "6": [
+    "11": [
+      "ai_context_roadmap",
+      "ai_context_roadmap_blocked_waiting_on",
+      "ai_context_roadmap_next_steps",
+      "ai_context_roadmap_open_decisions",
+      "ai_context_roadmap_roadmap_md"
+    ],
+    "12": [
       "scripts_file_index",
       "scripts_file_index_build_index",
       "scripts_file_index_search_index",
       "scripts_file_index_sh__entry",
       "scripts_file_index_show_help"
     ],
-    "7": [
+    "13": [
+      "scripts_readme",
+      "scripts_readme_available_scripts",
+      "scripts_readme_file_index_sh",
+      "scripts_readme_scripts_directory",
+      "scripts_readme_usage"
+    ],
+    "14": [
+      "ai_context_tasks",
+      "ai_context_tasks_here_s_what_s_open",
+      "ai_context_tasks_here_s_what_you_just_finished",
+      "ai_context_tasks_tasks_md"
+    ],
+    "15": [
+      "ai_context_changelog",
+      "ai_context_changelog_changelog_md",
+      "ai_context_changelog_yyyy_mm_dd"
+    ],
+    "16": [
       "scripts_yuki_dori_ready",
       "scripts_yuki_dori_ready_sh__entry",
       "scripts_yuki_dori_ready_show_help"
     ],
-    "8": [
-      "src_utils_mediapipe_utils_create_models",
-      "src_utils_mediapipe_utils_rationale_30"
-    ],
-    "9": [
-      "src_utils_mediapipe_utils_extract_keypoints",
-      "src_utils_mediapipe_utils_rationale_57"
-    ],
-    "10": [
+    "17": [
       "yuki_status",
       "yuki_status_sh__entry"
     ],
-    "11": [
+    "18": [
       "src_api_init"
     ],
-    "12": [
+    "19": [
       "src_init"
     ],
-    "13": [
+    "20": [
       "src_models_init"
     ],
-    "14": [
+    "21": [
       "src_services_init"
     ],
-    "15": [
+    "22": [
       "src_utils_init"
     ]
   },
   "cohesion": {
-    "0": 0.28888888888888886,
-    "1": 0.25,
-    "2": 0.2857142857142857,
-    "3": 0.2857142857142857,
-    "4": 0.3333333333333333,
-    "5": 0.4,
-    "6": 0.7,
-    "7": 1.0,
-    "8": 1.0,
-    "9": 1.0,
-    "10": 1.0,
-    "11": 1.0,
-    "12": 1.0,
-    "13": 1.0,
-    "14": 1.0,
-    "15": 1.0
+    "0": 0.0773109243697479,
+    "1": 0.12987012987012986,
+    "2": 0.11904761904761904,
+    "3": 0.10526315789473684,
+    "4": 0.15384615384615385,
+    "5": 0.21818181818181817,
+    "6": 0.18181818181818182,
+    "7": 0.3333333333333333,
+    "8": 0.25,
+    "9": 0.3333333333333333,
+    "10": 0.3333333333333333,
+    "11": 0.4,
+    "12": 0.7,
+    "13": 0.4,
+    "14": 0.5,
+    "15": 0.6666666666666666,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0,
+    "21": 1.0,
+    "22": 1.0
   },
   "gods": [
+    {
+      "id": "docs_structure_signspeakph_project_structure",
+      "label": "SignSpeakPH Project Structure",
+      "degree": 8
+    },
+    {
+      "id": "ai_context_project_index_project_index_md_example_signspeakph",
+      "label": "PROJECT_INDEX.md \u2014 example (SignSpeakPH)",
+      "degree": 7
+    },
+    {
+      "id": "src_utils_mediapipe_utils_extract_keypoints",
+      "label": "extract_keypoints()",
+      "degree": 6
+    },
+    {
+      "id": "yuki_dori_briefing_date_y_m_d_h_m_s",
+      "label": "$(date '+%Y-%m-%d %H:%M:%S')",
+      "degree": 6
+    },
     {
       "id": "app_predict_batch",
       "label": "predict_batch()",
       "degree": 6
+    },
+    {
+      "id": "readme_signspeakph_batch_capture_version",
+      "label": "SignSpeakPH - Batch capture version",
+      "degree": 5
+    },
+    {
+      "id": "docs_structure_key_improvements",
+      "label": "Key Improvements",
+      "degree": 5
     },
     {
       "id": "scripts_scan_index_main",
@@ -125,44 +307,14 @@
       "degree": 4
     },
     {
+      "id": "src_utils_mediapipe_utils_create_models",
+      "label": "create_models()",
+      "degree": 4
+    },
+    {
       "id": "src_utils_mediapipe_utils_mediapipe_detection",
       "label": "mediapipe_detection()",
       "degree": 4
-    },
-    {
-      "id": "src_utils_mediapipe_utils_extract_keypoints",
-      "label": "extract_keypoints()",
-      "degree": 4
-    },
-    {
-      "id": "scripts_file_index_sh__entry",
-      "label": "file_index.sh script",
-      "degree": 4
-    },
-    {
-      "id": "scripts_scan_index_fingerprint",
-      "label": "fingerprint()",
-      "degree": 3
-    },
-    {
-      "id": "app_delete_feedback",
-      "label": "delete_feedback()",
-      "degree": 3
-    },
-    {
-      "id": "app_handle_feedback",
-      "label": "handle_feedback()",
-      "degree": 3
-    },
-    {
-      "id": "app_update_feedback",
-      "label": "update_feedback()",
-      "degree": 3
-    },
-    {
-      "id": "app_decode_base64_image",
-      "label": "decode_base64_image()",
-      "degree": 3
     }
   ],
   "surprises": [
@@ -186,29 +338,44 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "test_create_models()",
+      "target": "create_models()",
+      "source_files": [
+        "tests/unit/test_mediapipe_utils.py",
+        "src/utils/mediapipe_utils.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "test_mediapipe_detection()",
+      "target": "create_models()",
+      "source_files": [
+        "tests/unit/test_mediapipe_utils.py",
+        "src/utils/mediapipe_utils.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "test_extract_keypoints_no_detection()",
+      "target": "extract_keypoints()",
+      "source_files": [
+        "tests/unit/test_mediapipe_utils.py",
+        "src/utils/mediapipe_utils.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
       "why": "connects across different repos/directories"
     }
   ],
-  "questions": [
-    {
-      "type": "bridge_node",
-      "question": "Why does `predict_batch()` connect `predict_batch` to `route`, `app.py`, `extract_keypoints`?",
-      "why": "High betweenness centrality (0.035) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `delete_feedback()` connect `route` to `app.py`?",
-      "why": "High betweenness centrality (0.028) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `handle_feedback()` connect `route` to `app.py`?",
-      "why": "High betweenness centrality (0.028) - this node is a cross-community bridge."
-    },
-    {
-      "type": "isolated_nodes",
-      "question": "What connects `yuki_status.sh script` to the rest of the system?",
-      "why": "1 weakly-connected nodes found - possible documentation gaps or missing edges."
-    }
-  ]
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
 }
