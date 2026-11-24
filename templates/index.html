@@ -537,6 +537,12 @@
         <div class="sign-card">
           <h3>${s.display}</h3>
           ${s.description ? `<p>${s.description}</p>` : ''}
+          ${s.gif ? `
+            <img class="sign-gif"
+                 src="${s.gif}"
+                 alt="How to perform the ${s.display} sign"
+                 loading="lazy">
+          ` : ''}
         </div>
       `).join('');
     }
