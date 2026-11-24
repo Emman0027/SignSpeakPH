@@ -397,3 +397,16 @@ button:focus-visible, input:focus-visible, [contenteditable]:focus-visible {
 #feedbackActions button:hover {
   opacity: 0.9;
 }
+
+/* Instructional GIFs in the Learn the Signs guide */
+.sign-gif {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  max-height: 260px;
+  height: auto;
+  object-fit: contain;
+  margin: 12px auto 0;
+  border-radius: 8px;
+  background: var(--bg);
+}
