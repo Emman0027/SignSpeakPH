@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
+from contextlib import contextmanager
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -41,10 +42,18 @@ class LearningStore:
         self.samples_dir.mkdir(parents=True, exist_ok=True)
         self._initialize_database()
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self):
         connection = sqlite3.connect(self.database_path, timeout=10)
         connection.row_factory = sqlite3.Row
-        return connection
+        try:
+            yield connection
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
 
     def _initialize_database(self) -> None:
         with self._connect() as connection:
