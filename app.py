@@ -319,12 +319,14 @@ def predict_batch():
 @limiter.limit("10 per hour")
 def submit_correction_sample():
     """Save a user-confirmed correction as a local, unreviewed training sample."""
-    payload = request.get_json(silent=True) or {}
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({"error": "a JSON object is required"}), 400
     try:
         correct_label = learning_store.validate_label(payload.get("correct_label"))
         predicted_label = learning_store.validate_label(payload.get("predicted_label"))
-        if correct_label not in ACTIONS:
-            raise LearningStoreError("correct_label must be an existing model sign")
+        if correct_label not in ACTIONS or correct_label in PROHIBITED_SIGNS:
+            raise LearningStoreError("correct_label must be an allowed existing model sign")
         if predicted_label not in ACTIONS:
             raise LearningStoreError("predicted_label must be an existing model sign")
         if correct_label == predicted_label:
