@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from contextlib import contextmanager
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -136,7 +136,9 @@ class LearningStore:
                 raise LearningStoreError("confidence must be between 0 and 1")
         if description is not None:
             if not isinstance(description, str) or len(description) > 300:
-                raise LearningStoreError("description must be text up to 300 characters")
+                raise LearningStoreError(
+                    "description must be text up to 300 characters"
+                )
             description = description.strip() or None
         if not isinstance(share_consent, bool):
             raise LearningStoreError("share_consent must be a boolean")
