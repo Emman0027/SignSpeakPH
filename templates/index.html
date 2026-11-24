@@ -553,6 +553,7 @@
       const tag = document.activeElement.tagName;
       const isEditable = document.activeElement.isContentEditable;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || isEditable) return;
+      if (document.querySelector('.modal-overlay[style*="display: flex"]')) return;
       e.preventDefault();
       toggleRunning();
     });
