@@ -95,6 +95,7 @@ from src.config.settings import (
 from src.constants import SIGN_INFO
 from src.utils.mediapipe_utils import create_models  # noqa: E402
 from src.utils.mediapipe_utils import extract_keypoints, mediapipe_detection
+from src.services.learning_store import LearningStore, LearningStoreError
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -109,7 +110,14 @@ with open(LABELS_PATH, "r") as f:
 with open(CONFIG_PATH, "r") as f:
     CONFIG = json.load(f)
 
+learning_store = LearningStore(
+    os.path.join(BASE_DIR, "data", "learning"),
+    sequence_length=SEQUENCE_LENGTH,
+    num_features=CONFIG.get("num_features", 258),
+)
+
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024
 
 # Initialize CORS
 CORS(app)
@@ -168,6 +176,37 @@ def decode_base64_image(data_url):
     np_arr = np.frombuffer(img_bytes, dtype=np.uint8)
     frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
     return frame
+
+
+def extract_learning_sequence(images):
+    """Extract the same 30x258 Pose+Hands features used by live inference."""
+    if not isinstance(images, list) or len(images) != SEQUENCE_LENGTH:
+        raise LearningStoreError(
+            f"images must contain exactly {SEQUENCE_LENGTH} frames"
+        )
+
+    sequence = []
+    for data_url in images:
+        if not isinstance(data_url, str) or not data_url.startswith("data:image/"):
+            raise LearningStoreError("each frame must be a base64 image data URL")
+        try:
+            frame = decode_base64_image(data_url)
+        except (ValueError, TypeError, base64.binascii.Error) as exc:
+            raise LearningStoreError("could not decode an image frame") from exc
+        if frame is None:
+            raise LearningStoreError("could not decode an image frame")
+        _, results = mediapipe_detection(frame, models)
+        sequence.append(extract_keypoints(results))
+
+    return learning_store.validate_sequence(sequence)
+
+
+def _learning_consent(payload):
+    consent = payload.get("share_consent", False)
+    if not isinstance(consent, bool):
+        raise LearningStoreError("share_consent must be a boolean")
+    return consent
+
 
 
 # Security headers
@@ -274,6 +313,71 @@ def predict_batch():
     if confidence > THRESHOLD:
         return jsonify({"text": ACTIONS[idx], "confidence": confidence})
     return jsonify({"text": "", "confidence": confidence})
+
+
+@app.route("/learning/correct", methods=["POST"])
+@limiter.limit("10 per hour")
+def submit_correction_sample():
+    """Save a user-confirmed correction as a local, unreviewed training sample."""
+    payload = request.get_json(silent=True) or {}
+    try:
+        correct_label = learning_store.validate_label(payload.get("correct_label"))
+        predicted_label = learning_store.validate_label(payload.get("predicted_label"))
+        if correct_label not in ACTIONS:
+            raise LearningStoreError("correct_label must be an existing model sign")
+        if predicted_label not in ACTIONS:
+            raise LearningStoreError("predicted_label must be an existing model sign")
+        if correct_label == predicted_label:
+            raise LearningStoreError("correct_label must differ from predicted_label")
+
+        sequence = extract_learning_sequence(payload.get("images"))
+        sample = learning_store.save_sample(
+            sequence=sequence,
+            sample_kind="correction",
+            label=correct_label,
+            predicted_label=predicted_label,
+            confidence=payload.get("confidence"),
+            share_consent=_learning_consent(payload),
+        )
+        return jsonify({"status": "saved", "sample": sample}), 201
+    except LearningStoreError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except Exception:
+        logger.exception("Failed to save correction sample")
+        return jsonify({"error": "could not save learning sample"}), 500
+
+
+@app.route("/learning/teach", methods=["POST"])
+@limiter.limit("10 per hour")
+def submit_new_sign_sample():
+    """Save a sample for a new sign; it is not added to the live model."""
+    payload = request.get_json(silent=True) or {}
+    try:
+        label = learning_store.validate_label(payload.get("label"))
+        if label in ACTIONS:
+            raise LearningStoreError("this sign already exists in the current model")
+        description = payload.get("description")
+        sequence = extract_learning_sequence(payload.get("images"))
+        sample = learning_store.save_sample(
+            sequence=sequence,
+            sample_kind="new_sign",
+            label=label,
+            description=description,
+            share_consent=_learning_consent(payload),
+        )
+        return jsonify({"status": "saved", "sample": sample}), 201
+    except LearningStoreError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except Exception:
+        logger.exception("Failed to save new-sign sample")
+        return jsonify({"error": "could not save learning sample"}), 500
+
+
+@app.route("/learning/summary")
+@limiter.exempt
+def learning_summary():
+    """Return local learning-sample counts without exposing sample contents."""
+    return jsonify(learning_store.get_summary()), 200
 
 
 @app.route("/feedback", methods=["POST"])
