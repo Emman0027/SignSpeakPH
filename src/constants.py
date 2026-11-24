@@ -27,26 +27,26 @@ SIGN_INFO = [
     {"label": "paalam", "display": "Paalam", "description": "Goodbye"},
     {"label": "tulong", "display": "Tulong", "description": "Help"},
     {
-        "label": "walang_anuman",
+        "label": "walang_anuman", "gif": "/static/gifs/walang_anuman.gif",
         "display": "Walang Anuman",
         "description": "You're welcome",
     },
     {
-        "label": "malungkot",
+        "label": "malungkot", "gif": "/static/gifs/malungkot.gif",
         "display": "Malungkot",
         "description": "Sad",
     },  # was "ingat" (Take care)
-    {"label": "gusto", "display": "Gusto", "description": "Want"},
-    {"label": "hindi_gusto", "display": "Hindi Gusto", "description": "Don't want"},
-    {"label": "tulog", "display": "Tulog", "description": "Sleep"},
-    {"label": "masaya", "display": "Masaya", "description": "Happy"},
-    {"label": "takot", "display": "Takot", "description": "Scared"},
+    {"label": "gusto", "gif": "/static/gifs/gusto.gif", "display": "Gusto", "description": "Want"},
+    {"label": "hindi_gusto", "gif": "/static/gifs/hindi_gusto.gif", "display": "Hindi Gusto", "description": "Don't want"},
+    {"label": "tulog", "gif": "/static/gifs/tulog.gif", "display": "Tulog", "description": "Sleep"},
+    {"label": "masaya", "gif": "/static/gifs/masaya.gif", "display": "Masaya", "description": "Happy"},
+    {"label": "takot", "gif": "/static/gifs/takot.gif", "display": "Takot", "description": "Scared"},
     {
-        "label": "patawad",
+        "label": "patawad", "gif": "/static/gifs/patawad.gif",
         "display": "Patawad",
         "description": "Sorry / Forgive me",
     },  # was "CR"
-    {"label": "pera", "display": "Pera", "description": "Money"},
-    {"label": "nanay", "display": "Nanay", "description": "Mother"},
-    {"label": "tatay", "display": "Tatay", "description": "Father"},
+    {"label": "pera", "gif": "/static/gifs/pera.gif", "display": "Pera", "description": "Money"},
+    {"label": "nanay", "gif": "/static/gifs/nanay.gif", "display": "Nanay", "description": "Mother"},
+    {"label": "tatay", "gif": "/static/gifs/tatay.gif", "display": "Tatay", "description": "Father"},
 ]
