@@ -29,3 +29,6 @@ graphify-out/*/cache/
 
 # Temporary/regenerable analysis files (keep reports and visualizations)
 # Keeping GRAPH_REPORT.md, graph.html, manifest.json, graph.json as they show results
+
+# User-contributed learning samples and local metadata must stay out of Git
+data/learning/
