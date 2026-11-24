@@ -93,9 +93,9 @@ from src.config.settings import (
     THRESHOLD,
 )
 from src.constants import SIGN_INFO
+from src.services.learning_store import LearningStore, LearningStoreError
 from src.utils.mediapipe_utils import create_models  # noqa: E402
 from src.utils.mediapipe_utils import extract_keypoints, mediapipe_detection
-from src.services.learning_store import LearningStore, LearningStoreError
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -326,7 +326,9 @@ def submit_correction_sample():
         correct_label = learning_store.validate_label(payload.get("correct_label"))
         predicted_label = learning_store.validate_label(payload.get("predicted_label"))
         if correct_label not in ACTIONS or correct_label in PROHIBITED_SIGNS:
-            raise LearningStoreError("correct_label must be an allowed existing model sign")
+            raise LearningStoreError(
+                "correct_label must be an allowed existing model sign"
+            )
         if predicted_label not in ACTIONS:
             raise LearningStoreError("predicted_label must be an existing model sign")
         if correct_label == predicted_label:
