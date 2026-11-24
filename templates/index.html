@@ -479,15 +479,15 @@
       busy = true;
       retryBtn.style.display = 'none';
 
-      const captureStart = performance.now();
-      const frames = await captureSequence();
-      const captureMs = Math.round(performance.now() - captureStart);
-      lastFrames = frames;
-
-      setState('processing');
-      statusText.innerText = `Captured in ${captureMs}ms - processing...`;
-
       try {
+        const captureStart = performance.now();
+        const frames = await captureSequence();
+        const captureMs = Math.round(performance.now() - captureStart);
+        lastFrames = frames;
+
+        setState('processing');
+        statusText.innerText = `Captured in ${captureMs}ms - processing...`;
+
         const { data, processMs } = await sendFrames(frames);
         handleResult(data, captureMs, processMs);
       } catch (err) {
