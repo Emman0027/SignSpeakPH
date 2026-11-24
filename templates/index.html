@@ -567,13 +567,18 @@
     let correctionSigns = null;
     let savedNewSignSamples = 0;
 
-    function pauseRecognitionForLearning() {
-      if (!running) return;
-      running = false;
-      toggleBtn.innerText = '▶ Start Signing';
-      toggleBtn.classList.remove('active');
-      statusText.innerText = 'Recognition paused for learning';
-      setState('idle');
+    async function pauseRecognitionForLearning() {
+      if (running) {
+        running = false;
+        toggleBtn.innerText = '▶ Start Signing';
+        toggleBtn.classList.remove('active');
+        statusText.innerText = 'Recognition paused for learning';
+        setState('idle');
+      }
+      // Let any in-flight recognition request finish before reusing the camera.
+      while (busy) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
     }
 
     async function loadCorrectionLabels() {
@@ -593,7 +598,7 @@
         correctionStatus.innerText = 'Wait for a recognized sign before correcting it.';
         return;
       }
-      pauseRecognitionForLearning();
+      await pauseRecognitionForLearning();
       try {
         await loadCorrectionLabels();
         document.getElementById('correctionPrompt').innerText =
@@ -640,8 +645,8 @@
       }
     });
 
-    document.getElementById('openTeachModalBtn').addEventListener('click', () => {
-      pauseRecognitionForLearning();
+    document.getElementById('openTeachModalBtn').addEventListener('click', async () => {
+      await pauseRecognitionForLearning();
       savedNewSignSamples = 0;
       teachStatus.innerText = 'Each click records one separate sample. Aim for at least 5 varied samples to start.';
       teachModal.style.display = 'flex';
