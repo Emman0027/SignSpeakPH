@@ -397,3 +397,73 @@ button:focus-visible, input:focus-visible, [contenteditable]:focus-visible {
 #feedbackActions button:hover {
   opacity: 0.9;
 }
+
+/* Self-learning capture forms */
+.learning-btn {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 9px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  background: var(--accent-hover);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.learning-btn:hover { filter: brightness(0.96); }
+.learning-modal { max-width: 520px; }
+.learning-body {
+  padding: 16px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+.learning-body > label:not(.learning-consent) {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 4px;
+}
+.learning-hint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.learning-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--card-bg);
+  color: var(--text);
+  font: inherit;
+}
+.learning-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.learning-consent input { margin-top: 2px; }
+.learning-status {
+  min-height: 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.learning-submit {
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--accent);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.learning-submit:disabled { opacity: 0.6; cursor: wait; }
