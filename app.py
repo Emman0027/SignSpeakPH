@@ -353,7 +353,9 @@ def submit_correction_sample():
 @limiter.limit("10 per hour")
 def submit_new_sign_sample():
     """Save a sample for a new sign; it is not added to the live model."""
-    payload = request.get_json(silent=True) or {}
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({"error": "a JSON object is required"}), 400
     try:
         label = learning_store.validate_label(payload.get("label"))
         if label in ACTIONS:
