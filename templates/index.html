@@ -17,6 +17,7 @@
         <button id="themeToggleBtn" class="icon-btn" aria-label="Toggle dark and light theme" title="Toggle theme">🌙</button>
         <button id="openSettingsBtn" class="guide-btn" aria-label="Open recognition settings" aria-haspopup="dialog">⚙ Settings</button>
         <button id="openGuideBtn" class="guide-btn" aria-label="Open sign language guide" aria-haspopup="dialog">📖 Learn the Signs</button>
+        <button id="openTeachModalBtn" class="guide-btn" aria-haspopup="dialog">＋ Teach a Sign</button>
       </div>
     </div>
   </header>
@@ -74,6 +75,7 @@
           <span class="star" data-rating="5">&#9733;</span>
         </div>
         <p id="feedbackStatus" style="margin: 12px 0 0; font-size: 14px; color: #666; min-height: 20px;"></p>
+        <button id="openCorrectionBtn" class="learning-btn" type="button">✎ Correct this prediction</button>
         <div id="feedbackActions" style="margin-top: 12px; text-align: center; display: none;">
           <button id="editFeedbackBtn" class="feedback-btn" style="background: #2196F3; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 8px;">Edit</button>
           <button id="deleteFeedbackBtn" class="feedback-btn" style="background: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Delete</button>
@@ -115,6 +117,50 @@
         </label>
         <input type="range" id="thresholdSlider" min="0" max="100" value="70" aria-label="Confidence threshold percentage">
         <p class="settings-hint">Lower this to accept less-certain guesses; raise it to require higher confidence before a sign is recognized.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Correction modal -->
+  <div id="correctionModal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Correct recognized sign">
+    <div class="modal learning-modal">
+      <div class="modal-header">
+        <h2>Correct this prediction</h2>
+        <button id="closeCorrectionBtn" class="close-btn" aria-label="Close correction form">✕</button>
+      </div>
+      <div class="learning-body">
+        <p id="correctionPrompt" class="learning-hint"></p>
+        <label for="correctLabelSelect">What was the correct sign?</label>
+        <select id="correctLabelSelect" class="learning-input"></select>
+        <label class="learning-consent">
+          <input type="checkbox" id="correctionShareConsent">
+          I agree this sample may be considered for future shared training. It will not be uploaded now.
+        </label>
+        <p id="correctionStatus" class="learning-status" role="status"></p>
+        <button id="saveCorrectionBtn" class="learning-submit" type="button">Save correction sample</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teach a new sign modal -->
+  <div id="teachModal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Teach a new sign">
+    <div class="modal learning-modal">
+      <div class="modal-header">
+        <h2>Teach SignSpeakPH a new sign</h2>
+        <button id="closeTeachModalBtn" class="close-btn" aria-label="Close new sign form">✕</button>
+      </div>
+      <div class="learning-body">
+        <p class="learning-hint">Enter a new label, then record one sample. Record several separate samples with slightly different natural performances to build a useful training set.</p>
+        <label for="newSignLabel">Sign label (example: magandang_araw)</label>
+        <input id="newSignLabel" class="learning-input" type="text" maxlength="40" placeholder="lowercase_or_underscores">
+        <label for="newSignDescription">Meaning / description (optional)</label>
+        <input id="newSignDescription" class="learning-input" type="text" maxlength="300" placeholder="What does this sign mean?">
+        <label class="learning-consent">
+          <input type="checkbox" id="newSignShareConsent">
+          I agree this sample may be considered for future shared training. It will not be uploaded now.
+        </label>
+        <p id="teachStatus" class="learning-status" role="status"></p>
+        <button id="recordNewSignBtn" class="learning-submit" type="button">Record and save sample</button>
       </div>
     </div>
   </div>
@@ -173,6 +219,8 @@
     let threshold = 0.7;
     let recentSigns = []; // {text, time}
     let lastPrediction = ""; // Track last prediction to show feedback for
+    let lastPredictionFrames = null;
+    let lastPredictionConfidence = null;
 
     function setState(state) {
       outputPanel.dataset.state = state; // 'idle' | 'recording' | 'processing' | 'error'
@@ -374,6 +422,8 @@
         prohibitedWarning.style.display = 'none';
         feedbackSection.style.display = 'block'; // Show feedback for valid predictions
         lastPrediction = data.text;
+        lastPredictionFrames = lastFrames ? [...lastFrames] : null;
+        lastPredictionConfidence = data.confidence;
 
         // Reset feedback state for new prediction
         userHasSubmittedFeedback = false;
@@ -505,6 +555,135 @@
       if (tag === 'INPUT' || tag === 'TEXTAREA' || isEditable) return;
       e.preventDefault();
       toggleRunning();
+    });
+
+    // --- User-contributed learning samples ---
+    const correctionModal = document.getElementById('correctionModal');
+    const teachModal = document.getElementById('teachModal');
+    const correctLabelSelect = document.getElementById('correctLabelSelect');
+    const correctionStatus = document.getElementById('correctionStatus');
+    const teachStatus = document.getElementById('teachStatus');
+    let correctionSigns = null;
+    let savedNewSignSamples = 0;
+
+    function pauseRecognitionForLearning() {
+      if (!running) return;
+      running = false;
+      toggleBtn.innerText = '▶ Start Signing';
+      toggleBtn.classList.remove('active');
+      statusText.innerText = 'Recognition paused for learning';
+      setState('idle');
+    }
+
+    async function loadCorrectionLabels() {
+      if (!correctionSigns) {
+        const response = await fetch('/signs');
+        if (!response.ok) throw new Error('Could not load the sign vocabulary');
+        correctionSigns = await response.json();
+      }
+      correctLabelSelect.innerHTML = correctionSigns
+        .filter(sign => sign.label !== lastPrediction)
+        .map(sign => `<option value="${sign.label}">${sign.display}</option>`)
+        .join('');
+    }
+
+    document.getElementById('openCorrectionBtn').addEventListener('click', async () => {
+      if (!lastPrediction || !lastPredictionFrames) {
+        correctionStatus.innerText = 'Wait for a recognized sign before correcting it.';
+        return;
+      }
+      pauseRecognitionForLearning();
+      try {
+        await loadCorrectionLabels();
+        document.getElementById('correctionPrompt').innerText =
+          `SignSpeakPH predicted "${lastPrediction}". Select the correct sign for this captured sequence.`;
+        correctionStatus.innerText = '';
+        correctionModal.style.display = 'flex';
+      } catch (err) {
+        correctionStatus.innerText = err.message;
+      }
+    });
+
+    document.getElementById('closeCorrectionBtn').addEventListener('click', () => {
+      correctionModal.style.display = 'none';
+    });
+    correctionModal.addEventListener('click', e => {
+      if (e.target === correctionModal) correctionModal.style.display = 'none';
+    });
+
+    document.getElementById('saveCorrectionBtn').addEventListener('click', async () => {
+      if (!lastPredictionFrames || !correctLabelSelect.value) return;
+      const button = document.getElementById('saveCorrectionBtn');
+      button.disabled = true;
+      correctionStatus.innerText = 'Extracting landmarks and saving sample...';
+      try {
+        const response = await fetch('/learning/correct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            images: lastPredictionFrames,
+            predicted_label: lastPrediction,
+            correct_label: correctLabelSelect.value,
+            confidence: lastPredictionConfidence,
+            share_consent: document.getElementById('correctionShareConsent').checked
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not save correction');
+        correctionStatus.innerText = 'Correction sample saved locally and queued for review.';
+        setTimeout(() => { correctionModal.style.display = 'none'; }, 1400);
+      } catch (err) {
+        correctionStatus.innerText = err.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    document.getElementById('openTeachModalBtn').addEventListener('click', () => {
+      pauseRecognitionForLearning();
+      savedNewSignSamples = 0;
+      teachStatus.innerText = 'Each click records one separate sample. Aim for at least 5 varied samples to start.';
+      teachModal.style.display = 'flex';
+    });
+    document.getElementById('closeTeachModalBtn').addEventListener('click', () => {
+      teachModal.style.display = 'none';
+    });
+    teachModal.addEventListener('click', e => {
+      if (e.target === teachModal) teachModal.style.display = 'none';
+    });
+
+    document.getElementById('recordNewSignBtn').addEventListener('click', async () => {
+      const label = document.getElementById('newSignLabel').value.trim().toLowerCase().replace(/\\s+/g, '_');
+      const description = document.getElementById('newSignDescription').value.trim();
+      if (!/^[a-z][a-z0-9_]{1,39}$/.test(label)) {
+        teachStatus.innerText = 'Use 2-40 lowercase letters, numbers, or underscores; start with a letter.';
+        return;
+      }
+      const button = document.getElementById('recordNewSignBtn');
+      button.disabled = true;
+      try {
+        await startCamera();
+        teachStatus.innerText = 'Recording 30 frames. Perform the sign naturally...';
+        const frames = await captureSequence();
+        const response = await fetch('/learning/teach', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            images: frames,
+            label,
+            description,
+            share_consent: document.getElementById('newSignShareConsent').checked
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not save new-sign sample');
+        savedNewSignSamples += 1;
+        teachStatus.innerText = `Saved sample ${savedNewSignSamples} for "${label}". Record another varied sample.`;
+      } catch (err) {
+        teachStatus.innerText = err.message;
+      } finally {
+        button.disabled = false;
+      }
     });
 
     // --- Sign guide modal ---
