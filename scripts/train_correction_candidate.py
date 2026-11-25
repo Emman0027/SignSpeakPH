@@ -196,13 +196,29 @@ def compare_per_class(labels, targets, baseline_predictions, candidate_predictio
 def get_base_model_path():
     pointer = CANDIDATES_DIR / "latest_candidate.json"
     if pointer.exists():
-        candidate = Path(read_json(pointer)["keras_path"])
+        candidate_info = read_json(pointer)
+        candidate = Path(candidate_info["keras_path"])
         if not candidate.is_absolute():
             candidate = ROOT / candidate
-        if candidate.exists():
-            print(f"Continuing from latest validated candidate: {candidate}")
-            return candidate
-        raise FileNotFoundError(f"Latest candidate checkpoint is missing: {candidate}")
+        manifest_path = candidate.parent / "manifest.json"
+        if not candidate.exists() or not manifest_path.exists():
+            raise FileNotFoundError(
+                f"Latest candidate checkpoint or manifest is missing: {candidate}"
+            )
+
+        manifest = read_json(manifest_path)
+        current_version = VERSION_PATH.read_text(encoding="utf-8").strip()
+        if manifest.get("status") != "validated":
+            raise ValueError("Latest candidate is not marked as validated.")
+        if manifest.get("production_version") != current_version:
+            print(
+                "Latest candidate was trained against a different production "
+                "version; restarting from the current production checkpoint."
+            )
+            return PRODUCTION_KERAS
+
+        print(f"Continuing from latest validated candidate: {candidate}")
+        return candidate
     return PRODUCTION_KERAS
 
 
