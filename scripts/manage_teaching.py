@@ -4,8 +4,8 @@ import argparse
 import json
 import math
 import re
-import shutil
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -98,8 +98,6 @@ def move_contribution(identifier, destination_dir, status):
 
     item["status"] = status
     item["review_note"] = reason
-    from datetime import datetime, timezone
-
     item["reviewed_at"] = datetime.now(timezone.utc).isoformat()
     destination_dir.mkdir(parents=True, exist_ok=True)
     destination = destination_dir / source.name
