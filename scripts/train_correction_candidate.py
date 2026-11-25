@@ -2,6 +2,7 @@
 
 This script never modifies the production Keras or TFLite model.
 """
+import errno
 import json
 import os
 import time
@@ -70,9 +71,14 @@ def load_replay_dataset(labels):
         if not class_dir.is_dir():
             raise FileNotFoundError(f"Missing production class folder: {class_dir}")
 
+        def folder_sort_key(path):
+            # Keep numeric sequence folders ordered naturally without comparing
+            # integers and strings in the same sort operation.
+            return (0, int(path.name)) if path.name.isdigit() else (1, path.name.casefold())
+
         sequence_dirs = sorted(
             [path for path in class_dir.iterdir() if path.is_dir()],
-            key=lambda path: int(path.name) if path.name.isdigit() else path.name,
+            key=folder_sort_key,
         )
         sequences = [load_sequence(path) for path in sequence_dirs]
         if len(sequences) < 10:
@@ -135,7 +141,8 @@ def load_new_corrections(labels):
     )
 
 
-def get_tflite_accuracy(model_path, x, y):
+def get_tflite_predictions(model_path, x, expected_classes):
+    """Run the TFLite model and return one predicted class index per sequence."""
     interpreter = tf.lite.Interpreter(model_path=str(model_path), num_threads=2)
     interpreter.allocate_tensors()
     input_detail = interpreter.get_input_details()[0]
@@ -143,15 +150,47 @@ def get_tflite_accuracy(model_path, x, y):
 
     if input_detail["dtype"] != np.float32:
         raise TypeError(f"Expected float32 TFLite input, got {input_detail['dtype']}")
+    if int(output_detail["shape"][-1]) != expected_classes:
+        raise ValueError(
+            f"Expected {expected_classes} output classes, got {output_detail['shape'][-1]}"
+        )
 
     predictions = []
     for sample in x:
-        interpreter.set_tensor(input_detail["index"], sample[np.newaxis, ...].astype(np.float32))
+        interpreter.set_tensor(
+            input_detail["index"], sample[np.newaxis, ...].astype(np.float32)
+        )
         interpreter.invoke()
         output = interpreter.get_tensor(output_detail["index"])[0]
         predictions.append(int(np.argmax(output)))
-    predictions = np.asarray(predictions, dtype=np.int64)
-    return float(np.mean(predictions == y))
+    return np.asarray(predictions, dtype=np.int64)
+
+
+def accuracy(predictions, targets):
+    return float(np.mean(predictions == targets))
+
+
+def compare_per_class(labels, targets, baseline_predictions, candidate_predictions):
+    """Reject a candidate that adds more than one validation error in any class."""
+    results = {}
+    failed_classes = []
+    for class_index, label in enumerate(labels):
+        mask = targets == class_index
+        sample_count = int(np.sum(mask))
+        baseline_errors = int(np.sum(baseline_predictions[mask] != targets[mask]))
+        candidate_errors = int(np.sum(candidate_predictions[mask] != targets[mask]))
+        allowed_errors = baseline_errors + 1
+        passed = candidate_errors <= allowed_errors
+        results[label] = {
+            "validation_samples": sample_count,
+            "baseline_errors": baseline_errors,
+            "candidate_errors": candidate_errors,
+            "maximum_allowed_errors": allowed_errors,
+            "passed": passed,
+        }
+        if not passed:
+            failed_classes.append(label)
+    return results, failed_classes
 
 
 def get_base_model_path():
@@ -200,7 +239,10 @@ def run_training():
     if not production_tflite.exists():
         raise FileNotFoundError(f"Production TFLite model not found: {production_tflite}")
 
-    baseline_accuracy = get_tflite_accuracy(production_tflite, validation_x, validation_y)
+    baseline_predictions = get_tflite_predictions(
+        production_tflite, validation_x, len(labels)
+    )
+    baseline_accuracy = accuracy(baseline_predictions, validation_y)
     base_model_path = get_base_model_path()
     model = tf.keras.models.load_model(base_model_path, compile=True)
 
@@ -259,9 +301,16 @@ def run_training():
     tflite_bytes = converter.convert()
     tflite_path.write_bytes(tflite_bytes)
 
-    candidate_accuracy = get_tflite_accuracy(tflite_path, validation_x, validation_y)
+    candidate_predictions = get_tflite_predictions(tflite_path, validation_x, len(labels))
+    candidate_accuracy = accuracy(candidate_predictions, validation_y)
     accuracy_drop = baseline_accuracy - candidate_accuracy
-    accepted = accuracy_drop <= MAX_VALIDATION_ACCURACY_DROP
+    per_class_results, failed_classes = compare_per_class(
+        labels, validation_y, baseline_predictions, candidate_predictions
+    )
+    accepted = (
+        accuracy_drop <= MAX_VALIDATION_ACCURACY_DROP
+        and not failed_classes
+    )
 
     manifest = {
         "candidate_id": candidate_id,
@@ -279,6 +328,8 @@ def run_training():
         "candidate_tflite_accuracy": candidate_accuracy,
         "validation_accuracy_drop": accuracy_drop,
         "maximum_allowed_drop": MAX_VALIDATION_ACCURACY_DROP,
+        "per_class_validation": per_class_results,
+        "failed_classes": failed_classes,
         "keras_path": str(keras_path.relative_to(ROOT)),
         "tflite_path": str(tflite_path.relative_to(ROOT)),
         "production_modified": False,
@@ -289,6 +340,14 @@ def run_training():
     print(f"Allowed accuracy drop: {MAX_VALIDATION_ACCURACY_DROP:.4f}")
     if not accepted:
         print("Candidate REJECTED. Production model was not changed.")
+        if accuracy_drop > MAX_VALIDATION_ACCURACY_DROP:
+            print(
+                f"Overall accuracy drop {accuracy_drop:.4f} exceeds "
+                f"the allowed {MAX_VALIDATION_ACCURACY_DROP:.4f}."
+            )
+        if failed_classes:
+            print("Per-class regression guard failed for: " + ", ".join(failed_classes))
+        print(f"Evaluation report: {candidate_dir / 'manifest.json'}")
         return
 
     write_json(
@@ -305,22 +364,65 @@ def run_training():
     print(f"Review report: {candidate_dir / 'manifest.json'}")
 
 
-def main():
+def process_is_running(pid):
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        # The process exists, but this account cannot signal it.
+        return True
+    except OSError as error:
+        if error.errno == errno.ESRCH:
+            return False
+        # Treat ambiguous OS errors conservatively: never remove a possibly
+        # active training lock.
+        return True
+
+
+def acquire_training_lock():
     LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
     try:
         descriptor = os.open(str(LOCK_PATH), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
     except FileExistsError:
-        if time.time() - LOCK_PATH.stat().st_mtime > 6 * 60 * 60:
-            LOCK_PATH.unlink(missing_ok=True)
+        try:
+            lock_text = LOCK_PATH.read_text(encoding="ascii").strip()
+            lock_pid = int(lock_text)
+        except (OSError, ValueError):
+            lock_pid = None
+
+        if lock_pid is not None and process_is_running(lock_pid):
+            raise SystemExit(
+                f"Mini-training is already running (PID {lock_pid}; {LOCK_PATH})."
+            )
+
+        # A malformed lock is only considered stale after six hours. A valid
+        # PID is removed only after the operating system confirms it is gone.
+        age_seconds = time.time() - LOCK_PATH.stat().st_mtime
+        if lock_pid is None and age_seconds <= 6 * 60 * 60:
+            raise SystemExit("Training lock exists but its owner cannot be verified.")
+        LOCK_PATH.unlink(missing_ok=True)
+        try:
             descriptor = os.open(str(LOCK_PATH), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-        else:
-            raise SystemExit("Mini-training is already running (training.lock exists).")
+        except FileExistsError:
+            raise SystemExit("Another mini-training process acquired the lock.")
+
+    with os.fdopen(descriptor, "w", encoding="ascii") as lock_file:
+        lock_file.write(str(os.getpid()))
+
+
+def main():
+    acquire_training_lock()
     try:
-        os.write(descriptor, str(os.getpid()).encode("ascii"))
-        os.close(descriptor)
         run_training()
     finally:
-        LOCK_PATH.unlink(missing_ok=True)
+        try:
+            owner_pid = int(LOCK_PATH.read_text(encoding="ascii").strip())
+        except (OSError, ValueError):
+            owner_pid = None
+        if owner_pid == os.getpid():
+            LOCK_PATH.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
