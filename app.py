@@ -28,8 +28,10 @@ import base64
 import json
 import logging
 import os
+import re
 import sys
 import time
+import unicodedata
 import uuid
 
 # MediaPipe tries GPU/EGL acceleration by default and silently falls back
@@ -89,6 +91,7 @@ from src.config.settings import (
     CONFIG_PATH,
     LABELS_PATH,
     MODEL_PATH,
+    NUM_FEATURES,
     PROHIBITED_SIGNS,
     SEQUENCE_LENGTH,
     THRESHOLD,
