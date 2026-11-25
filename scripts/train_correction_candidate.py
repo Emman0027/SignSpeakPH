@@ -6,6 +6,7 @@ import errno
 import json
 import os
 import time
+import uuid
 from pathlib import Path
 
 import numpy as np
@@ -306,7 +307,7 @@ def run_training():
         verbose=2,
     )
 
-    candidate_id = time.strftime("candidate_%Y%m%d_%H%M%S", time.gmtime())
+    candidate_id = time.strftime("candidate_%Y%m%d_%H%M%S", time.gmtime()) + "_" + uuid.uuid4().hex[:8]
     candidate_dir = CANDIDATES_DIR / candidate_id
     candidate_dir.mkdir(parents=True, exist_ok=False)
     keras_path = candidate_dir / "action.keras"
@@ -381,13 +382,32 @@ def run_training():
 
 
 def process_is_running(pid):
+    if os.name == "nt":
+        # os.kill(pid, 0) is not a reliable process-existence probe on every
+        # Windows/Python combination. Query the process handle instead.
+        import ctypes
+
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        open_process = kernel32.OpenProcess
+        open_process.argtypes = [ctypes.c_ulong, ctypes.c_int, ctypes.c_ulong]
+        open_process.restype = ctypes.c_void_p
+        handle = open_process(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not handle:
+            return ctypes.get_last_error() == 5  # Access denied means it exists.
+        try:
+            exit_code = ctypes.c_ulong()
+            if not kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+                return True
+            return exit_code.value == 259  # STILL_ACTIVE
+        finally:
+            kernel32.CloseHandle(handle)
+
     try:
         os.kill(pid, 0)
         return True
     except ProcessLookupError:
         return False
     except PermissionError:
-        # The process exists, but this account cannot signal it.
         return True
     except OSError as error:
         if error.errno == errno.ESRCH:
