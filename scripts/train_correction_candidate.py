@@ -2,6 +2,7 @@
 
 This script never modifies the production Keras or TFLite model.
 """
+
 import errno
 import json
 import os
@@ -51,9 +52,14 @@ def load_sequence(sequence_dir):
         frame_files.sort()
 
     if len(frame_files) != 30:
-        raise ValueError(f"{sequence_dir}: expected 30 .npy frames, found {len(frame_files)}")
+        raise ValueError(
+            f"{sequence_dir}: expected 30 .npy frames, found {len(frame_files)}"
+        )
 
-    frames = [np.asarray(np.load(path, allow_pickle=False), dtype=np.float32) for path in frame_files]
+    frames = [
+        np.asarray(np.load(path, allow_pickle=False), dtype=np.float32)
+        for path in frame_files
+    ]
     sequence = np.stack(frames)
     if sequence.shape != (30, 258):
         raise ValueError(f"{sequence_dir}: expected (30, 258), got {sequence.shape}")
@@ -75,7 +81,11 @@ def load_replay_dataset(labels):
         def folder_sort_key(path):
             # Keep numeric sequence folders ordered naturally without comparing
             # integers and strings in the same sort operation.
-            return (0, int(path.name)) if path.name.isdigit() else (1, path.name.casefold())
+            return (
+                (0, int(path.name))
+                if path.name.isdigit()
+                else (1, path.name.casefold())
+            )
 
         sequence_dirs = sorted(
             [path for path in class_dir.iterdir() if path.is_dir()],
@@ -83,7 +93,9 @@ def load_replay_dataset(labels):
         )
         sequences = [load_sequence(path) for path in sequence_dirs]
         if len(sequences) < 10:
-            raise ValueError(f"{label}: at least 10 valid sequences are required; found {len(sequences)}")
+            raise ValueError(
+                f"{label}: at least 10 valid sequences are required; found {len(sequences)}"
+            )
 
         indices = rng.permutation(len(sequences))
         validation_count = max(1, round(len(sequences) * 0.20))
@@ -115,18 +127,27 @@ def load_new_corrections(labels):
     examples, targets, correction_ids = [], [], []
 
     if not CORRECTIONS_DIR.exists():
-        return np.empty((0, 30, 258), dtype=np.float32), np.empty((0,), dtype=np.int64), []
+        return (
+            np.empty((0, 30, 258), dtype=np.float32),
+            np.empty((0,), dtype=np.int64),
+            [],
+        )
 
     for path in sorted(CORRECTIONS_DIR.glob("*.json")):
         item = read_json(path)
-        if item.get("status") != "approved" or item.get("training_status") == "trained_candidate":
+        if (
+            item.get("status") != "approved"
+            or item.get("training_status") == "trained_candidate"
+        ):
             continue
         if not item.get("sequence_included") or "sequence" not in item:
             continue
 
         corrected_label = item.get("corrected_label")
         if corrected_label not in label_to_index:
-            raise ValueError(f"{path.name}: corrected label is not in production labels")
+            raise ValueError(
+                f"{path.name}: corrected label is not in production labels"
+            )
         sequence = np.asarray(item["sequence"], dtype=np.float32)
         if sequence.shape != (30, 258) or not np.isfinite(sequence).all():
             raise ValueError(f"{path.name}: approved sequence is invalid")
@@ -239,7 +260,9 @@ def run_training():
     if not DATASET_DIR.is_dir():
         raise FileNotFoundError(f"Replay dataset not found: {DATASET_DIR}")
     if not PRODUCTION_KERAS.exists():
-        raise FileNotFoundError(f"Production Keras checkpoint not found: {PRODUCTION_KERAS}")
+        raise FileNotFoundError(
+            f"Production Keras checkpoint not found: {PRODUCTION_KERAS}"
+        )
 
     labels = read_json(LABELS_PATH)
     if len(labels) != 22:
@@ -247,14 +270,20 @@ def run_training():
 
     correction_x, correction_y, correction_ids = load_new_corrections(labels)
     if len(correction_ids) < MIN_CORRECTIONS:
-        print(f"Waiting for {MIN_CORRECTIONS} eligible approved corrections; found {len(correction_ids)}.")
+        print(
+            f"Waiting for {MIN_CORRECTIONS} eligible approved corrections; found {len(correction_ids)}."
+        )
         return
 
-    replay_x, replay_y, validation_x, validation_y, class_counts = load_replay_dataset(labels)
+    replay_x, replay_y, validation_x, validation_y, class_counts = load_replay_dataset(
+        labels
+    )
     version = VERSION_PATH.read_text(encoding="utf-8").strip()
     production_tflite = MODEL_DIR / f"action_{version}.tflite"
     if not production_tflite.exists():
-        raise FileNotFoundError(f"Production TFLite model not found: {production_tflite}")
+        raise FileNotFoundError(
+            f"Production TFLite model not found: {production_tflite}"
+        )
 
     baseline_predictions = get_tflite_predictions(
         production_tflite, validation_x, len(labels)
@@ -263,8 +292,13 @@ def run_training():
     base_model_path = get_base_model_path()
     model = tf.keras.models.load_model(base_model_path, compile=True)
 
-    if model.input_shape != (None, 30, 258) or model.output_shape != (None, len(labels)):
-        raise ValueError(f"Checkpoint shape mismatch: {model.input_shape} -> {model.output_shape}")
+    if model.input_shape != (None, 30, 258) or model.output_shape != (
+        None,
+        len(labels),
+    ):
+        raise ValueError(
+            f"Checkpoint shape mismatch: {model.input_shape} -> {model.output_shape}"
+        )
 
     loss_name = getattr(model.loss, "__name__", str(model.loss)).lower()
     if "sparse_categorical" in loss_name:
@@ -273,8 +307,12 @@ def run_training():
         y_validation = validation_y
     elif "categorical" in loss_name:
         y_replay = tf.keras.utils.to_categorical(replay_y, num_classes=len(labels))
-        y_corrections = tf.keras.utils.to_categorical(correction_y, num_classes=len(labels))
-        y_validation = tf.keras.utils.to_categorical(validation_y, num_classes=len(labels))
+        y_corrections = tf.keras.utils.to_categorical(
+            correction_y, num_classes=len(labels)
+        )
+        y_validation = tf.keras.utils.to_categorical(
+            validation_y, num_classes=len(labels)
+        )
     else:
         raise ValueError(f"Unsupported saved loss function: {model.loss}")
 
@@ -290,7 +328,9 @@ def run_training():
         model.optimizer.learning_rate = LEARNING_RATE
 
     print(f"Baseline production TFLite validation accuracy: {baseline_accuracy:.4f}")
-    print(f"Training with {len(replay_x)} replay samples and {len(correction_ids)} approved corrections.")
+    print(
+        f"Training with {len(replay_x)} replay samples and {len(correction_ids)} approved corrections."
+    )
     print(f"Fine-tuning for up to {EPOCHS} epochs at learning rate {LEARNING_RATE}.")
 
     early_stopping = tf.keras.callbacks.EarlyStopping(
@@ -307,7 +347,11 @@ def run_training():
         verbose=2,
     )
 
-    candidate_id = time.strftime("candidate_%Y%m%d_%H%M%S", time.gmtime()) + "_" + uuid.uuid4().hex[:8]
+    candidate_id = (
+        time.strftime("candidate_%Y%m%d_%H%M%S", time.gmtime())
+        + "_"
+        + uuid.uuid4().hex[:8]
+    )
     candidate_dir = CANDIDATES_DIR / candidate_id
     candidate_dir.mkdir(parents=True, exist_ok=False)
     keras_path = candidate_dir / "action.keras"
@@ -318,16 +362,15 @@ def run_training():
     tflite_bytes = converter.convert()
     tflite_path.write_bytes(tflite_bytes)
 
-    candidate_predictions = get_tflite_predictions(tflite_path, validation_x, len(labels))
+    candidate_predictions = get_tflite_predictions(
+        tflite_path, validation_x, len(labels)
+    )
     candidate_accuracy = accuracy(candidate_predictions, validation_y)
     accuracy_drop = baseline_accuracy - candidate_accuracy
     per_class_results, failed_classes = compare_per_class(
         labels, validation_y, baseline_predictions, candidate_predictions
     )
-    accepted = (
-        accuracy_drop <= MAX_VALIDATION_ACCURACY_DROP
-        and not failed_classes
-    )
+    accepted = accuracy_drop <= MAX_VALIDATION_ACCURACY_DROP and not failed_classes
 
     manifest = {
         "candidate_id": candidate_id,
