@@ -92,12 +92,13 @@ main { max-width: 900px; margin: 24px auto; padding: 0 16px 40px; display: flex;
 }
 
 .recording-badge {
+  z-index: 4;
   position: absolute; top: 10px; left: 10px;
   background: rgba(220,38,38,0.9); color: white;
   padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;
   display: flex; align-items: center; gap: 4px;
 }
-.progress-track { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: rgba(255,255,255,0.2); }
+.progress-track { position: absolute; z-index: 4; bottom: 0; left: 0; right: 0; height: 5px; background: rgba(255,255,255,0.2); }
 .progress-fill { height: 100%; width: 0%; background: var(--success); transition: width 0.03s linear; }
 
 /* Prohibited warning styling - integrated with main branch design */
