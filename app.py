@@ -45,7 +45,7 @@ import numpy as np  # noqa: E402
 
 # Monitoring and error tracking imports
 import sentry_sdk
-from flask import Flask, jsonify, render_template, request  # noqa: E402
+from flask import Flask, jsonify, render_template, request, session  # noqa: E402
 
 # Security hardening imports
 from flask_cors import CORS
@@ -114,6 +114,14 @@ with open(CONFIG_PATH, "r") as f:
     CONFIG = json.load(f)
 
 app = Flask(__name__)
+# Admin sessions are signed with a per-installation secret. Set a persistent
+# SIGNSPEAKPH_SESSION_SECRET in the environment if sessions must survive restarts.
+app.secret_key = os.environ.get("SIGNSPEAKPH_SESSION_SECRET") or secrets.token_hex(32)
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("FLASK_HTTPS", "false").lower() == "true",
+)
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # Bound JSON/image upload size
 
 # Initialize CORS
@@ -670,6 +678,147 @@ def delete_feedback(feedback_id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+# --- Local administrator review dashboard ---
+def _admin_password_configured():
+    return bool(os.environ.get("SIGNSPEAKPH_ADMIN_PASSWORD"))
+
+
+def _admin_authenticated():
+    return session.get("signspeakph_admin") is True
+
+
+def _admin_csrf_valid():
+    supplied = request.headers.get("X-CSRF-Token", "")
+    expected = session.get("admin_csrf", "")
+    return bool(supplied and expected and secrets.compare_digest(supplied, expected))
+
+
+@app.route("/admin")
+def admin_dashboard():
+    return render_template("admin.html")
+
+
+@app.route("/admin/login", methods=["POST"])
+@limiter.limit("5 per hour")
+def admin_login():
+    if not _admin_password_configured():
+        return jsonify({"error": "Administrator password is not configured. Set SIGNSPEAKPH_ADMIN_PASSWORD before starting SignSpeakPH."}), 503
+    payload = request.get_json(silent=True) or {}
+    supplied = str(payload.get("password", ""))
+    expected = os.environ.get("SIGNSPEAKPH_ADMIN_PASSWORD", "")
+    if not secrets.compare_digest(supplied, expected):
+        return jsonify({"error": "Incorrect administrator password."}), 401
+    session.clear()
+    session["signspeakph_admin"] = True
+    session["admin_csrf"] = secrets.token_urlsafe(32)
+    return jsonify({"status": "success", "csrf_token": session["admin_csrf"]}), 200
+
+
+@app.route("/admin/session")
+def admin_session():
+    if not _admin_authenticated():
+        return jsonify({"authenticated": False, "password_configured": _admin_password_configured()}), 200
+    return jsonify({"authenticated": True, "csrf_token": session.get("admin_csrf", "")}), 200
+
+
+@app.route("/admin/logout", methods=["POST"])
+def admin_logout():
+    if not _admin_authenticated() or not _admin_csrf_valid():
+        return jsonify({"error": "Unauthorized request."}), 401
+    session.clear()
+    return jsonify({"status": "success"}), 200
+
+
+@app.route("/admin/submissions", methods=["GET", "POST"])
+def admin_submissions():
+    if not _admin_authenticated():
+        return jsonify({"error": "Administrator login required."}), 401
+    if request.method == "GET":
+        items = []
+        roots = {
+            "correction": os.path.join(BASE_DIR, "data", "corrections", "pending"),
+            "teaching": os.path.join(BASE_DIR, "data", "teaching", "pending"),
+        }
+        for kind, folder in roots.items():
+            if not os.path.isdir(folder):
+                continue
+            for filename in sorted(os.listdir(folder)):
+                if not filename.endswith(".json"):
+                    continue
+                path = os.path.join(folder, filename)
+                try:
+                    with open(path, "r", encoding="utf-8") as handle:
+                        item = json.load(handle)
+                    summary = {
+                        "id": str(item.get("id", filename[:-5])),
+                        "type": kind,
+                        "datetime": item.get("datetime", ""),
+                        "notes": item.get("notes", ""),
+                    }
+                    if kind == "correction":
+                        summary.update({
+                            "predicted_label": item.get("predicted_label", ""),
+                            "corrected_label": item.get("corrected_label", ""),
+                            "sequence_included": item.get("sequence_included") is True,
+                        })
+                    else:
+                        summary.update({
+                            "display_name": item.get("display_name", ""),
+                            "label": item.get("label", ""),
+                            "meaning": item.get("meaning", ""),
+                            "sample_count": item.get("sample_count", 0),
+                        })
+                    items.append(summary)
+                except (OSError, json.JSONDecodeError):
+                    logger.warning("Could not read pending %s submission: %s", kind, filename)
+        items.sort(key=lambda value: value.get("datetime", ""), reverse=True)
+        return jsonify({"submissions": items}), 200
+
+    if not _admin_csrf_valid():
+        return jsonify({"error": "Invalid or missing security token."}), 403
+    payload = request.get_json(silent=True) or {}
+    kind = str(payload.get("type", ""))
+    action = str(payload.get("action", ""))
+    identifier = str(payload.get("id", ""))
+    try:
+        identifier = str(uuid.UUID(identifier))
+    except (ValueError, AttributeError):
+        return jsonify({"error": "Invalid submission ID."}), 400
+    if kind not in ("correction", "teaching") or action not in ("approve", "reject"):
+        return jsonify({"error": "Invalid review action."}), 400
+
+    pending_dir = os.path.join(BASE_DIR, "data", "corrections" if kind == "correction" else "teaching", "pending")
+    source = os.path.join(pending_dir, identifier + ".json")
+    if not os.path.isfile(source):
+        return jsonify({"error": "This pending submission no longer exists. Refresh the list."}), 404
+
+    if kind == "correction":
+        script = os.path.join(BASE_DIR, "scripts", "manage_corrections.py")
+        command = [sys.executable, script, action, identifier]
+        result = subprocess.run(command, cwd=BASE_DIR, capture_output=True, text=True, timeout=1800)
+        if result.returncode != 0:
+            logger.error("Correction review failed: %s", result.stderr or result.stdout)
+            return jsonify({"error": "Correction review failed. Check the application log."}), 500
+        return jsonify({"status": "success", "message": (result.stdout or "").strip()}), 200
+
+    destination_folder = os.path.join(BASE_DIR, "data", "teaching", "approved" if action == "approve" else "rejected")
+    os.makedirs(destination_folder, exist_ok=True)
+    try:
+        with open(source, "r", encoding="utf-8") as handle:
+            contribution = json.load(handle)
+        contribution["status"] = "approved" if action == "approve" else "rejected"
+        contribution["reviewed_at"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        destination = os.path.join(destination_folder, identifier + ".json")
+        with open(destination, "w", encoding="utf-8") as handle:
+            json.dump(contribution, handle, indent=2)
+        os.remove(source)
+    except (OSError, json.JSONDecodeError):
+        logger.exception("Teaching contribution review failed")
+        return jsonify({"error": "Could not update this teaching submission."}), 500
+    return jsonify({"status": "success", "message": f"New sign {action}d. It remains outside the live model until separately trained and evaluated."}), 200
 
 
 @app.route("/metrics")
