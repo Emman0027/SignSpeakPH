@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, New_signs ]
+    branches: [ main, New_signs, feature/self-learning-mvp ]
   pull_request:
-    branches: [ main, New_signs ]
+    branches: [ main, New_signs, feature/self-learning-mvp ]
 
 jobs:
   test:
