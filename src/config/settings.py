@@ -1,6 +1,7 @@
 """
 Configuration management for SignSpeakPH
 """
+
 import json
 import os
 from pathlib import Path
