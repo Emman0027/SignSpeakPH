@@ -367,6 +367,101 @@ def submit_correction():
         return jsonify({"error": "could not submit correction"}), 500
 
 
+@app.route("/teach-sign", methods=["POST"])
+@limiter.limit("5 per hour")
+def submit_teaching_contribution():
+    """Store a proposed new sign and consented landmark samples for review."""
+    try:
+        payload = request.get_json(silent=True) or {}
+        display_name = str(payload.get("display_name", "")).strip()
+        meaning = str(payload.get("meaning", "")).strip()
+        notes = str(payload.get("notes", "")).strip()
+        samples = payload.get("samples")
+
+        if not display_name or len(display_name) > 60:
+            return jsonify({"error": "sign name is required (maximum 60 characters)"}), 400
+        if not meaning or len(meaning) > 120:
+            return jsonify({"error": "Filipino meaning is required (maximum 120 characters)"}), 400
+        if len(notes) > 500:
+            return jsonify({"error": "notes must be 500 characters or fewer"}), 400
+        if not isinstance(samples, list) or not 3 <= len(samples) <= 5:
+            return jsonify({"error": "please record between 3 and 5 separate samples"}), 400
+
+        normalized = unicodedata.normalize("NFKD", display_name)
+        normalized = normalized.encode("ascii", "ignore").decode("ascii").lower()
+        label = re.sub(r"[^a-z0-9]+", "_", normalized).strip("_")
+        if not label or len(label) > 40:
+            return jsonify({"error": "use a sign name that can be represented as a short label"}), 400
+        if label in ACTIONS:
+            return jsonify({"error": "this sign is already supported; use Correct a Translation instead"}), 409
+
+        processed_samples = []
+        for sample_index, images in enumerate(samples, start=1):
+            if not isinstance(images, list) or len(images) != SEQUENCE_LENGTH:
+                return (
+                    jsonify({
+                        "error": f"sample {sample_index} must contain exactly {SEQUENCE_LENGTH} frames"
+                    }),
+                    400,
+                )
+
+            sequence = []
+            for data_url in images:
+                if not isinstance(data_url, str) or len(data_url) > 500000:
+                    return jsonify({"error": "invalid or oversized image frame"}), 400
+                try:
+                    frame = decode_base64_image(data_url)
+                except (ValueError, TypeError):
+                    frame = None
+                if frame is None:
+                    return jsonify({"error": "could not decode an image frame"}), 400
+                _, results = mediapipe_detection(frame, models)
+                keypoints = np.asarray(extract_keypoints(results), dtype=np.float32)
+                if keypoints.shape != (NUM_FEATURES,) or not np.isfinite(keypoints).all():
+                    return jsonify({"error": "a captured frame did not produce valid landmarks"}), 422
+                sequence.append(keypoints.tolist())
+
+            processed_samples.append(sequence)
+
+        contribution = {
+            "id": str(uuid.uuid4()),
+            "label": label,
+            "display_name": display_name,
+            "meaning": meaning,
+            "notes": notes,
+            "sample_count": len(processed_samples),
+            "sequence_length": SEQUENCE_LENGTH,
+            "num_features": NUM_FEATURES,
+            "samples": processed_samples,
+            "raw_video_saved": False,
+            "consent_to_store_landmarks": True,
+            "status": "pending",
+            "timestamp": time.time(),
+            "datetime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+        }
+
+        pending_dir = os.path.join(BASE_DIR, "data", "teaching", "pending")
+        os.makedirs(pending_dir, exist_ok=True)
+        contribution_path = os.path.join(pending_dir, f"{contribution['id']}.json")
+        with open(contribution_path, "w", encoding="utf-8") as file:
+            json.dump(contribution, file, indent=2)
+
+        return (
+            jsonify({
+                "status": "success",
+                "message": "New sign samples submitted for review",
+                "id": contribution["id"],
+                "label": label,
+                "sample_count": len(processed_samples),
+            }),
+            201,
+        )
+
+    except Exception:
+        logger.exception("New sign teaching submission failed")
+        return jsonify({"error": "could not submit new sign samples"}), 500
+
+
 @app.route("/feedback", methods=["POST"])
 def handle_feedback():
     """Handle customer satisfaction feedback"""
