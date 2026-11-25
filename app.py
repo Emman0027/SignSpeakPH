@@ -250,14 +250,7 @@ def predict_batch():
     res = interpreter.get_tensor(output_details[0]["index"])[0]
     t2 = time.time()
 
-    # TEMPORARY DIAGNOSTIC: exclude Tulong from selectable predictions.
-    # The model still computes its Tulong score; this only prevents Tulong
-    # from winning argmax. Remove this block to restore normal predictions.
-    filtered_res = res.copy()
-    if "tulong" in ACTIONS:
-        filtered_res[ACTIONS.index("tulong")] = -np.inf
-
-    idx = int(np.argmax(filtered_res))
+    idx = int(np.argmax(res))
     confidence = float(res[idx])
 
     # Check if the predicted sign is prohibited
