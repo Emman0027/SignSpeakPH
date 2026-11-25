@@ -451,3 +451,51 @@ button:focus-visible, input:focus-visible, [contenteditable]:focus-visible {
 .correction-status.success { color: var(--success); }
 .correction-status.error { color: var(--danger); }
 .correction-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+
+
+/* Roomier Teach a New Sign form */
+.teaching-modal {
+  max-width: 720px;
+  max-height: 92vh;
+}
+
+.teaching-form {
+  gap: 14px;
+  padding: 24px 28px 28px;
+}
+
+.teaching-form input[type="text"],
+.teaching-form textarea {
+  display: block;
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.teaching-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.teaching-form input[type="text"]:focus,
+.teaching-form textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (max-width: 600px) {
+  .teaching-modal {
+    max-height: 94vh;
+  }
+
+  .teaching-form {
+    padding: 18px 16px 20px;
+  }
+}
