@@ -217,7 +217,7 @@
       let lastOverlayFrame = 0;
       const processOverlayFrame = async now => {
         requestAnimationFrame(processOverlayFrame);
-        if (video.readyState < 2 || overlayBusy || now - lastOverlayFrame < 66) return;
+        if (video.readyState < 2 || overlayBusy || now - lastOverlayFrame < 100) return;
 
         overlayBusy = true;
         lastOverlayFrame = now;
