@@ -1,8 +1,8 @@
 {
   "kamusta": {
     "precision": 1.0,
-    "recall": 0.9166666666666666,
-    "f1-score": 0.9565217391304348,
+    "recall": 1.0,
+    "f1-score": 1.0,
     "support": 12.0
   },
   "salamat": {
@@ -18,9 +18,9 @@
     "support": 12.0
   },
   "oo": {
-    "precision": 0.9230769230769231,
+    "precision": 1.0,
     "recall": 1.0,
-    "f1-score": 0.96,
+    "f1-score": 1.0,
     "support": 12.0
   },
   "hindi": {
@@ -131,17 +131,17 @@
     "f1-score": 1.0,
     "support": 12.0
   },
-  "accuracy": 0.9962121212121212,
+  "accuracy": 1.0,
   "macro avg": {
-    "precision": 0.9965034965034966,
-    "recall": 0.9962121212121211,
-    "f1-score": 0.9962055335968379,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
     "support": 264.0
   },
   "weighted avg": {
-    "precision": 0.9965034965034966,
-    "recall": 0.9962121212121212,
-    "f1-score": 0.9962055335968379,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1-score": 1.0,
     "support": 264.0
   }
 }
