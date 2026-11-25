@@ -25,6 +25,7 @@ Then open http://127.0.0.1:5000
 """
 
 import base64
+import secrets
 import json
 import logging
 import os
