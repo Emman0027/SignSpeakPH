@@ -391,16 +391,22 @@ def process_is_running(pid):
         open_process = kernel32.OpenProcess
         open_process.argtypes = [ctypes.c_ulong, ctypes.c_int, ctypes.c_ulong]
         open_process.restype = ctypes.c_void_p
+        get_exit_code = kernel32.GetExitCodeProcess
+        get_exit_code.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_ulong)]
+        get_exit_code.restype = ctypes.c_int
+        close_handle = kernel32.CloseHandle
+        close_handle.argtypes = [ctypes.c_void_p]
+        close_handle.restype = ctypes.c_int
         handle = open_process(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
         if not handle:
             return ctypes.get_last_error() == 5  # Access denied means it exists.
         try:
             exit_code = ctypes.c_ulong()
-            if not kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+            if not get_exit_code(handle, ctypes.byref(exit_code)):
                 return True
             return exit_code.value == 259  # STILL_ACTIVE
         finally:
-            kernel32.CloseHandle(handle)
+            close_handle(handle)
 
     try:
         os.kill(pid, 0)
