@@ -382,28 +382,67 @@ def submit_teaching_contribution():
         samples = payload.get("samples")
 
         if not display_name or len(display_name) > 60:
-            return jsonify({"error": "sign name is required (maximum 60 characters)"}), 400
+            return (
+                jsonify({"error": "sign name is required (maximum 60 characters)"}),
+                400,
+            )
         if not meaning or len(meaning) > 120:
-            return jsonify({"error": "Filipino meaning is required (maximum 120 characters)"}), 400
+            return (
+                jsonify({"error": "Filipino meaning is required (maximum 120 characters)"}),
+                400,
+            )
         if len(notes) > 500:
             return jsonify({"error": "notes must be 500 characters or fewer"}), 400
         if not isinstance(samples, list) or not 3 <= len(samples) <= 5:
-            return jsonify({"error": "please record between 3 and 5 separate samples"}), 400
+            return (
+                jsonify({"error": "please record between 3 and 5 separate samples"}),
+                400,
+            )
 
         normalized = unicodedata.normalize("NFKD", display_name)
         normalized = normalized.encode("ascii", "ignore").decode("ascii").lower()
         label = re.sub(r"[^a-z0-9]+", "_", normalized).strip("_")
         if not label or len(label) > 40:
-            return jsonify({"error": "use a sign name that can be represented as a short label"}), 400
+            return (
+                jsonify({"error": "use a sign name that can be represented as a short label"}),
+                400,
+            )
         if label in ACTIONS:
-            return jsonify({"error": "this sign is already supported; use Correct a Translation instead"}), 409
+            return (
+                jsonify({
+                    "error": "this sign is already supported; use Correct a Translation instead"
+                }),
+                409,
+            )
+
+        for folder_name in ("pending", "approved"):
+            folder_path = os.path.join(BASE_DIR, "data", "teaching", folder_name)
+            if not os.path.isdir(folder_path):
+                continue
+            for filename in os.listdir(folder_path):
+                if not filename.endswith(".json"):
+                    continue
+                existing_path = os.path.join(folder_path, filename)
+                try:
+                    with open(existing_path, "r", encoding="utf-8") as existing_file:
+                        existing = json.load(existing_file)
+                except (OSError, json.JSONDecodeError):
+                    continue
+                if existing.get("label") == label:
+                    return (
+                        jsonify({"error": "a contribution for this sign is already under review"}),
+                        409,
+                    )
 
         processed_samples = []
         for sample_index, images in enumerate(samples, start=1):
             if not isinstance(images, list) or len(images) != SEQUENCE_LENGTH:
                 return (
                     jsonify({
-                        "error": f"sample {sample_index} must contain exactly {SEQUENCE_LENGTH} frames"
+                        "error": (
+                            f"sample {sample_index} must contain exactly "
+                            f"{SEQUENCE_LENGTH} frames"
+                        )
                     }),
                     400,
                 )
@@ -421,7 +460,12 @@ def submit_teaching_contribution():
                 _, results = mediapipe_detection(frame, models)
                 keypoints = np.asarray(extract_keypoints(results), dtype=np.float32)
                 if keypoints.shape != (NUM_FEATURES,) or not np.isfinite(keypoints).all():
-                    return jsonify({"error": "a captured frame did not produce valid landmarks"}), 422
+                    return (
+                        jsonify({
+                            "error": "a captured frame did not produce valid landmarks"
+                        }),
+                        422,
+                    )
                 sequence.append(keypoints.tolist())
 
             processed_samples.append(sequence)
