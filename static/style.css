@@ -250,10 +250,52 @@ main { max-width: 900px; margin: 24px auto; padding: 0 16px 40px; display: flex;
 .modal-header h2 { font-size: 20px; color: var(--accent); }
 .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
 
-.settings-body { padding: 16px 24px 24px; }
-.settings-label { display: block; font-size: 14px; margin-bottom: 10px; }
-.settings-hint { font-size: 13px; color: var(--muted-light); margin-top: 10px; }
-#thresholdSlider { width: 100%; }
+.settings-modal {
+  max-width: 560px;
+  min-height: 280px;
+}
+.settings-modal .modal-header {
+  padding: 28px 32px 0;
+}
+.settings-modal .modal-header h2 {
+  font-size: 23px;
+}
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 32px 32px;
+  gap: 14px;
+}
+.settings-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.settings-hint {
+  font-size: 14px;
+  color: var(--muted-light);
+  line-height: 1.6;
+  margin-top: 0;
+}
+#thresholdSlider {
+  width: 100%;
+  margin: 8px 0;
+  cursor: pointer;
+}
+.settings-admin-entry {
+  border-top: 1px solid var(--border);
+  margin-top: 12px;
+  padding-top: 22px;
+}
+.settings-admin-entry .guide-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 20px;
+  font-size: 14px;
+}
 
 .sign-search {
   margin: 16px 24px 0; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
