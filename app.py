@@ -276,6 +276,76 @@ def predict_batch():
     return jsonify({"text": "", "confidence": confidence})
 
 
+@app.route("/corrections", methods=["POST"])
+@limiter.limit("10 per hour")
+def submit_correction():
+    """Store a user's correction for maintainer review; never update the live model."""
+    try:
+        payload = request.get_json(silent=True) or {}
+        predicted_label = str(payload.get("predicted_label", "")).strip()
+        corrected_label = str(payload.get("corrected_label", "")).strip()
+        notes = str(payload.get("notes", "")).strip()
+        include_sequence = payload.get("include_sequence") is True
+
+        if predicted_label not in ACTIONS:
+            return jsonify({"error": "invalid predicted label"}), 400
+        if corrected_label not in ACTIONS:
+            return jsonify({"error": "please choose a supported corrected sign"}), 400
+        if predicted_label == corrected_label:
+            return jsonify({"error": "the corrected sign must be different from the prediction"}), 400
+        if len(notes) > 500:
+            return jsonify({"error": "notes must be 500 characters or fewer"}), 400
+
+        correction = {
+            "id": str(uuid.uuid4()),
+            "predicted_label": predicted_label,
+            "corrected_label": corrected_label,
+            "notes": notes,
+            "sequence_included": include_sequence,
+            "status": "pending",
+            "timestamp": time.time(),
+            "datetime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+        }
+
+        if include_sequence:
+            images = payload.get("images")
+            if not isinstance(images, list) or len(images) != SEQUENCE_LENGTH:
+                return jsonify({"error": f"sequence consent requires exactly {SEQUENCE_LENGTH} frames"}), 400
+
+            sequence = []
+            for data_url in images:
+                if not isinstance(data_url, str) or len(data_url) > 500000:
+                    return jsonify({"error": "invalid or oversized image frame"}), 400
+                try:
+                    frame = decode_base64_image(data_url)
+                except (ValueError, TypeError):
+                    frame = None
+                if frame is None:
+                    return jsonify({"error": "could not decode an image frame"}), 400
+                _, results = mediapipe_detection(frame, models)
+                keypoints = extract_keypoints(results)
+                sequence.append(np.asarray(keypoints, dtype=np.float32).tolist())
+
+            correction["sequence"] = sequence
+
+        pending_dir = os.path.join(BASE_DIR, "data", "corrections", "pending")
+        os.makedirs(pending_dir, exist_ok=True)
+        correction_path = os.path.join(pending_dir, f"{correction['id']}.json")
+        with open(correction_path, "w", encoding="utf-8") as file:
+            json.dump(correction, file, indent=2)
+
+        return jsonify({
+            "status": "success",
+            "message": "Correction submitted for review",
+            "id": correction["id"],
+            "sequence_included": include_sequence,
+        }), 201
+
+    except Exception:
+        logger.exception("Correction submission failed")
+        return jsonify({"error": "could not submit correction"}), 500
+
+
 @app.route("/feedback", methods=["POST"])
 def handle_feedback():
     """Handle customer satisfaction feedback"""
