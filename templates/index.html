@@ -29,6 +29,7 @@
   <main>
     <section class="video-container">
       <video id="webcam" autoplay playsinline muted aria-label="Live camera feed"></video>
+      <canvas id="landmarkCanvas" class="landmark-overlay" aria-hidden="true"></canvas>
       <canvas id="captureCanvas" style="display:none;"></canvas>
       <div id="recordingBadge" class="recording-badge" style="display:none;" role="status">
         ● Recording <span id="frameCount">0</span>/30
@@ -131,8 +132,109 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
   <script>
     const video = document.getElementById('webcam');
+    const landmarkCanvas = document.getElementById('landmarkCanvas');
+    const landmarkCtx = landmarkCanvas.getContext('2d');
+    let poseOverlayResults = null;
+    let handsOverlayResults = null;
+    let poseOverlayModel = null;
+    let handsOverlayModel = null;
+    let overlayBusy = false;
+    let overlayStarted = false;
+
+    function drawLandmarkOverlay() {
+      if (!video.videoWidth || !video.videoHeight) return;
+
+      if (landmarkCanvas.width !== video.videoWidth || landmarkCanvas.height !== video.videoHeight) {
+        landmarkCanvas.width = video.videoWidth;
+        landmarkCanvas.height = video.videoHeight;
+      }
+
+      landmarkCtx.clearRect(0, 0, landmarkCanvas.width, landmarkCanvas.height);
+
+      if (poseOverlayResults && poseOverlayResults.poseLandmarks) {
+        drawConnectors(landmarkCtx, poseOverlayResults.poseLandmarks, POSE_CONNECTIONS,
+          { color: '#00E5FF', lineWidth: 3 });
+        drawLandmarks(landmarkCtx, poseOverlayResults.poseLandmarks,
+          { color: '#FFFFFF', fillColor: '#00A8CC', lineWidth: 1, radius: 2 });
+      }
+
+      if (handsOverlayResults && handsOverlayResults.multiHandLandmarks) {
+        handsOverlayResults.multiHandLandmarks.forEach((handLandmarks, index) => {
+          const handedness = handsOverlayResults.multiHandedness?.[index]?.label;
+          const handColor = handedness === 'Left' ? '#FFD54F' : '#FF8A65';
+          drawConnectors(landmarkCtx, handLandmarks, HAND_CONNECTIONS,
+            { color: handColor, lineWidth: 3 });
+          drawLandmarks(landmarkCtx, handLandmarks,
+            { color: '#FFFFFF', fillColor: handColor, lineWidth: 1, radius: 2 });
+        });
+      }
+    }
+
+    async function startLandmarkOverlay() {
+      if (overlayStarted) return;
+      overlayStarted = true;
+
+      if (typeof Pose === 'undefined' || typeof Hands === 'undefined' ||
+          typeof drawConnectors === 'undefined' || typeof drawLandmarks === 'undefined') {
+        console.warn('MediaPipe drawing libraries did not load. Camera recognition will still work without the overlay.');
+        return;
+      }
+
+      poseOverlayModel = new Pose({
+        locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+      });
+      poseOverlayModel.setOptions({
+        modelComplexity: 0,
+        smoothLandmarks: true,
+        enableSegmentation: false,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+      });
+      poseOverlayModel.onResults(results => {
+        poseOverlayResults = results;
+        drawLandmarkOverlay();
+      });
+
+      handsOverlayModel = new Hands({
+        locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+      });
+      handsOverlayModel.setOptions({
+        maxNumHands: 2,
+        modelComplexity: 0,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+      });
+      handsOverlayModel.onResults(results => {
+        handsOverlayResults = results;
+        drawLandmarkOverlay();
+      });
+
+      let lastOverlayFrame = 0;
+      const processOverlayFrame = async now => {
+        requestAnimationFrame(processOverlayFrame);
+        if (video.readyState < 2 || overlayBusy || now - lastOverlayFrame < 66) return;
+
+        overlayBusy = true;
+        lastOverlayFrame = now;
+        try {
+          await poseOverlayModel.send({ image: video });
+          await handsOverlayModel.send({ image: video });
+        } catch (error) {
+          console.warn('Landmark overlay frame failed:', error);
+        } finally {
+          overlayBusy = false;
+        }
+      };
+
+      requestAnimationFrame(processOverlayFrame);
+    }
+
+
     const canvas = document.getElementById('captureCanvas');
     const ctx = canvas.getContext('2d');
     const predictionText = document.getElementById('predictionText');
@@ -293,7 +395,9 @@
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
         video.srcObject = stream;
+        await video.play();
         cameraStarted = true;
+        startLandmarkOverlay().catch(error => console.warn('Could not start landmark overlay:', error));
       } catch (err) {
         predictionText.innerText = "Camera access denied or unavailable";
         setState('error');
