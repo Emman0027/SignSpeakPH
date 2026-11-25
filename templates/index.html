@@ -422,6 +422,7 @@
       teachingForm.reset();
       teachingSamples = [];
       teachingStatus.textContent = '';
+      teachingStatus.classList.remove('success', 'error');
       teachingCaptureStatus.textContent = 'Position your hands and upper body inside the camera view.';
       updateTeachingControls();
       teachingModal.style.display = 'flex';
