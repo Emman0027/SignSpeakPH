@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignSpeakPH | Admin Review</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header><div class="header-row"><div><h1>SignSpeakPH</h1><p class="subtitle">Administrator Review Dashboard</p></div><a class="guide-btn" href="/">Back to Recognition</a></div></header>
+  <main class="admin-page">
+    <section id="loginPanel" class="admin-panel" style="display:none">
+      <h2>Administrator Login</h2>
+      <p class="admin-message">Only the application administrator can review submissions.</p>
+      <form id="loginForm" class="admin-login-form">
+        <label for="adminPassword">Administrator password</label>
+        <input id="adminPassword" type="password" autocomplete="current-password" required>
+        <button class="admin-btn admin-approve" type="submit">Sign In</button>
+      </form>
+      <p id="loginMessage" class="admin-message" role="status"></p>
+    </section>
+    <section id="reviewPanel" class="admin-panel" style="display:none">
+      <div class="admin-header"><div><h2>Submission Review</h2><p class="admin-message">Review corrections and new sign contributions before they enter any training workflow.</p></div><button id="logoutBtn" class="admin-btn admin-reject" type="button">Sign Out</button></div>
+      <p id="reviewMessage" class="admin-message" role="status"></p>
+      <div id="submissionList"></div>
+    </section>
+  </main>
+<script>
+let csrfToken = '';
+const loginPanel = document.getElementById('loginPanel');
+const reviewPanel = document.getElementById('reviewPanel');
+const loginMessage = document.getElementById('loginMessage');
+const reviewMessage = document.getElementById('reviewMessage');
+const submissionList = document.getElementById('submissionList');
+async function requestJson(url, options={}) {
+  const response = await fetch(url, {credentials:'same-origin', ...options});
+  const data = await response.json().catch(()=>({}));
+  if (!response.ok) throw new Error(data.error || 'Request failed.');
+  return data;
+}
+function safeText(value) {
+  const node = document.createElement('span');
+  node.textContent = value == null ? '' : String(value);
+  return node.innerHTML;
+}
+async function refreshSession() {
+  try {
+    const data = await requestJson('/admin/session');
+    if (data.authenticated) {
+      csrfToken = data.csrf_token;
+      loginPanel.style.display = 'none';
+      reviewPanel.style.display = 'block';
+      await loadSubmissions();
+    } else {
+      loginPanel.style.display = 'block';
+      reviewPanel.style.display = 'none';
+      if (!data.password_configured) loginMessage.textContent = 'Administrator password is not configured. Set SIGNSPEAKPH_ADMIN_PASSWORD before starting the app.';
+    }
+  } catch(error) { loginPanel.style.display='block'; loginMessage.textContent=error.message; }
+}
+async function loadSubmissions() {
+  try {
+    const data = await requestJson('/admin/submissions');
+    submissionList.innerHTML = '';
+    if (!data.submissions.length) {
+      submissionList.innerHTML = '<p class="admin-empty">No pending submissions.</p>';
+      return;
+    }
+    data.submissions.forEach(item => {
+      const card = document.createElement('article');
+      card.className = 'admin-submission';
+      let details = '';
+      if (item.type === 'correction') {
+        details = '<p><strong>Prediction:</strong> '+safeText(item.predicted_label)+' → <strong>Correction:</strong> '+safeText(item.corrected_label)+'</p><p class="admin-meta">Landmark sequence consent: '+(item.sequence_included ? 'Yes' : 'No')+'</p>';
+      } else {
+        details = '<p><strong>Proposed sign:</strong> '+safeText(item.display_name)+' ('+safeText(item.label)+')</p><p><strong>Meaning:</strong> '+safeText(item.meaning)+'</p><p class="admin-meta">Recorded samples: '+safeText(item.sample_count)+'</p>';
+      }
+      card.innerHTML = '<h3>'+ (item.type === 'correction' ? 'Translation Correction' : 'New Sign Contribution') +'</h3>'+details+'<p class="admin-meta">Submitted: '+safeText(item.datetime)+'</p><p class="admin-meta">Notes: '+safeText(item.notes || 'None')+'</p><p class="admin-meta">Reference: '+safeText(item.id)+'</p><div class="admin-actions"><button class="admin-btn admin-approve" data-action="approve">Approve</button><button class="admin-btn admin-reject" data-action="reject">Reject</button></div>';
+      card.querySelectorAll('button').forEach(button => button.addEventListener('click', () => reviewSubmission(item, button.dataset.action, button)));
+      submissionList.appendChild(card);
+    });
+  } catch(error) { reviewMessage.textContent = error.message; }
+}
+async function reviewSubmission(item, action, button) {
+  const verb = action === 'approve' ? 'approve' : 'reject';
+  if (!confirm('Are you sure you want to '+verb+' this '+item.type+' submission?')) return;
+  button.disabled = true;
+  try {
+    const data = await requestJson('/admin/submissions', {
+      method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},
+      body:JSON.stringify({type:item.type, action, id:item.id})
+    });
+    reviewMessage.textContent = data.message || 'Submission reviewed.';
+    await loadSubmissions();
+  } catch(error) { reviewMessage.textContent = error.message; button.disabled = false; }
+}
+document.getElementById('loginForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  loginMessage.textContent = 'Signing in...';
+  try {
+    const data = await requestJson('/admin/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('adminPassword').value})});
+    csrfToken = data.csrf_token;
+    document.getElementById('adminPassword').value = '';
+    await refreshSession();
+  } catch(error) { loginMessage.textContent = error.message; }
+});
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  try { await requestJson('/admin/logout',{method:'POST',headers:{'X-CSRF-Token':csrfToken}}); csrfToken=''; await refreshSession(); }
+  catch(error) { reviewMessage.textContent=error.message; }
+});
+refreshSession();
+</script>
+</body>
+</html>
