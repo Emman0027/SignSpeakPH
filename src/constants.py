@@ -11,21 +11,21 @@ GET /signs.
 # meaning of the sign; add how to perform it later, checked against an FSL
 # reference. An empty description is simply not shown.
 SIGN_INFO = [
-    {"label": "kamusta", "display": "Kamusta", "description": "Hello / How are you?"},
-    {"label": "salamat", "display": "Salamat", "description": "Thank you"},
-    {"label": "mahalkita", "display": "Mahalkita", "description": "I love you"},
-    {"label": "oo", "display": "Oo", "description": "Yes"},
-    {"label": "hindi", "display": "Hindi", "description": "No"},
-    {"label": "sino", "display": "Sino", "description": "Who"},
-    {"label": "saan", "display": "Saan", "description": "Where"},
+    {"label": "kamusta", "gif": "/static/gifs/kumusta.gif", "display": "Kamusta", "description": "Hello / How are you?"},
+    {"label": "salamat", "gif": "/static/gifs/salamat.gif", "display": "Salamat", "description": "Thank you"},
+    {"label": "mahalkita", "gif": "/static/gifs/mahalkita.gif", "display": "Mahalkita", "description": "I love you"},
+    {"label": "oo", "gif": "/static/gifs/oo.gif", "display": "Oo", "description": "Yes"},
+    {"label": "hindi", "gif": "/static/gifs/hindi.gif", "display": "Hindi", "description": "No"},
+    {"label": "sino", "gif": "/static/gifs/sino.gif", "display": "Sino", "description": "Who"},
+    {"label": "saan", "gif": "/static/gifs/saan.gif", "display": "Saan", "description": "Where"},
     {"label": "ulitin", "display": "Ulitin", "description": "Repeat / Again"},
     {
-        "label": "pakiusap",
+        "label": "pakiusap", "gif": "/static/gifs/pakiusap.gif",
         "display": "Pakiusap",
         "description": "Please",
     },  # was "please"
-    {"label": "paalam", "display": "Paalam", "description": "Goodbye"},
-    {"label": "tulong", "display": "Tulong", "description": "Help"},
+    {"label": "paalam", "gif": "/static/gifs/paalam.gif", "display": "Paalam", "description": "Goodbye"},
+    {"label": "tulong", "gif": "/static/gifs/tulong.gif", "display": "Tulong", "description": "Help"},
     {
         "label": "walang_anuman", "gif": "/static/gifs/walang_anuman.gif",
         "display": "Walang Anuman",
