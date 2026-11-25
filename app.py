@@ -175,9 +175,9 @@ def decode_base64_image(data_url):
 # Security headers
 @app.after_request
 def add_security_headers(response):
-    response.headers[
-        "Strict-Transport-Security"
-    ] = "max-age=31536000; includeSubDomains"
+    response.headers["Strict-Transport-Security"] = (
+        "max-age=31536000; includeSubDomains"
+    )
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
@@ -294,7 +294,14 @@ def submit_correction():
         if corrected_label not in ACTIONS:
             return jsonify({"error": "please choose a supported corrected sign"}), 400
         if predicted_label == corrected_label:
-            return jsonify({"error": "the corrected sign must be different from the prediction"}), 400
+            return (
+                jsonify(
+                    {
+                        "error": "the corrected sign must be different from the prediction"
+                    }
+                ),
+                400,
+            )
         if len(notes) > 500:
             return jsonify({"error": "notes must be 500 characters or fewer"}), 400
 
@@ -312,7 +319,14 @@ def submit_correction():
         if include_sequence:
             images = payload.get("images")
             if not isinstance(images, list) or len(images) != SEQUENCE_LENGTH:
-                return jsonify({"error": f"sequence consent requires exactly {SEQUENCE_LENGTH} frames"}), 400
+                return (
+                    jsonify(
+                        {
+                            "error": f"sequence consent requires exactly {SEQUENCE_LENGTH} frames"
+                        }
+                    ),
+                    400,
+                )
 
             sequence = []
             for data_url in images:
@@ -336,12 +350,17 @@ def submit_correction():
         with open(correction_path, "w", encoding="utf-8") as file:
             json.dump(correction, file, indent=2)
 
-        return jsonify({
-            "status": "success",
-            "message": "Correction submitted for review",
-            "id": correction["id"],
-            "sequence_included": include_sequence,
-        }), 201
+        return (
+            jsonify(
+                {
+                    "status": "success",
+                    "message": "Correction submitted for review",
+                    "id": correction["id"],
+                    "sequence_included": include_sequence,
+                }
+            ),
+            201,
+        )
 
     except Exception:
         logger.exception("Correction submission failed")
