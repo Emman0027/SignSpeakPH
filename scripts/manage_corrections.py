@@ -2,6 +2,7 @@
 
 Approvals are intentionally CLI-only; public visitors cannot approve training data.
 """
+
 import argparse
 import json
 import os
@@ -43,7 +44,9 @@ def training_threshold():
     try:
         value = int(os.environ.get("SIGNSPEAKPH_TRAINING_THRESHOLD", "5"))
     except ValueError:
-        raise RuntimeError("SIGNSPEAKPH_TRAINING_THRESHOLD must be an integer from 5 to 10.")
+        raise RuntimeError(
+            "SIGNSPEAKPH_TRAINING_THRESHOLD must be an integer from 5 to 10."
+        )
     if not 5 <= value <= 10:
         raise RuntimeError("SIGNSPEAKPH_TRAINING_THRESHOLD must be from 5 to 10.")
     return value
@@ -55,6 +58,7 @@ def sequence_is_valid(data):
         return False, "no consented sequence"
     try:
         import numpy as np
+
         array = np.asarray(sequence, dtype=np.float32)
     except (TypeError, ValueError):
         return False, "sequence is not numeric"
@@ -94,7 +98,11 @@ def eligible_untrained_count():
         try:
             item = read_json(path)
             valid, _ = sequence_is_valid(item)
-            if item.get("status") == "approved" and item.get("training_status") != "trained_candidate" and valid:
+            if (
+                item.get("status") == "approved"
+                and item.get("training_status") != "trained_candidate"
+                and valid
+            ):
                 count += 1
         except Exception:
             continue
@@ -118,7 +126,9 @@ def approve(identifier):
     source.unlink()
     print(f"Approved: {identifier}")
     if not valid:
-        print(f"Approved for record-keeping only; not eligible for training ({reason}).")
+        print(
+            f"Approved for record-keeping only; not eligible for training ({reason})."
+        )
         return
 
     threshold = training_threshold()
@@ -134,7 +144,9 @@ def approve(identifier):
         print(f"Candidate training did not complete (exit code {result.returncode}).")
         print("Approved corrections remain available for another attempt.")
     else:
-        print("Candidate training process finished. Review its evaluation report before promotion.")
+        print(
+            "Candidate training process finished. Review its evaluation report before promotion."
+        )
 
 
 def reject(identifier):
@@ -155,7 +167,9 @@ def reject(identifier):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Review SignSpeakPH correction submissions.")
+    parser = argparse.ArgumentParser(
+        description="Review SignSpeakPH correction submissions."
+    )
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("list", help="List pending and approved corrections")
     approve_parser = commands.add_parser("approve", help="Approve one correction")
