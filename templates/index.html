@@ -59,6 +59,7 @@
 
       <p id="statusText" class="status-text" role="status"></p>
       <button id="correctTranslationBtn" class="correction-btn" type="button" style="display:none;">✎ Correct a Translation</button>
+      <button id="teachNewSignBtn" class="correction-btn" type="button">＋ Teach a New Sign</button>
 
       <label class="toggle">
         <input type="checkbox" id="voiceToggle" checked aria-label="Enable voice output">
@@ -156,6 +157,42 @@
         <div class="correction-actions">
           <button id="cancelCorrectionBtn" class="clear-btn" type="button">Cancel</button>
           <button id="submitCorrectionBtn" class="correction-btn" type="submit">Submit Correction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Teach a New Sign modal -->
+  <div id="teachingModal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="teachingTitle">
+    <div class="modal correction-modal">
+      <div class="modal-header">
+        <h2 id="teachingTitle">Teach a New Sign</h2>
+        <button id="closeTeachingBtn" class="close-btn" type="button" aria-label="Close teaching form">✕</button>
+      </div>
+      <form id="teachingForm" class="correction-form">
+        <p class="correction-intro">Record the same sign 3 to 5 times. Each sample captures 30 frames. Use the same camera position and perform the sign naturally.</p>
+        <label for="teachingSignName">Sign name</label>
+        <input id="teachingSignName" type="text" maxlength="60" required placeholder="e.g. magandang_umaga">
+        <label for="teachingMeaning">Filipino meaning / translation</label>
+        <input id="teachingMeaning" type="text" maxlength="120" required placeholder="e.g. Good morning">
+        <label for="teachingNotes">Notes for the reviewer (optional)</label>
+        <textarea id="teachingNotes" maxlength="500" rows="2" placeholder="Describe hand movement or regional variation, if useful"></textarea>
+        <div style="margin:12px 0; padding:12px; background:#f5f7fa; border-radius:8px;">
+          <strong id="teachingSampleCount">Samples recorded: 0 / 3 minimum</strong>
+          <p id="teachingCaptureStatus" class="correction-status" role="status">Position your hands and upper body inside the camera view.</p>
+          <div class="correction-actions">
+            <button id="recordTeachingSampleBtn" class="correction-btn" type="button">● Record Sample 1</button>
+            <button id="undoTeachingSampleBtn" class="clear-btn" type="button" disabled>Remove Last Sample</button>
+          </div>
+        </div>
+        <label class="consent-option">
+          <input type="checkbox" id="teachingConsent" required>
+          <span><strong>I agree to submit these landmark samples</strong><br>SignSpeakPH will store the 30-frame pose and hand landmark sequences for review and possible model training. The camera images and raw video will not be stored. The new sign will not be added to live recognition until it has been reviewed and a new model passes evaluation.</span>
+        </label>
+        <p id="teachingStatus" class="correction-status" role="status"></p>
+        <div class="correction-actions">
+          <button id="cancelTeachingBtn" class="clear-btn" type="button">Cancel</button>
+          <button id="submitTeachingBtn" class="correction-btn" type="submit" disabled>Submit New Sign</button>
         </div>
       </form>
     </div>
@@ -330,6 +367,141 @@
       }
     }
     loadCorrectionSigns();
+
+    // --- Teach a New Sign ---
+    const teachNewSignBtn = document.getElementById('teachNewSignBtn');
+    const teachingModal = document.getElementById('teachingModal');
+    const teachingForm = document.getElementById('teachingForm');
+    const teachingSignName = document.getElementById('teachingSignName');
+    const teachingMeaning = document.getElementById('teachingMeaning');
+    const teachingNotes = document.getElementById('teachingNotes');
+    const teachingConsent = document.getElementById('teachingConsent');
+    const teachingSampleCount = document.getElementById('teachingSampleCount');
+    const teachingCaptureStatus = document.getElementById('teachingCaptureStatus');
+    const teachingStatus = document.getElementById('teachingStatus');
+    const recordTeachingSampleBtn = document.getElementById('recordTeachingSampleBtn');
+    const undoTeachingSampleBtn = document.getElementById('undoTeachingSampleBtn');
+    const submitTeachingBtn = document.getElementById('submitTeachingBtn');
+    let teachingSamples = [];
+    let teachingWasRunning = false;
+    let recordingTeachingSample = false;
+
+    function updateTeachingControls() {
+      teachingSampleCount.textContent = `Samples recorded: ${teachingSamples.length} / 3 minimum (maximum 5)`;
+      recordTeachingSampleBtn.disabled = recordingTeachingSample || teachingSamples.length >= 5;
+      recordTeachingSampleBtn.textContent = recordingTeachingSample
+        ? 'Recording sample...'
+        : `● Record Sample ${teachingSamples.length + 1}`;
+      undoTeachingSampleBtn.disabled = recordingTeachingSample || teachingSamples.length === 0;
+      submitTeachingBtn.disabled = recordingTeachingSample || teachingSamples.length < 3 || !teachingConsent.checked;
+    }
+
+    function resumePredictionAfterTeaching() {
+      if (teachingWasRunning) {
+        teachingWasRunning = false;
+        running = true;
+        toggleBtn.innerText = '■ Stop Signing';
+        toggleBtn.classList.add('active');
+        captureAndPredictLoop();
+      }
+    }
+
+    function closeTeachingModal() {
+      if (recordingTeachingSample) return;
+      teachingModal.style.display = 'none';
+      resumePredictionAfterTeaching();
+    }
+
+    teachNewSignBtn.addEventListener('click', async () => {
+      teachingWasRunning = running;
+      if (running) {
+        running = false;
+        toggleBtn.innerText = '▶ Start Signing';
+        toggleBtn.classList.remove('active');
+      }
+      teachingForm.reset();
+      teachingSamples = [];
+      teachingStatus.textContent = '';
+      teachingCaptureStatus.textContent = 'Position your hands and upper body inside the camera view.';
+      updateTeachingControls();
+      teachingModal.style.display = 'flex';
+      try {
+        await startCamera();
+      } catch (error) {
+        teachingCaptureStatus.textContent = 'Camera access is required to record a sign.';
+      }
+    });
+
+    recordTeachingSampleBtn.addEventListener('click', async () => {
+      if (recordingTeachingSample || teachingSamples.length >= 5) return;
+      recordingTeachingSample = true;
+      updateTeachingControls();
+      try {
+        await startCamera();
+        while (busy) await new Promise(resolve => setTimeout(resolve, 100));
+        const frames = [];
+        teachingCaptureStatus.textContent = `Recording sample ${teachingSamples.length + 1}. Perform the sign now...`;
+        for (let i = 0; i < SEQUENCE_LENGTH; i++) {
+          frames.push(captureFrame());
+          teachingCaptureStatus.textContent = `Recording sample ${teachingSamples.length + 1}: frame ${i + 1} / ${SEQUENCE_LENGTH}`;
+          await new Promise(resolve => setTimeout(resolve, CAPTURE_INTERVAL_MS));
+        }
+        teachingSamples.push(frames);
+        teachingCaptureStatus.textContent = `Sample ${teachingSamples.length} saved. Rest, then perform the same sign again.`;
+      } catch (error) {
+        console.error('Teaching sample capture failed:', error);
+        teachingCaptureStatus.textContent = 'Could not record this sample. Check camera access and try again.';
+      } finally {
+        recordingTeachingSample = false;
+        updateTeachingControls();
+      }
+    });
+
+    undoTeachingSampleBtn.addEventListener('click', () => {
+      if (recordingTeachingSample || teachingSamples.length === 0) return;
+      teachingSamples.pop();
+      teachingCaptureStatus.textContent = 'Last sample removed. You can record it again.';
+      updateTeachingControls();
+    });
+
+    teachingConsent.addEventListener('change', updateTeachingControls);
+
+    teachingForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (teachingSamples.length < 3 || !teachingConsent.checked) return;
+      submitTeachingBtn.disabled = true;
+      teachingStatus.textContent = 'Processing landmark samples and submitting...';
+      try {
+        const response = await fetch('/teach-sign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            display_name: teachingSignName.value.trim(),
+            meaning: teachingMeaning.value.trim(),
+            notes: teachingNotes.value.trim(),
+            samples: teachingSamples
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Submission failed');
+        teachingStatus.textContent = `Submitted for review. Reference: ${result.id}`;
+        teachingStatus.classList.add('success');
+        teachingCaptureStatus.textContent = 'Your new sign contribution has been saved.';
+        teachingSamples = [];
+        teachingForm.reset();
+        updateTeachingControls();
+      } catch (error) {
+        teachingStatus.textContent = error.message || 'Could not submit the new sign.';
+        teachingStatus.classList.add('error');
+        updateTeachingControls();
+      }
+    });
+
+    document.getElementById('closeTeachingBtn').addEventListener('click', closeTeachingModal);
+    document.getElementById('cancelTeachingBtn').addEventListener('click', closeTeachingModal);
+    teachingModal.addEventListener('click', event => {
+      if (event.target === teachingModal) closeTeachingModal();
+    });
 
     correctTranslationBtn.addEventListener('click', () => {
       if (!lastPrediction || !lastFrames) {
