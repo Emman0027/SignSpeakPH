@@ -58,6 +58,7 @@
       </div>
 
       <p id="statusText" class="status-text" role="status"></p>
+      <button id="correctTranslationBtn" class="correction-btn" type="button" style="display:none;">✎ Correct a Translation</button>
 
       <label class="toggle">
         <input type="checkbox" id="voiceToggle" checked aria-label="Enable voice output">
@@ -129,6 +130,34 @@
       </div>
       <input id="signSearch" class="sign-search" type="text" placeholder="Search signs..." aria-label="Search signs">
       <div id="signList" class="sign-list">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Correct a Translation modal -->
+  <div id="correctionModal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="correctionTitle">
+    <div class="modal correction-modal">
+      <div class="modal-header">
+        <h2 id="correctionTitle">Correct a Translation</h2>
+        <button id="closeCorrectionBtn" class="close-btn" type="button" aria-label="Close correction form">✕</button>
+      </div>
+      <form id="correctionForm" class="correction-form">
+        <p class="correction-intro">You reported that <strong id="predictedLabelText">the prediction</strong> was incorrect. Choose the sign you actually performed.</p>
+        <label for="correctedSignSelect">Correct sign</label>
+        <select id="correctedSignSelect" required>
+          <option value="">Loading supported signs...</option>
+        </select>
+        <label for="correctionNotes">Additional details (optional)</label>
+        <textarea id="correctionNotes" maxlength="500" rows="3" placeholder="Anything that may help the reviewer (maximum 500 characters)"></textarea>
+        <label class="consent-option">
+          <input type="checkbox" id="includeCorrectionSequence">
+          <span><strong>Share the landmark sequence</strong><br>Allow SignSpeakPH to save the 30-frame landmark sequence from this prediction for review and possible future training. No raw video is saved. Leave unchecked to submit only the correction details.</span>
+        </label>
+        <p id="correctionStatus" class="correction-status" role="status"></p>
+        <div class="correction-actions">
+          <button id="cancelCorrectionBtn" class="clear-btn" type="button">Cancel</button>
+          <button id="submitCorrectionBtn" class="correction-btn" type="submit">Submit Correction</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -275,6 +304,110 @@
     let threshold = 0.7;
     let recentSigns = []; // {text, time}
     let lastPrediction = ""; // Track last prediction to show feedback for
+    let correctionSigns = [];
+    const correctTranslationBtn = document.getElementById('correctTranslationBtn');
+    const correctionModal = document.getElementById('correctionModal');
+    const correctionForm = document.getElementById('correctionForm');
+    const correctedSignSelect = document.getElementById('correctedSignSelect');
+    const correctionNotes = document.getElementById('correctionNotes');
+    const includeCorrectionSequence = document.getElementById('includeCorrectionSequence');
+    const correctionStatus = document.getElementById('correctionStatus');
+
+    async function loadCorrectionSigns() {
+      try {
+        const response = await fetch('/signs');
+        if (!response.ok) throw new Error('Could not load supported signs');
+        correctionSigns = await response.json();
+        correctedSignSelect.innerHTML = '<option value="">Choose the correct sign</option>' +
+          correctionSigns.map(sign => {
+            const option = document.createElement('option');
+            option.value = sign.label;
+            option.textContent = sign.display;
+            return option.outerHTML;
+          }).join('');
+      } catch (error) {
+        correctionStatus.textContent = 'Could not load the sign list. Please refresh the page.';
+      }
+    }
+    loadCorrectionSigns();
+
+    correctTranslationBtn.addEventListener('click', () => {
+      if (!lastPrediction || !lastFrames) {
+        correctionStatus.textContent = 'Please make a prediction first.';
+        return;
+      }
+      correctionForm.reset();
+      correctionStatus.textContent = '';
+      correctionStatus.classList.remove('success', 'error');
+      correctionModal.style.display = 'flex';
+    });
+
+    document.getElementById('closeCorrectionBtn').addEventListener('click', () => {
+      correctionModal.style.display = 'none';
+    });
+    document.getElementById('cancelCorrectionBtn').addEventListener('click', () => {
+      correctionModal.style.display = 'none';
+    });
+    correctionModal.addEventListener('click', event => {
+      if (event.target === correctionModal) correctionModal.style.display = 'none';
+    });
+
+    correctionForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const correctedLabel = correctedSignSelect.value;
+      if (!lastPrediction || !lastFrames) {
+        correctionStatus.textContent = 'The previous camera sequence is no longer available. Make another prediction.';
+        return;
+      }
+      if (!correctedLabel) {
+        correctionStatus.textContent = 'Please select the correct sign.';
+        return;
+      }
+      if (correctedLabel === lastPrediction) {
+        correctionStatus.textContent = 'Choose a label different from the current prediction.';
+        return;
+      }
+
+      const consent = includeCorrectionSequence.checked;
+      const submitButton = document.getElementById('submitCorrectionBtn');
+      const payload = {
+        predicted_label: lastPrediction,
+        corrected_label: correctedLabel,
+        notes: correctionNotes.value.trim(),
+        include_sequence: consent
+      };
+      if (consent) payload.images = lastFrames;
+
+      submitButton.disabled = true;
+      correctionStatus.classList.remove('success', 'error');
+      correctionStatus.textContent = consent
+        ? 'Processing and submitting the landmark sequence...'
+        : 'Submitting correction...';
+
+      try {
+        const response = await fetch('/corrections', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Submission failed');
+        correctionStatus.textContent = consent
+          ? 'Correction submitted with landmark sequence for maintainer review.'
+          : 'Correction submitted without camera sequence for maintainer review.';
+        correctionStatus.classList.add('success');
+        setTimeout(() => {
+          correctionModal.style.display = 'none';
+          correctionStatus.classList.remove('success');
+        }, 1800);
+      } catch (error) {
+        correctionStatus.textContent = error.message;
+        correctionStatus.classList.add('error');
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
 
     function setState(state) {
       outputPanel.dataset.state = state; // 'idle' | 'recording' | 'processing' | 'error'
@@ -457,7 +590,9 @@
         statusText.innerText = data.message || "This sign is not allowed";
         prohibitedWarning.style.display = 'block';
         feedbackSection.style.display = 'none'; // Hide feedback for prohibited signs
-        lastPrediction = ""; // Don't show feedback for prohibited signs
+        lastPrediction = "";
+        correctTranslationBtn.style.display = 'none'; // Don't show feedback for prohibited signs
+        correctTranslationBtn.style.display = 'none';
         // Reset feedback state
         userHasSubmittedFeedback = false;
         currentFeedbackId = null;
@@ -478,6 +613,8 @@
         prohibitedWarning.style.display = 'none';
         feedbackSection.style.display = 'block'; // Show feedback for valid predictions
         lastPrediction = data.text;
+        correctTranslationBtn.style.display = 'inline-block';
+        document.getElementById('predictedLabelText').textContent = data.text;
 
         // Reset feedback state for new prediction
         userHasSubmittedFeedback = false;
