@@ -422,3 +422,32 @@ button:focus-visible, input:focus-visible, [contenteditable]:focus-visible {
   border-radius: 8px;
   background: var(--bg);
 }
+
+
+/* Correct a Translation */
+.correction-btn {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.correction-btn:hover { opacity: 0.9; }
+.correction-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.correction-modal { overflow-y: auto; }
+.correction-form { display: flex; flex-direction: column; gap: 10px; padding: 18px 24px 24px; overflow-y: auto; }
+.correction-intro, .correction-form label { color: var(--text); font-size: 14px; line-height: 1.5; }
+.correction-form select, .correction-form textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--card-bg); color: var(--text); font: inherit;
+}
+.consent-option { display: flex; align-items: flex-start; gap: 10px; margin-top: 6px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; }
+.consent-option input { margin-top: 4px; flex: 0 0 auto; }
+.consent-option span { font-size: 13px; color: var(--muted); }
+.correction-status { min-height: 20px; font-size: 13px; color: var(--muted); }
+.correction-status.success { color: var(--success); }
+.correction-status.error { color: var(--danger); }
+.correction-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
