@@ -5,9 +5,25 @@ This directory contains utility scripts for SignSpeakPH.
 ## Available scripts
 
 - `manage_corrections.py` - Local maintainer review of submitted corrections.
+- `manage_teaching.py` - Local maintainer review of new-sign teaching contributions.
 - `train_correction_candidate.py` - Isolated mini-training, replay evaluation, and candidate staging.
 - `scan_index.py` - Incremental repository state tracker.
 - `file_index.sh` - Generate and search a file index.
+
+
+## Teach a new sign
+
+Visitors can use **Teach a New Sign** in the web app to submit a proposed Filipino sign. Each contribution requires a sign name, its meaning, and 3 to 5 separate webcam samples. Each sample is captured as 30 frames and converted by the server into 258-feature pose-and-hand landmarks. Raw camera images and video are not retained. Contributions are stored in `data/teaching/pending/` and are not added to the production vocabulary or live TFLite model.
+
+Maintainers can review submissions locally:
+
+```powershell
+python scripts/manage_teaching.py list
+python scripts/manage_teaching.py approve <TEACHING-UUID>
+python scripts/manage_teaching.py reject <TEACHING-UUID>
+```
+
+Approval validates the sample count and every 30 x 258 sequence, then moves the contribution to `data/teaching/approved/`. This is approval for dataset preparation only; it does not retrain or change the live model. New-class training needs a separate output-layer expansion and evaluation workflow before any production promotion.
 
 ## Correction review and mini-training
 
