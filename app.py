@@ -110,6 +110,7 @@ with open(CONFIG_PATH, "r") as f:
     CONFIG = json.load(f)
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # Bound JSON/image upload size
 
 # Initialize CORS
 CORS(app)
