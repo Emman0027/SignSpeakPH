@@ -30,6 +30,7 @@ import logging
 import os
 import sys
 import time
+import uuid
 
 # MediaPipe tries GPU/EGL acceleration by default and silently falls back
 # to CPU when it fails - but it retries this failed attempt on EVERY frame,
