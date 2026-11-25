@@ -499,3 +499,25 @@ button:focus-visible, input:focus-visible, [contenteditable]:focus-visible {
     padding: 18px 16px 20px;
   }
 }
+
+
+/* Teaching sample counter panel: readable in light and dark themes */
+.teaching-samples-panel {
+  margin: 12px 0;
+  padding: 16px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.teaching-samples-panel strong {
+  display: block;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.teaching-samples-panel .correction-status {
+  color: var(--muted);
+}
