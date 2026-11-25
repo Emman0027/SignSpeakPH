@@ -35,8 +35,9 @@ When the threshold is reached, the approval command starts the trainer in a sepa
 2. Uses replay samples from the 22 production classes in `data/models/production/MP_Data`.
 3. Fine-tunes with the newly approved correction sequences.
 4. Converts the result to TFLite and evaluates it against the current production TFLite model on a fixed held-out split.
-5. Stages a candidate only if its validation accuracy is no more than 1 percentage point below the production baseline.
+5. Compares the candidate against the production TFLite baseline on the same held-out validation sequences. It must stay within 1 percentage point of overall accuracy and must not add more than one validation error in any individual sign class.
+6. Stages the candidate only when both validation gates pass. A candidate trained against an older production version is never reused as the next training base.
 
-Candidate artifacts and reports are written under `data/models/candidates/`. These are local generated files and are not committed to Git. The production Keras and TFLite files are never overwritten by this workflow. A validated candidate still requires maintainer review and a separate, deliberate promotion step.
+Candidate artifacts and per-class evaluation reports are written under `data/models/candidates/`. These are local generated files and are not committed to Git. The training lock records its process ID; an active training process is not unlocked merely because it has been running for a long time. The production Keras and TFLite files are never overwritten by this workflow. A validated candidate still requires maintainer review and a separate, deliberate promotion step.
 
 The production checkpoint, dataset, and production TFLite file must exist locally. Do not delete or rename them before running this workflow.
