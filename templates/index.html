@@ -119,8 +119,30 @@
         <input type="range" id="thresholdSlider" min="0" max="100" value="70" aria-label="Confidence threshold percentage">
         <p class="settings-hint">Lower this to accept less-certain guesses; raise it to require higher confidence before a sign is recognized.</p>
         <div class="settings-admin-entry">
-          <a href="/admin" class="guide-btn" role="button">Sign in as Administrator</a>
+          <a href="/admin" class="guide-btn" role="button">Administrator Dashboard</a>
         </div>
+
+        <section class="candidate-test-panel" aria-labelledby="candidateTestHeading">
+          <h3 id="candidateTestHeading">Staged Candidate Testing</h3>
+          <p class="settings-hint">Compare a validated candidate with the production model using one live camera sample. This test never promotes or replaces a model.</p>
+          <div id="candidateTestSignedOut" class="candidate-test-notice">
+            <p>Administrator sign-in is required to test staged models.</p>
+            <a href="/admin" class="guide-btn">Sign in as Administrator</a>
+          </div>
+          <div id="candidateTestControls" style="display:none;">
+            <label for="candidateSelect" class="settings-label">Validated candidate</label>
+            <select id="candidateSelect" class="candidate-select">
+              <option value="">Loading candidates...</option>
+            </select>
+            <div class="candidate-test-actions">
+              <button id="refreshCandidatesBtn" class="clear-btn" type="button">Refresh list</button>
+              <button id="compareCandidateBtn" class="correction-btn" type="button" disabled>Record &amp; Compare</button>
+            </div>
+            <p id="candidateTestStatus" class="candidate-test-status" role="status" aria-live="polite"></p>
+            <div id="candidateCompareResults" class="candidate-compare-results" aria-live="polite"></div>
+          </div>
+        </section>
+
       </div>
     </div>
   </div>
@@ -646,11 +668,165 @@
     document.getElementById('openSettingsBtn').addEventListener('click', () => {
       settingsModal.style.display = 'flex';
     });
+    document.getElementById('openSettingsBtn').addEventListener('click', loadCandidateOptions);
     document.getElementById('closeSettingsBtn').addEventListener('click', () => {
       settingsModal.style.display = 'none';
     });
     settingsModal.addEventListener('click', (e) => {
       if (e.target === settingsModal) settingsModal.style.display = 'none';
+    });
+
+
+    // --- Read-only live comparison of production and staged candidate models ---
+    const candidateTestSignedOut = document.getElementById('candidateTestSignedOut');
+    const candidateTestControls = document.getElementById('candidateTestControls');
+    const candidateSelect = document.getElementById('candidateSelect');
+    const refreshCandidatesBtn = document.getElementById('refreshCandidatesBtn');
+    const compareCandidateBtn = document.getElementById('compareCandidateBtn');
+    const candidateTestStatus = document.getElementById('candidateTestStatus');
+    const candidateCompareResults = document.getElementById('candidateCompareResults');
+    let candidateAdminCsrf = '';
+
+    async function loadCandidateOptions() {
+      candidateTestStatus.textContent = '';
+      candidateCompareResults.replaceChildren();
+      try {
+        const sessionResponse = await fetch('/admin/session', { credentials: 'same-origin' });
+        const sessionData = await sessionResponse.json();
+        if (!sessionData.authenticated) {
+          candidateAdminCsrf = '';
+          candidateTestSignedOut.style.display = 'block';
+          candidateTestControls.style.display = 'none';
+          candidateTestStatus.textContent = sessionData.password_configured
+            ? 'Sign in as Administrator to access candidate testing.'
+            : 'Administrator password is not configured on this installation.';
+          return;
+        }
+
+        candidateAdminCsrf = sessionData.csrf_token || '';
+        candidateTestSignedOut.style.display = 'none';
+        candidateTestControls.style.display = 'block';
+        candidateTestStatus.textContent = 'Loading validated candidates...';
+
+        const response = await fetch('/admin/candidates', { credentials: 'same-origin' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Could not load candidates.');
+
+        candidateSelect.replaceChildren();
+        if (!data.candidates || data.candidates.length === 0) {
+          const emptyOption = document.createElement('option');
+          emptyOption.value = '';
+          emptyOption.textContent = 'No validated candidates available';
+          candidateSelect.appendChild(emptyOption);
+          compareCandidateBtn.disabled = true;
+          candidateTestStatus.textContent = 'Train and validate a candidate before testing it here.';
+          return;
+        }
+
+        data.candidates.forEach(candidate => {
+          const option = document.createElement('option');
+          option.value = candidate.candidate_id;
+          option.textContent = candidate.candidate_id + ' · validation ' +
+            (Number(candidate.candidate_accuracy) * 100).toFixed(1) + '%';
+          candidateSelect.appendChild(option);
+        });
+        compareCandidateBtn.disabled = false;
+        candidateTestStatus.textContent = data.candidates.length + ' validated candidate(s) available.';
+      } catch (error) {
+        candidateTestStatus.textContent = error.message || 'Could not load candidate list.';
+        compareCandidateBtn.disabled = true;
+      }
+    }
+
+    function showCandidateComparison(data) {
+      candidateCompareResults.replaceChildren();
+      const heading = document.createElement('h4');
+      heading.textContent = 'Live comparison result';
+      candidateCompareResults.appendChild(heading);
+
+      const grid = document.createElement('div');
+      grid.className = 'candidate-result-grid';
+      [
+        { title: 'Production model', result: data.production },
+        { title: 'Staged candidate', result: data.candidate }
+      ].forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'candidate-result-card';
+        const title = document.createElement('strong');
+        title.textContent = item.title;
+        const label = document.createElement('span');
+        label.className = 'candidate-result-label';
+        label.textContent = item.result.label;
+        const confidence = document.createElement('span');
+        confidence.textContent = 'Confidence: ' + (item.result.confidence * 100).toFixed(1) + '%';
+        card.append(title, label, confidence);
+        grid.appendChild(card);
+      });
+      candidateCompareResults.appendChild(grid);
+
+      const verdict = document.createElement('p');
+      verdict.className = 'candidate-test-verdict';
+      verdict.textContent = data.same_prediction
+        ? 'Both models predicted the same sign.'
+        : 'The models disagreed. Review this sample before drawing conclusions.';
+      candidateCompareResults.appendChild(verdict);
+
+      const note = document.createElement('p');
+      note.className = 'settings-hint';
+      note.textContent = data.note;
+      candidateCompareResults.appendChild(note);
+    }
+
+    refreshCandidatesBtn.addEventListener('click', loadCandidateOptions);
+    compareCandidateBtn.addEventListener('click', async () => {
+      if (!candidateAdminCsrf || !candidateSelect.value || busy) return;
+      const wasRunning = running;
+      if (wasRunning) {
+        running = false;
+        toggleBtn.innerText = '▶ Start Signing';
+        toggleBtn.classList.remove('active');
+      }
+
+      compareCandidateBtn.disabled = true;
+      candidateCompareResults.replaceChildren();
+      candidateTestStatus.textContent = 'Preparing camera comparison...';
+      try {
+        while (busy) await new Promise(resolve => setTimeout(resolve, 80));
+        await startCamera();
+        busy = true;
+        candidateTestStatus.textContent = 'Recording 30 frames. Perform one sign naturally...';
+        const frames = await captureSequence();
+        setState('processing');
+        candidateTestStatus.textContent = 'Comparing production and candidate models...';
+
+        const response = await fetch('/admin/candidates/compare', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': candidateAdminCsrf
+          },
+          body: JSON.stringify({
+            candidate_id: candidateSelect.value,
+            images: frames
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Candidate comparison failed.');
+        showCandidateComparison(data);
+        candidateTestStatus.textContent = 'Comparison completed. No model files were changed.';
+      } catch (error) {
+        candidateTestStatus.textContent = error.message || 'Could not complete the comparison.';
+      } finally {
+        busy = false;
+        compareCandidateBtn.disabled = !candidateSelect.value;
+        if (wasRunning) {
+          running = true;
+          toggleBtn.innerText = '■ Stop Signing';
+          toggleBtn.classList.add('active');
+          captureAndPredictLoop();
+        }
+      }
     });
 
     // --- Recent signs history ---
