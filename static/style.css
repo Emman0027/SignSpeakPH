@@ -298,6 +298,101 @@ main { max-width: 900px; margin: 24px auto; padding: 0 16px 40px; display: flex;
   font-size: 14px;
 }
 
+
+.candidate-test-panel {
+  border-top: 1px solid var(--border);
+  margin-top: 10px;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.candidate-test-panel h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 17px;
+}
+.candidate-test-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.candidate-test-notice p,
+.candidate-test-status,
+.candidate-test-verdict {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.candidate-select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text);
+}
+.candidate-test-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.candidate-test-actions button {
+  min-height: 42px;
+}
+.candidate-compare-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.candidate-compare-results h4 {
+  margin: 4px 0 0;
+  color: var(--text);
+}
+.candidate-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.candidate-result-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.candidate-result-card strong {
+  color: var(--text);
+  font-size: 13px;
+}
+.candidate-result-label {
+  color: var(--accent);
+  font-size: 18px;
+  font-weight: 700;
+}
+.candidate-test-verdict {
+  font-weight: 600;
+}
+@media (max-width: 480px) {
+  .candidate-result-grid {
+    grid-template-columns: 1fr;
+  }
+  .candidate-test-actions {
+    flex-direction: column;
+  }
+  .candidate-test-actions button {
+    width: 100%;
+  }
+}
+
 .sign-search {
   margin: 16px 24px 0; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
   background: var(--card-bg); color: var(--text);
