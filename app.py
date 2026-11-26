@@ -822,6 +822,153 @@ def admin_submissions():
     return jsonify({"status": "success", "message": f"New sign {action}d. It remains outside the live model until separately trained and evaluated."}), 200
 
 
+
+
+# --- Read-only staged candidate comparison ---
+def _validated_candidate_entries():
+    candidates_root = os.path.join(BASE_DIR, "data", "models", "candidates")
+    entries = []
+    if not os.path.isdir(candidates_root):
+        return entries
+
+    for candidate_id in sorted(os.listdir(candidates_root), reverse=True):
+        if not re.fullmatch(r"candidate_[A-Za-z0-9_-]{1,100}", candidate_id):
+            continue
+        candidate_dir = os.path.join(candidates_root, candidate_id)
+        manifest_path = os.path.join(candidate_dir, "manifest.json")
+        model_path = os.path.join(candidate_dir, "action.tflite")
+        if not os.path.isfile(manifest_path) or not os.path.isfile(model_path):
+            continue
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as handle:
+                manifest = json.load(handle)
+        except (OSError, json.JSONDecodeError):
+            logger.warning("Skipping unreadable candidate manifest: %s", candidate_id)
+            continue
+
+        if (
+            manifest.get("candidate_id") != candidate_id
+            or manifest.get("status") != "validated"
+            or manifest.get("production_modified") is not False
+        ):
+            continue
+
+        entries.append({
+            "candidate_id": candidate_id,
+            "model_path": model_path,
+            "created_utc": manifest.get("created_utc", ""),
+            "baseline_accuracy": manifest.get("baseline_production_tflite_accuracy"),
+            "candidate_accuracy": manifest.get("candidate_tflite_accuracy"),
+            "validation_samples": manifest.get("validation_samples"),
+        })
+    return entries
+
+
+@app.route("/admin/candidates", methods=["GET"])
+def admin_candidates():
+    if not _admin_authenticated():
+        return jsonify({"error": "Administrator login required."}), 401
+
+    candidates = _validated_candidate_entries()
+    return jsonify({
+        "candidates": [
+            {key: value for key, value in item.items() if key != "model_path"}
+            for item in candidates
+        ]
+    }), 200
+
+
+@app.route("/admin/candidates/compare", methods=["POST"])
+@limiter.limit("20 per hour")
+def compare_candidate_live():
+    if not _admin_authenticated():
+        return jsonify({"error": "Administrator login required."}), 401
+    if not _admin_csrf_valid():
+        return jsonify({"error": "Invalid or missing security token."}), 403
+
+    payload = request.get_json(silent=True) or {}
+    candidate_id = str(payload.get("candidate_id", ""))
+    images = payload.get("images")
+
+    if not isinstance(images, list) or len(images) != SEQUENCE_LENGTH:
+        return jsonify({
+            "error": f"Exactly {SEQUENCE_LENGTH} camera frames are required."
+        }), 400
+
+    candidate = next(
+        (item for item in _validated_candidate_entries()
+         if item["candidate_id"] == candidate_id),
+        None,
+    )
+    if candidate is None:
+        return jsonify({"error": "The selected validated candidate is no longer available."}), 404
+
+    try:
+        sequence = []
+        for frame_index, data_url in enumerate(images, start=1):
+            if not isinstance(data_url, str) or len(data_url) > 500000:
+                return jsonify({"error": f"Frame {frame_index} is invalid or too large."}), 400
+            try:
+                frame = decode_base64_image(data_url)
+            except (ValueError, TypeError):
+                frame = None
+            if frame is None:
+                return jsonify({"error": f"Could not decode camera frame {frame_index}."}), 400
+
+            _, results = mediapipe_detection(frame, models)
+            keypoints = np.asarray(extract_keypoints(results), dtype=np.float32)
+            if keypoints.shape != (NUM_FEATURES,) or not np.isfinite(keypoints).all():
+                return jsonify({"error": f"Frame {frame_index} produced invalid landmarks."}), 422
+            sequence.append(keypoints)
+
+        input_data = np.asarray(sequence, dtype=np.float32)[np.newaxis, ...]
+
+        # Use fresh interpreters so the comparison cannot change the live
+        # prediction interpreter's state or replace either model.
+        production_test_interpreter = tflite.Interpreter(
+            model_path=str(MODEL_PATH), num_threads=2
+        )
+        candidate_test_interpreter = tflite.Interpreter(
+            model_path=candidate["model_path"], num_threads=2
+        )
+
+        def run_test_interpreter(test_interpreter):
+            test_interpreter.allocate_tensors()
+            input_detail = test_interpreter.get_input_details()[0]
+            output_detail = test_interpreter.get_output_details()[0]
+            if input_detail["dtype"] != np.float32:
+                raise TypeError("Model input is not float32.")
+            if tuple(input_detail["shape"]) != (1, SEQUENCE_LENGTH, NUM_FEATURES):
+                raise ValueError("Model input dimensions do not match this application.")
+            if int(output_detail["shape"][-1]) != len(ACTIONS):
+                raise ValueError("Model output classes do not match the active sign labels.")
+            test_interpreter.set_tensor(input_detail["index"], input_data)
+            test_interpreter.invoke()
+            return test_interpreter.get_tensor(output_detail["index"])[0]
+
+        production_scores = run_test_interpreter(production_test_interpreter)
+        candidate_scores = run_test_interpreter(candidate_test_interpreter)
+        production_index = int(np.argmax(production_scores))
+        candidate_index = int(np.argmax(candidate_scores))
+
+        return jsonify({
+            "candidate_id": candidate_id,
+            "production": {
+                "label": ACTIONS[production_index],
+                "confidence": float(production_scores[production_index]),
+            },
+            "candidate": {
+                "label": ACTIONS[candidate_index],
+                "confidence": float(candidate_scores[candidate_index]),
+            },
+            "same_prediction": production_index == candidate_index,
+            "note": "Agreement means both models chose the same label; it does not establish that the sign was correctly performed.",
+        }), 200
+    except Exception:
+        logger.exception("Live candidate comparison failed")
+        return jsonify({"error": "Could not compare the models. Check the application log."}), 500
+
+
 @app.route("/metrics")
 def metrics():
     return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
