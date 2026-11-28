@@ -25,11 +25,12 @@ Then open http://127.0.0.1:5000
 """
 
 import base64
-import secrets
 import json
 import logging
 import os
 import re
+import secrets
+import subprocess
 import sys
 import time
 import unicodedata
@@ -187,9 +188,9 @@ def decode_base64_image(data_url):
 # Security headers
 @app.after_request
 def add_security_headers(response):
-    response.headers["Strict-Transport-Security"] = (
-        "max-age=31536000; includeSubDomains"
-    )
+    response.headers[
+        "Strict-Transport-Security"
+    ] = "max-age=31536000; includeSubDomains"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
@@ -397,7 +398,9 @@ def submit_teaching_contribution():
             )
         if not meaning or len(meaning) > 120:
             return (
-                jsonify({"error": "Filipino meaning is required (maximum 120 characters)"}),
+                jsonify(
+                    {"error": "Filipino meaning is required (maximum 120 characters)"}
+                ),
                 400,
             )
         if len(notes) > 500:
@@ -413,14 +416,20 @@ def submit_teaching_contribution():
         label = re.sub(r"[^a-z0-9]+", "_", normalized).strip("_")
         if not label or len(label) > 40:
             return (
-                jsonify({"error": "use a sign name that can be represented as a short label"}),
+                jsonify(
+                    {
+                        "error": "use a sign name that can be represented as a short label"
+                    }
+                ),
                 400,
             )
         if label in ACTIONS:
             return (
-                jsonify({
-                    "error": "this sign is already supported; use Correct a Translation instead"
-                }),
+                jsonify(
+                    {
+                        "error": "this sign is already supported; use Correct a Translation instead"
+                    }
+                ),
                 409,
             )
 
@@ -439,7 +448,11 @@ def submit_teaching_contribution():
                     continue
                 if existing.get("label") == label:
                     return (
-                        jsonify({"error": "a contribution for this sign is already under review"}),
+                        jsonify(
+                            {
+                                "error": "a contribution for this sign is already under review"
+                            }
+                        ),
                         409,
                     )
 
@@ -447,12 +460,14 @@ def submit_teaching_contribution():
         for sample_index, images in enumerate(samples, start=1):
             if not isinstance(images, list) or len(images) != SEQUENCE_LENGTH:
                 return (
-                    jsonify({
-                        "error": (
-                            f"sample {sample_index} must contain exactly "
-                            f"{SEQUENCE_LENGTH} frames"
-                        )
-                    }),
+                    jsonify(
+                        {
+                            "error": (
+                                f"sample {sample_index} must contain exactly "
+                                f"{SEQUENCE_LENGTH} frames"
+                            )
+                        }
+                    ),
                     400,
                 )
 
@@ -468,11 +483,16 @@ def submit_teaching_contribution():
                     return jsonify({"error": "could not decode an image frame"}), 400
                 _, results = mediapipe_detection(frame, models)
                 keypoints = np.asarray(extract_keypoints(results), dtype=np.float32)
-                if keypoints.shape != (NUM_FEATURES,) or not np.isfinite(keypoints).all():
+                if (
+                    keypoints.shape != (NUM_FEATURES,)
+                    or not np.isfinite(keypoints).all()
+                ):
                     return (
-                        jsonify({
-                            "error": "a captured frame did not produce valid landmarks"
-                        }),
+                        jsonify(
+                            {
+                                "error": "a captured frame did not produce valid landmarks"
+                            }
+                        ),
                         422,
                     )
                 sequence.append(keypoints.tolist())
@@ -503,13 +523,15 @@ def submit_teaching_contribution():
             json.dump(contribution, file, indent=2)
 
         return (
-            jsonify({
-                "status": "success",
-                "message": "New sign samples submitted for review",
-                "id": contribution["id"],
-                "label": label,
-                "sample_count": len(processed_samples),
-            }),
+            jsonify(
+                {
+                    "status": "success",
+                    "message": "New sign samples submitted for review",
+                    "id": contribution["id"],
+                    "label": label,
+                    "sample_count": len(processed_samples),
+                }
+            ),
             201,
         )
 
@@ -681,7 +703,6 @@ def delete_feedback(feedback_id):
         return jsonify({"error": str(e)}), 500
 
 
-
 # --- Local administrator review dashboard ---
 def _admin_password_configured():
     return bool(os.environ.get("SIGNSPEAKPH_ADMIN_PASSWORD"))
@@ -706,7 +727,17 @@ def admin_dashboard():
 @limiter.limit("5 per hour")
 def admin_login():
     if not _admin_password_configured():
-        return jsonify({"error": "Administrator password is not configured. Set SIGNSPEAKPH_ADMIN_PASSWORD before starting SignSpeakPH."}), 503
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "Administrator password is not configured. "
+                        "Set SIGNSPEAKPH_ADMIN_PASSWORD before starting SignSpeakPH."
+                    )
+                }
+            ),
+            503,
+        )
     payload = request.get_json(silent=True) or {}
     supplied = str(payload.get("password", ""))
     expected = os.environ.get("SIGNSPEAKPH_ADMIN_PASSWORD", "")
@@ -721,8 +752,19 @@ def admin_login():
 @app.route("/admin/session")
 def admin_session():
     if not _admin_authenticated():
-        return jsonify({"authenticated": False, "password_configured": _admin_password_configured()}), 200
-    return jsonify({"authenticated": True, "csrf_token": session.get("admin_csrf", "")}), 200
+        return (
+            jsonify(
+                {
+                    "authenticated": False,
+                    "password_configured": _admin_password_configured(),
+                }
+            ),
+            200,
+        )
+    return (
+        jsonify({"authenticated": True, "csrf_token": session.get("admin_csrf", "")}),
+        200,
+    )
 
 
 @app.route("/admin/logout", methods=["POST"])
@@ -760,21 +802,28 @@ def admin_submissions():
                         "notes": item.get("notes", ""),
                     }
                     if kind == "correction":
-                        summary.update({
-                            "predicted_label": item.get("predicted_label", ""),
-                            "corrected_label": item.get("corrected_label", ""),
-                            "sequence_included": item.get("sequence_included") is True,
-                        })
+                        summary.update(
+                            {
+                                "predicted_label": item.get("predicted_label", ""),
+                                "corrected_label": item.get("corrected_label", ""),
+                                "sequence_included": item.get("sequence_included")
+                                is True,
+                            }
+                        )
                     else:
-                        summary.update({
-                            "display_name": item.get("display_name", ""),
-                            "label": item.get("label", ""),
-                            "meaning": item.get("meaning", ""),
-                            "sample_count": item.get("sample_count", 0),
-                        })
+                        summary.update(
+                            {
+                                "display_name": item.get("display_name", ""),
+                                "label": item.get("label", ""),
+                                "meaning": item.get("meaning", ""),
+                                "sample_count": item.get("sample_count", 0),
+                            }
+                        )
                     items.append(summary)
                 except (OSError, json.JSONDecodeError):
-                    logger.warning("Could not read pending %s submission: %s", kind, filename)
+                    logger.warning(
+                        "Could not read pending %s submission: %s", kind, filename
+                    )
         items.sort(key=lambda value: value.get("datetime", ""), reverse=True)
         return jsonify({"submissions": items}), 200
 
@@ -791,27 +840,51 @@ def admin_submissions():
     if kind not in ("correction", "teaching") or action not in ("approve", "reject"):
         return jsonify({"error": "Invalid review action."}), 400
 
-    pending_dir = os.path.join(BASE_DIR, "data", "corrections" if kind == "correction" else "teaching", "pending")
+    pending_dir = os.path.join(
+        BASE_DIR,
+        "data",
+        "corrections" if kind == "correction" else "teaching",
+        "pending",
+    )
     source = os.path.join(pending_dir, identifier + ".json")
     if not os.path.isfile(source):
-        return jsonify({"error": "This pending submission no longer exists. Refresh the list."}), 404
+        return (
+            jsonify(
+                {"error": "This pending submission no longer exists. Refresh the list."}
+            ),
+            404,
+        )
 
     if kind == "correction":
         script = os.path.join(BASE_DIR, "scripts", "manage_corrections.py")
         command = [sys.executable, script, action, identifier]
-        result = subprocess.run(command, cwd=BASE_DIR, capture_output=True, text=True, timeout=1800)
+        result = subprocess.run(
+            command, cwd=BASE_DIR, capture_output=True, text=True, timeout=1800
+        )
         if result.returncode != 0:
             logger.error("Correction review failed: %s", result.stderr or result.stdout)
-            return jsonify({"error": "Correction review failed. Check the application log."}), 500
-        return jsonify({"status": "success", "message": (result.stdout or "").strip()}), 200
+            return (
+                jsonify(
+                    {"error": "Correction review failed. Check the application log."}
+                ),
+                500,
+            )
+        return (
+            jsonify({"status": "success", "message": (result.stdout or "").strip()}),
+            200,
+        )
 
-    destination_folder = os.path.join(BASE_DIR, "data", "teaching", "approved" if action == "approve" else "rejected")
+    destination_folder = os.path.join(
+        BASE_DIR, "data", "teaching", "approved" if action == "approve" else "rejected"
+    )
     os.makedirs(destination_folder, exist_ok=True)
     try:
         with open(source, "r", encoding="utf-8") as handle:
             contribution = json.load(handle)
         contribution["status"] = "approved" if action == "approve" else "rejected"
-        contribution["reviewed_at"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        contribution["reviewed_at"] = time.strftime(
+            "%Y-%m-%d %H:%M:%S", time.localtime()
+        )
         destination = os.path.join(destination_folder, identifier + ".json")
         with open(destination, "w", encoding="utf-8") as handle:
             json.dump(contribution, handle, indent=2)
@@ -819,9 +892,18 @@ def admin_submissions():
     except (OSError, json.JSONDecodeError):
         logger.exception("Teaching contribution review failed")
         return jsonify({"error": "Could not update this teaching submission."}), 500
-    return jsonify({"status": "success", "message": f"New sign {action}d. It remains outside the live model until separately trained and evaluated."}), 200
-
-
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": (
+                    f"New sign {action}{'d' if action.endswith('e') else 'ed'}. "
+                    "It remains outside the live model until separately trained and evaluated."
+                ),
+            }
+        ),
+        200,
+    )
 
 
 # --- Read-only staged candidate comparison ---
@@ -853,14 +935,18 @@ def _validated_candidate_entries():
         ):
             continue
 
-        entries.append({
-            "candidate_id": candidate_id,
-            "model_path": model_path,
-            "created_utc": manifest.get("created_utc", ""),
-            "baseline_accuracy": manifest.get("baseline_production_tflite_accuracy"),
-            "candidate_accuracy": manifest.get("candidate_tflite_accuracy"),
-            "validation_samples": manifest.get("validation_samples"),
-        })
+        entries.append(
+            {
+                "candidate_id": candidate_id,
+                "model_path": model_path,
+                "created_utc": manifest.get("created_utc", ""),
+                "baseline_accuracy": manifest.get(
+                    "baseline_production_tflite_accuracy"
+                ),
+                "candidate_accuracy": manifest.get("candidate_tflite_accuracy"),
+                "validation_samples": manifest.get("validation_samples"),
+            }
+        )
     return entries
 
 
@@ -870,12 +956,17 @@ def admin_candidates():
         return jsonify({"error": "Administrator login required."}), 401
 
     candidates = _validated_candidate_entries()
-    return jsonify({
-        "candidates": [
-            {key: value for key, value in item.items() if key != "model_path"}
-            for item in candidates
-        ]
-    }), 200
+    return (
+        jsonify(
+            {
+                "candidates": [
+                    {key: value for key, value in item.items() if key != "model_path"}
+                    for item in candidates
+                ]
+            }
+        ),
+        200,
+    )
 
 
 @app.route("/admin/candidates/compare", methods=["POST"])
@@ -891,34 +982,56 @@ def compare_candidate_live():
     images = payload.get("images")
 
     if not isinstance(images, list) or len(images) != SEQUENCE_LENGTH:
-        return jsonify({
-            "error": f"Exactly {SEQUENCE_LENGTH} camera frames are required."
-        }), 400
+        return (
+            jsonify(
+                {"error": f"Exactly {SEQUENCE_LENGTH} camera frames are required."}
+            ),
+            400,
+        )
 
     candidate = next(
-        (item for item in _validated_candidate_entries()
-         if item["candidate_id"] == candidate_id),
+        (
+            item
+            for item in _validated_candidate_entries()
+            if item["candidate_id"] == candidate_id
+        ),
         None,
     )
     if candidate is None:
-        return jsonify({"error": "The selected validated candidate is no longer available."}), 404
+        return (
+            jsonify(
+                {"error": "The selected validated candidate is no longer available."}
+            ),
+            404,
+        )
 
     try:
         sequence = []
         for frame_index, data_url in enumerate(images, start=1):
             if not isinstance(data_url, str) or len(data_url) > 500000:
-                return jsonify({"error": f"Frame {frame_index} is invalid or too large."}), 400
+                return (
+                    jsonify({"error": f"Frame {frame_index} is invalid or too large."}),
+                    400,
+                )
             try:
                 frame = decode_base64_image(data_url)
             except (ValueError, TypeError):
                 frame = None
             if frame is None:
-                return jsonify({"error": f"Could not decode camera frame {frame_index}."}), 400
+                return (
+                    jsonify({"error": f"Could not decode camera frame {frame_index}."}),
+                    400,
+                )
 
             _, results = mediapipe_detection(frame, models)
             keypoints = np.asarray(extract_keypoints(results), dtype=np.float32)
             if keypoints.shape != (NUM_FEATURES,) or not np.isfinite(keypoints).all():
-                return jsonify({"error": f"Frame {frame_index} produced invalid landmarks."}), 422
+                return (
+                    jsonify(
+                        {"error": f"Frame {frame_index} produced invalid landmarks."}
+                    ),
+                    422,
+                )
             sequence.append(keypoints)
 
         input_data = np.asarray(sequence, dtype=np.float32)[np.newaxis, ...]
@@ -939,9 +1052,13 @@ def compare_candidate_live():
             if input_detail["dtype"] != np.float32:
                 raise TypeError("Model input is not float32.")
             if tuple(input_detail["shape"]) != (1, SEQUENCE_LENGTH, NUM_FEATURES):
-                raise ValueError("Model input dimensions do not match this application.")
+                raise ValueError(
+                    "Model input dimensions do not match this application."
+                )
             if int(output_detail["shape"][-1]) != len(ACTIONS):
-                raise ValueError("Model output classes do not match the active sign labels.")
+                raise ValueError(
+                    "Model output classes do not match the active sign labels."
+                )
             test_interpreter.set_tensor(input_detail["index"], input_data)
             test_interpreter.invoke()
             return test_interpreter.get_tensor(output_detail["index"])[0]
@@ -951,22 +1068,35 @@ def compare_candidate_live():
         production_index = int(np.argmax(production_scores))
         candidate_index = int(np.argmax(candidate_scores))
 
-        return jsonify({
-            "candidate_id": candidate_id,
-            "production": {
-                "label": ACTIONS[production_index],
-                "confidence": float(production_scores[production_index]),
-            },
-            "candidate": {
-                "label": ACTIONS[candidate_index],
-                "confidence": float(candidate_scores[candidate_index]),
-            },
-            "same_prediction": production_index == candidate_index,
-            "note": "Agreement means both models chose the same label; it does not establish that the sign was correctly performed.",
-        }), 200
+        return (
+            jsonify(
+                {
+                    "candidate_id": candidate_id,
+                    "production": {
+                        "label": ACTIONS[production_index],
+                        "confidence": float(production_scores[production_index]),
+                    },
+                    "candidate": {
+                        "label": ACTIONS[candidate_index],
+                        "confidence": float(candidate_scores[candidate_index]),
+                    },
+                    "same_prediction": production_index == candidate_index,
+                    "note": (
+                        "Agreement means both models chose the same label; "
+                        "it does not establish that the sign was correctly performed."
+                    ),
+                }
+            ),
+            200,
+        )
     except Exception:
         logger.exception("Live candidate comparison failed")
-        return jsonify({"error": "Could not compare the models. Check the application log."}), 500
+        return (
+            jsonify(
+                {"error": "Could not compare the models. Check the application log."}
+            ),
+            500,
+        )
 
 
 @app.route("/metrics")

@@ -820,11 +820,14 @@
       } finally {
         busy = false;
         compareCandidateBtn.disabled = !candidateSelect.value;
+
         if (wasRunning) {
           running = true;
           toggleBtn.innerText = '■ Stop Signing';
           toggleBtn.classList.add('active');
           captureAndPredictLoop();
+        } else {
+          setState('idle');
         }
       }
     });
@@ -897,20 +900,28 @@
       return canvas.toDataURL('image/jpeg', 0.6);
     }
 
+    
     async function captureSequence() {
       setState('recording');
       recordingBadge.style.display = 'flex';
+
       const frames = [];
-      for (let i = 0; i < SEQUENCE_LENGTH; i++) {
-        frames.push(captureFrame());
-        frameCountEl.innerText = i + 1;
-        progressFill.style.width = `${((i + 1) / SEQUENCE_LENGTH) * 100}%`;
-        await new Promise(resolve => setTimeout(resolve, CAPTURE_INTERVAL_MS));
+
+      try {
+        for (let i = 0; i < SEQUENCE_LENGTH; i++) {
+          frames.push(captureFrame());
+          frameCountEl.innerText = i + 1;
+          progressFill.style.width = `${((i + 1) / SEQUENCE_LENGTH) * 100}%`;
+          await new Promise(resolve => setTimeout(resolve, CAPTURE_INTERVAL_MS));
+        }
+
+        return frames;
+      } finally {
+        recordingBadge.style.display = 'none';
+        progressFill.style.width = '0%';
       }
-      recordingBadge.style.display = 'none';
-      progressFill.style.width = '0%';
-      return frames;
     }
+
 
     async function sendFrames(frames) {
       const sendStart = performance.now();

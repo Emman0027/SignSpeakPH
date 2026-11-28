@@ -1,0 +1,13 @@
+{
+  "id": "1d9113e8-d00b-4897-8641-19b6836eb2bb",
+  "predicted_label": "kamusta",
+  "corrected_label": "salamat",
+  "notes": "Test correction",
+  "sequence_included": false,
+  "status": "approved",
+  "timestamp": 1795625823.1802914,
+  "datetime": "2026-11-26 00:57:03",
+  "reviewed_at": "2026-11-26 01:05:16",
+  "training_status": "not_eligible",
+  "training_note": "no consented sequence"
+}

@@ -1,0 +1,230 @@
+{
+  "candidate_id": "candidate_20261126_022649_b1f6402c",
+  "status": "validated",
+  "created_utc": "2026-11-26T02:27:29Z",
+  "base_checkpoint": "data\\models\\production\\action.keras",
+  "production_version": "v1.1.0",
+  "labels": [
+    "kamusta",
+    "salamat",
+    "mahalkita",
+    "oo",
+    "hindi",
+    "sino",
+    "saan",
+    "ulitin",
+    "pakiusap",
+    "paalam",
+    "tulong",
+    "walang_anuman",
+    "malungkot",
+    "gusto",
+    "hindi_gusto",
+    "tulog",
+    "masaya",
+    "takot",
+    "patawad",
+    "pera",
+    "nanay",
+    "tatay"
+  ],
+  "correction_ids": [
+    "19bfe27e-9843-47f2-a09d-a9e0269b4009",
+    "4758d4ad-3171-4fdd-93bc-fdf3dd8bb03e",
+    "c255ad7c-6135-4a7f-a7a2-63cf4b846ae3",
+    "dfe63b04-73a4-4a56-92b0-bcdb969a6044",
+    "eb1c16c9-1eaf-4674-bde4-97ebbbb3c57a",
+    "ffcad343-cf9f-4aa2-924c-d22ba73d030a"
+  ],
+  "replay_samples": 264,
+  "correction_repeats": 4,
+  "validation_samples": 264,
+  "dataset_sequences_per_class": {
+    "kamusta": 60,
+    "salamat": 60,
+    "mahalkita": 60,
+    "oo": 60,
+    "hindi": 60,
+    "sino": 60,
+    "saan": 60,
+    "ulitin": 60,
+    "pakiusap": 60,
+    "paalam": 60,
+    "tulong": 60,
+    "walang_anuman": 60,
+    "malungkot": 60,
+    "gusto": 60,
+    "hindi_gusto": 60,
+    "tulog": 60,
+    "masaya": 60,
+    "takot": 60,
+    "patawad": 60,
+    "pera": 60,
+    "nanay": 60,
+    "tatay": 60
+  },
+  "baseline_production_tflite_accuracy": 1.0,
+  "candidate_tflite_accuracy": 1.0,
+  "validation_accuracy_drop": 0.0,
+  "maximum_allowed_drop": 0.01,
+  "per_class_validation": {
+    "kamusta": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "salamat": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "mahalkita": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "oo": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "hindi": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "sino": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "saan": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "ulitin": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "pakiusap": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "paalam": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "tulong": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "walang_anuman": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "malungkot": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "gusto": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "hindi_gusto": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "tulog": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "masaya": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "takot": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "patawad": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "pera": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "nanay": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    },
+    "tatay": {
+      "validation_samples": 12,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "maximum_allowed_errors": 1,
+      "passed": true
+    }
+  },
+  "failed_classes": [],
+  "keras_path": "data\\models\\candidates\\candidate_20261126_022649_b1f6402c\\action.keras",
+  "tflite_path": "data\\models\\candidates\\candidate_20261126_022649_b1f6402c\\action.tflite",
+  "production_modified": false
+}

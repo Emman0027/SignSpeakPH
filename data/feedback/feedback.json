@@ -44,5 +44,11 @@
     "user_id": "test_user_123",
     "timestamp": 1790565871.3699608,
     "datetime": "2026-09-28 11:24:31"
+  },
+  {
+    "rating": 1,
+    "prediction": "salamat",
+    "timestamp": 1795581979.9398196,
+    "datetime": "2026-11-25 12:46:19"
   }
 ]

@@ -271,7 +271,8 @@ def run_training():
     correction_x, correction_y, correction_ids = load_new_corrections(labels)
     if len(correction_ids) < MIN_CORRECTIONS:
         print(
-            f"Waiting for {MIN_CORRECTIONS} eligible approved corrections; found {len(correction_ids)}."
+            f"Waiting for {MIN_CORRECTIONS} eligible approved corrections; "
+            f"found {len(correction_ids)}."
         )
         return
 
@@ -329,7 +330,8 @@ def run_training():
 
     print(f"Baseline production TFLite validation accuracy: {baseline_accuracy:.4f}")
     print(
-        f"Training with {len(replay_x)} replay samples and {len(correction_ids)} approved corrections."
+        f"Training with {len(replay_x)} replay samples and "
+        f"{len(correction_ids)} approved corrections."
     )
     print(f"Fine-tuning for up to {EPOCHS} epochs at learning rate {LEARNING_RATE}.")
 
@@ -358,7 +360,21 @@ def run_training():
     tflite_path = candidate_dir / "action.tflite"
     model.save(keras_path)
 
-    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    # Match the production exporter's fixed-batch TFLite conversion.
+    seq_len = model.input_shape[1]
+    n_feat = model.input_shape[2]
+
+    fn = tf.function(
+        lambda t: model(t, training=False),
+        input_signature=[tf.TensorSpec([1, seq_len, n_feat], tf.float32)],
+    )
+
+    converter = tf.lite.TFLiteConverter.from_concrete_functions(
+        [fn.get_concrete_function()], model
+    )
+    converter.experimental_enable_resource_variables = True
+    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]
+
     tflite_bytes = converter.convert()
     tflite_path.write_bytes(tflite_bytes)
 
